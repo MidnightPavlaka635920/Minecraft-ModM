@@ -6,6 +6,7 @@ This project targets server owners, because it might be hard to install mods/plu
 - [libcurl](https://curl.se/libcurl/) (for downloading mods/plugins)  
 - A C++ compiler with C++20 support (e.g., `g++`)  
 - `make` utility
+- nlohmann/json library
 ## Binary name
 This project's binary is called 
 ```bash
