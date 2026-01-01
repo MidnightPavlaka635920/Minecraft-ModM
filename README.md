@@ -42,3 +42,7 @@ Commands:
 - List installed plugins: `mcmodm list <Install path>`
 - Remove mod/plugin: `mcmodm remove <Project ID> <Install Path>`. Just specified package will be removed
 - Update all packages: `mcmodm updateall <new Game version> <Install path>`
+## Compiling yourself
+There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide.
+Source files are in src/
+Header files are in include/
