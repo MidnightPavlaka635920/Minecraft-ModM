@@ -22,3 +22,10 @@ Then, you have to install the program. Installation is different for both Window
  cd "C:\Path\To\Installed\File"
  ```
 6. Run file
+### Linux (Debian)
+1. Download `.deb` file
+2. Run
+  ```bash
+dpkg-deb -i mcmodm.deb
+```
+3. Simply run `mcmodem --help`
