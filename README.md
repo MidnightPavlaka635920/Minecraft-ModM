@@ -28,7 +28,7 @@ Then, you have to install the program. Installation is different for both Window
   ```bash
 dpkg-deb -i mcmodm.deb
 ```
-3. Simply run `mcmodem --help`
+3. Simply run `mcmodem <option>`
 ## Setting up
 1. To create a version file, run
 ```bash
@@ -36,3 +36,9 @@ mcmodm setup <path> <version> <loader>
 ```
 2. You are ready :)
 ## Usage
+Commands:
+- Search for mod/plugins: `mcmodm <mod/plugin name>
+- Then, use project ID and use run `mcmodm install <Project ID> <Install Path>`. Dependencies will be installed
+- List installed plugins: `mcmodm list <Install path>`
+- Remove mod/plugin: `mcmodm remove <Project ID> <Install Path>`. Just specified package will be removed
+- Update all packages: `mcmodm updateall <new Game version> <Install path>`
