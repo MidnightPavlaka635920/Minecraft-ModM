@@ -17,7 +17,8 @@ Then, you have to install the program. Installation is different for both Window
 2. Double-click the file
 3. Follow installation guide
 4. Run cmd.exe or something
-5. run ```cmd
-6. cd "C:\Path\To\Installed\File"
-7. ```
-8. Run file
+5. run
+6. ```cmd
+7. cd "C:\Path\To\Installed\File"
+8. ```
+9. Run file
