@@ -9,3 +9,15 @@ This project's binary is called
 ```bash
 mcmodm
 ```
+## Installation
+In order to install this program, you should download a file from `releases` section.
+Then, you have to install the program. Installation is different for both Windows and Linux users.
+### Windows
+1. Download .exe file
+2. Double-click the file
+3. Follow installation guide
+4. Run cmd.exe or something
+5. run ```cmd
+6. cd "C:\Path\To\Installed\File"
+7. ```
+8. Run file
