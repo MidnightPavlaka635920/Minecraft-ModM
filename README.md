@@ -1,7 +1,7 @@
 # Minecraft-ModM
 A CLI tool for managing Minecraft mods/plugins for servers.
 ## About
-Thos project targets server owners, because it might be hard to install mods/plugins in a CLI server interface. I had that problem, and I hated when I had to update my server. So, this is the solution.
+This project targets server owners, because it might be hard to install mods/plugins in a CLI server interface. I had that problem, and I hated when I had to update my server. So, this is the solution.
 ## Dependencies
 - libcurl
 ## Binary name
@@ -29,3 +29,10 @@ Then, you have to install the program. Installation is different for both Window
 dpkg-deb -i mcmodm.deb
 ```
 3. Simply run `mcmodem --help`
+## Setting up
+1. To create a version file, run
+```bash
+mcmodm setup <path> <version> <loader>
+```
+2. You are ready :)
+## Usage
