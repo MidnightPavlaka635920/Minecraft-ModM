@@ -37,7 +37,7 @@ dpkg-deb -i mcmodm.deb
 ```bash
 mcmodm setup <path> <version> <loader>
 ```
-2. You are ready :)
+2. You are ready 
 ## Usage
 Commands:
 - Search for mod/plugins: `mcmodm <mod/plugin name>
@@ -46,6 +46,7 @@ Commands:
 - Remove mod/plugin: `mcmodm remove <Project ID> (Project ID ) <Install Path>`. Just specified package will be removed
 - Update all packages: `mcmodm updateall <new Game version> <Install path>`
 ## Compiling yourself
-There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide.
-Source files are in src/
-Header files are in include/
+There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide. Source files are in src/
+On WIndoes, steps are simmilar after installing dependencies, using a MINGW64 shell.
+H bash eader files are in include/
+
