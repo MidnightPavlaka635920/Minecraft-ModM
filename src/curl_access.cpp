@@ -1,5 +1,9 @@
 #include <unistd.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/wait.h>
+#endif
 #include <vector>
 #include <string>
 #include <stdexcept>
