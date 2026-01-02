@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "Usage: mcmodm install <modname> <path>\n";
             return 1;
         }
-        std::string install_path = argv[3]; // installation path
+        std::string install_path = argv[(argc - 1)]; // installation path
         
         // INSTALL operation: read requested version/loader from req.json
         std::string req_path = install_path;
@@ -87,8 +87,12 @@ int main(int argc, char* argv[]) {
             return 1;
 
         }
-        std::string pn = argv[2];          // mod name or slug
-        install_mod(pn, install_path, req, false);
+        for (unsigned int i = 2; i < (argc - 1); i++){
+            std::string pn = argv[i];          // mod name or slug
+            install_mod(pn, install_path, req, false);
+        }
+        //std::string pn = argv[2];          // mod name or slug
+        //install_mod(pn, install_path, req, false);
 
         
     } else if (operation =="remove"){
@@ -96,9 +100,13 @@ int main(int argc, char* argv[]) {
             std::cerr << "Usage: mcmodm remove <modname> <path>\n";
             return 1;
         }
-        std::string install_path = argv[3]; // installation path
-        std::string pn = argv[2]; 
-        remove_package(pn, install_path, false);
+        std::string install_path = argv[(argc - 1)]; // installation path
+        for (unsigned int i = 2; i < (argc - 1); i++){
+            std::string pn = argv[i];          // mod name or slug
+            remove_package(pn, install_path, false);
+        }
+        //std::string pn = argv[2]; 
+        //remove_package(pn, install_path, false);
     } else if (operation == "updateall"){
         if (argc < 4) {
             std::cerr << "Usage: mcmodm updateall <version> <path>\n";
