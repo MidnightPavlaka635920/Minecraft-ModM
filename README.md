@@ -41,9 +41,9 @@ mcmodm setup <path> <version> <loader>
 ## Usage
 Commands:
 - Search for mod/plugins: `mcmodm <mod/plugin name>
-- Then, use project ID and use run `mcmodm install <Project ID> <Install Path>`. Dependencies will be installed
+- Then, use project ID and run `mcmodm install <Project ID> (Project ID ) <Install Path>`. Dependencies will be installed. Multiple packages could be installed.
 - List installed plugins: `mcmodm list <Install path>`
-- Remove mod/plugin: `mcmodm remove <Project ID> <Install Path>`. Just specified package will be removed
+- Remove mod/plugin: `mcmodm remove <Project ID> (Project ID ) <Install Path>`. Just specified package will be removed
 - Update all packages: `mcmodm updateall <new Game version> <Install path>`
 ## Compiling yourself
 There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide.
