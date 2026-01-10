@@ -8,7 +8,8 @@ void mark_installed(
     const std::string& project_id,
     const std::string& game_version,
     const std::string& loader,
-    const std::string& file
+    const std::string& file,
+    const std::string& name
 );
 void set_path(const std::string& p);
 json load_packages();

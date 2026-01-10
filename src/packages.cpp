@@ -36,14 +36,16 @@ void mark_installed(
     const std::string& project_id,
     const std::string& game_version,
     const std::string& loader,
-    const std::string& file
+    const std::string& file,
+    const std::string& name
 ) {
     json j = load_packages();
 
     j["installed"][project_id] = {
         {"game_version", game_version},
         {"loader", loader},
-        {"file", file}
+        {"file", file},
+        {"name", name}
     };
 
     save_packages(j);

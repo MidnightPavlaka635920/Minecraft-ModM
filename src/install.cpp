@@ -26,6 +26,15 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
     // Fetch all versions for this project
     std::string url = "https://api.modrinth.com/v2/project/" + pn + "/version";
     std::string oVerData;
+    std::string nurl = "https://api.modrinth.com/v2/project/" + pn;
+    std::string ntf;
+    try {
+        ntf = curl_to_string(nurl);
+    } catch (const std::exception& e) {
+        std::cerr << "Error fetching main page: " << e.what() << "\n";
+        throw std::runtime_error("Error fetching versions.");
+    }
+    json pdata = json::parse(ntf);
     try {
         oVerData = curl_to_string(url);
     } catch (const std::exception& e) {
@@ -59,6 +68,7 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
             std::string dl_url = release["files"][0]["url"];
             std::string filename = release["files"][0]["filename"];
             std::string out_file = install_path + "/" + filename;
+            std::string name = pdata["title"];
 
             std::cout << "Found matching version for " << pn << release["name"] << std::endl;
             std::cout << "Downloading to: " << out_file << "\n";
@@ -69,7 +79,7 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
             }
-            if (just_install){continue;} else{mark_installed(pn, ver, loader, filename);
+            if (just_install){mark_installed(pn, ver, loader, filename, name);continue;} else{mark_installed(pn, ver, loader, filename, name);
 
             // ---- Install required dependencies ----
                 if (release.contains("dependencies")) {
