@@ -1,3 +1,16 @@
+#ifdef _WIN32
+#include <windows.h>
+/*void enable_ansi() {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE) return;
+
+    DWORD dwMode = 0;
+    if (!GetConsoleMode(hOut, &dwMode)) return;
+
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
+}*/
+#endif
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -12,6 +25,7 @@
 #include "../include/updateall.h"
 #include "../include/list.h"
 #include "../include/setup.h"
+#include "../include/easy.h"
 using json = nlohmann::json;
 void help(){
     std::cout << "Available commands:\n"
@@ -20,7 +34,10 @@ void help(){
     << "  remove <modname> <path>         - Remove mod <modname> from <path>\n"
     << "  updateall <version> <path>       - Update all mods in <path> for game version <version>\n"
     << "  list <path>                      - List installed mods in <path>\n"
-    << "  setup <path> <version> <loader>  - Setup req.json in <path> with specified version and loader\n";
+    << "  setup <path> <version> <loader>  - Setup req.json in <path> with specified version and loader\n"
+    << "  easy_install <path>              - Easy install mods from a list in <path>\n"
+    << "  easy_remove <path>               - Easy remove mods from a list in <path>\n"
+    << "Version 1.0\n";
 }
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -29,7 +46,9 @@ int main(int argc, char* argv[]) {
     }
 
     std::string operation = argv[1];   // "ls" or "i"
-
+    /*#ifdef _WIN32
+        enable_ansi();
+    #endif*/
     if (operation == "search") {
         if(argc < 3){
             std::cout << "Not enough arguments provided\n Usage: mcmodm search <modname>\n";
@@ -152,8 +171,22 @@ int main(int argc, char* argv[]) {
         help();
     } else if(operation == "3"){
         std::cout << "OP 3! Actual project name: dricca" << std::endl;
-    }
-        else {
+    } else if(operation == "easy_install"){
+        if (argc < 3) {
+            std::cerr << "Usage: mcmodm easy_install <path>\n";
+            return 1;
+        }
+        std::string install_path = argv[2]; // installation path
+        easy_install(install_path);
+    } else if(operation == "easy_remove"){
+        if (argc < 3) {
+            std::cerr << "Usage: mcmodm easy_remove <path>\n";
+            return 1;
+        }
+        std::string install_path = argv[2]; // installation path
+        easy_remove(install_path);
+
+    } else {
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();
         return 1;
