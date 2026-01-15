@@ -18,4 +18,5 @@ void setup(std::string& path, std::string& version, std::string& loader){
     }
     ofs << req_s.dump(4);
     ofs.close();
+    std::cout <<"Setup created successfully at " << req_path << ". Remember that!\n";
 }

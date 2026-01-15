@@ -9,6 +9,7 @@
 #include <curl/curl.h>
 using json = nlohmann::json;
 #include "../include/packages.h"
+std::string name;
 
 void install_mod(const std::string& pn, const std::string& install_path, const json& req, bool just_install) {
     set_path(install_path);
@@ -68,9 +69,9 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
             std::string dl_url = release["files"][0]["url"];
             std::string filename = release["files"][0]["filename"];
             std::string out_file = install_path + "/" + filename;
-            std::string name = pdata["title"];
+            name = pdata["title"];
 
-            std::cout << "Found matching version for " << pn << release["name"] << std::endl;
+            std::cout << "Found matching version for " << name << release["name"] << "(" << pn << ")"<< std::endl;
             std::cout << "Downloading to: " << out_file << "\n";
 
             try {
@@ -103,6 +104,6 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
     }
 
     if (!found) {
-        throw std::runtime_error("No matching version found for " + pn);
+        throw std::runtime_error("No matching version found for " + name + " (" + pn + ")");
     }
 }

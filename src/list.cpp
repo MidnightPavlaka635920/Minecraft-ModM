@@ -10,7 +10,7 @@ void list_packs (std::string& install_path){
     json packgs = load_packages();
     size_t packgs_instal = packgs["installed"].size();
     if (packgs_instal == 0) {
-        std::cout << "No packages installed.\n";
+        std::cout << "No packages installed. If that seems wrong, try again with a different path.\n";
         return;
     }
     std::cout << "Installed packages (" << packgs_instal << "):\n";
