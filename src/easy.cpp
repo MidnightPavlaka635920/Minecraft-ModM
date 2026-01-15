@@ -60,7 +60,7 @@ void easy_install(std::string& install_path){
                 try {
                     int idx = std::stoi(token);
                     if (idx < 0 || idx >= (int)hits.size()) {
-                        std::cerr << "Invalid selection: " << idx << "\n";
+                        std::cerr << "Invalid selection: " << idx <<" Use a number from the list, or a for all.\n";
                         continue;
                     }
                     to_install.push_back(hits[idx]["project_id"]);
@@ -132,7 +132,7 @@ void easy_remove(std::string& install_path){
                 try {
                     int i = std::stoi(token);
                     if (i < 0 || i >= (int)ids.size()) {
-                        std::cerr << "Invalid selection: " << i << "\n";
+                        std::cerr << "Invalid selection: " << i << " Use a number from the list, or a for all.\n";
                         continue;
                     }
                     to_remove.push_back(ids[i]);

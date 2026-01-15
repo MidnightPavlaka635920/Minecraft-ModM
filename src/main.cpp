@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
             return 1;
 
         }
-        for (unsigned int i = 2; i < (argc - 1); i++){
+        for (int i = 2; i < (argc - 1); i++){
             std::string pn = argv[i];          // mod name or slug
             install_mod(pn, install_path, req, false);
         }
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         std::string install_path = argv[(argc - 1)]; // installation path
-        for (unsigned int i = 2; i < (argc - 1); i++){
+        for (int i = 2; i < (argc - 1); i++){
             std::string pn = argv[i];          // mod name or slug
             remove_package(pn, install_path, false);
         }
