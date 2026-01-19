@@ -26,17 +26,19 @@
 #include "../include/list.h"
 #include "../include/setup.h"
 #include "../include/easy.h"
+#include "../include/iff.h"
 using json = nlohmann::json;
 void help(){
     std::cout << "Available commands:\n"
-    << "  search <modname>                 - List online mods matching <modname>\n"
-    << "  install <modname> <path>         - Install mod <modname> to <path>\n"
-    << "  remove <modname> <path>         - Remove mod <modname> from <path>\n"
-    << "  updateall <version> <path>       - Update all mods in <path> for game version <version>\n"
-    << "  list <path>                      - List installed mods in <path>\n"
-    << "  setup <path> <version> <loader>  - Setup req.json in <path> with specified version and loader\n"
-    << "  easy_install <path>              - Easy install mods from a list in <path>\n"
-    << "  easy_remove <path>               - Easy remove mods from a list in <path>\n"
+    << "  search <modname>                           - List online mods matching <modname>\n"
+    << "  install <modname> <path>                   - Install mod <modname> to <path>\n"
+    << "  remove <modname> <path>                    - Remove mod <modname> from <path>\n"
+    << "  updateall <version> <path>                 - Update all mods in <path> for game version <version>\n"
+    << "  list <path>                                - List installed mods in <path>\n"
+    << "  setup <path> <version> <loader>            - Setup req.json in <path> with specified version and loader\n"
+    << "  easy_install <path>                        - Easy install mods from a list in <path>\n"
+    << "  easy_remove <path>                         - Easy remove mods from a list in <path>\n"
+    << "  iff <path-to-packages.json> <install_path> - Install from a list of packages\n"
     << "Version 1.0\n";
 }
 int main(int argc, char* argv[]) {
@@ -133,7 +135,7 @@ int main(int argc, char* argv[]) {
         }
         std::string version = argv[2]; // game version
         std::string install_path = argv[3]; // installation path
-                std::string req_path = install_path;
+        std::string req_path = install_path;
         if (!req_path.empty() && req_path.back() != '/'){
             req_path += '/';
         }
@@ -185,6 +187,15 @@ int main(int argc, char* argv[]) {
         }
         std::string install_path = argv[2]; // installation path
         easy_remove(install_path);
+    } else if(operation == "iff"){
+        if (argc < 4) {
+            std::cerr << "Usage: mcmodm iff <path-to-packages.json> <install-path>\n";
+            return 1;
+        }
+        std::string packages_path = argv[2]; // path to packages.json
+        std::string install_path = argv[3]; // installation path
+        iff(packages_path, install_path);
+
 
     } else {
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
