@@ -71,7 +71,7 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
             std::string out_file = install_path + "/" + filename;
             name = pdata["title"];
 
-            std::cout << "Found matching version for " << name << release["name"] << "(" << pn << ")"<< std::endl;
+            std::cout << "Found matching version for " << name << release["name"].get<std::string>() << " (" << pn << ")"<< std::endl;
             std::cout << "Downloading to: " << out_file << "\n";
 
             try {

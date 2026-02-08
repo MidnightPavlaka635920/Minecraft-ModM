@@ -16,6 +16,6 @@ void list_packs (std::string& install_path){
     std::cout << "Installed packages (" << packgs_instal << "):\n";
     std::cout << "File Name - Project ID - Game Version\n";
     for (auto& [project_id, info] : packgs["installed"].items()) {
-        std::cout << info["file"] << " - " << project_id << " - " << info["game_version"] << "\n";
+        std::cout << info["name"].get<std::string>() << " - " << project_id << " - " << info["game_version"].get<std::string>() << "\n";
     }
 }

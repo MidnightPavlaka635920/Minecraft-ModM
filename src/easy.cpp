@@ -33,7 +33,7 @@ void easy_install(std::string& install_path){
         }
         std::cout << "This is what is found:\n";
         for (size_t h = 0;h < hits.size();h++){
-            std::cout << h << ") " << hits[h]["title"] << " - " << hits[h]["description"] << " - " << hits[h]["project_id"] << std::endl;
+            std::cout << h << ") " << hits[h]["title"].get<std::string>() << " - " << hits[h]["description"].get<std::string>() << " - " << hits[h]["project_id"].get<std::string>() << std::endl;
         }
         std::cout << "Which one to install? (type number in front of the item, a for all, or more seperated by commas without a space):";
         //unsigned int choice;
@@ -104,8 +104,8 @@ void easy_remove(std::string& install_path){
         size_t idx = 0;
         std::cout << "Name - File - Game Version\n";
         for (auto& [project_id, info] : installed.items()) {
-            std::cout << idx << ") " << info["name"]
-                    << " (" << info["file"] << ") " << info["game_version"] << "\n";
+            std::cout << idx << ") " << info["name"].get<std::string>()
+                    << " (" << info["file"].get<std::string>() << ") " << info["game_version"].get<std::string>() << "\n";
             ids.push_back(project_id);
             idx++;
         }

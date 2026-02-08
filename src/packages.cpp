@@ -1,6 +1,9 @@
 #include "../include/packages.h"
 #include <fstream>
+#include <string>
+#include <iostream>
 #include <nlohmann/json.hpp>
+#include "../include/curl_access.h"
 
 using json = nlohmann::json;
 
@@ -49,4 +52,39 @@ void mark_installed(
     };
 
     save_packages(j);
+}
+bool can_be_upgraded(const std::string& project_id, const std::string& game_version, const std::string& loader) {
+    std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
+    std::string verDataString;
+    try {
+        verDataString = curl_to_string(url);
+    } catch (const std::exception& e) {
+        std::cerr << "Error fetching versions: " << e.what() << "\n";
+        throw std::runtime_error("Error fetching versions."); 
+    }
+    json verData;
+    try{
+        verData = json::parse(verDataString);
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to parse JSON: [" << verDataString << "]\n";
+        std::cerr << "Error: " << e.what() << "\n";
+        throw std::runtime_error("Failed to parse version data.");
+    }
+    bool found = false;
+    for (auto& release : verData) {
+        bool ver_comp = false, loa_comp = false;
+
+        for (auto& gver : release["game_versions"])
+            if (gver == game_version) { ver_comp = true; break; }
+
+        for (auto& ldr : release["loaders"])
+            if (ldr == loader) { loa_comp = true; break; }
+
+        if (ver_comp && loa_comp) {
+            found = true;
+            break;
+        }
+
+    }
+    return found;
 }

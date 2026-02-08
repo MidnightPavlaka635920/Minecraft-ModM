@@ -15,7 +15,7 @@ void iff(const std::string& packages_path, const std::string& install_path){
     std::cout << "Packages to be installed: " << packgs_installed << "\n";
     unsigned int idx = 0;
     for (auto& [project_id, info] : packages["installed"].items()){
-        std::cout << idx << ")" << info["name"] << "\n";
+        std::cout << idx << ")" << info["name"].get<std::string>() << "\n";
         idx++;
     }
     std::cout << "Install these packages? (y/n, enter doesn't work): ";
