@@ -39,7 +39,8 @@ void help(){
     << "  easy_install <path>                        - Easy install mods from a list in <path>\n"
     << "  easy_remove <path>                         - Easy remove mods from a list in <path>\n"
     << "  iff <path-to-packages.json> <install_path> - Install from a list of packages\n"
-    << "Version 1.0\n";
+    << "  ck_upd <version> <loader> <path-to-req.json> - Check if all packages can be upgraded\n"
+    << "Version 1.3\n";
 }
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -75,9 +76,9 @@ int main(int argc, char* argv[]) {
         std::cout << "Search results for '" << pn << "':\n";
         std::cout << "Title - Slug - Project ID\n";
         for (const auto& hit : hits) {
-            std::cout << hit["title"] << " - "
-                      << hit["slug"] << " - "
-                      << hit["project_id"] << "\n";
+            std::cout << hit["title"].get<std::string>() << " - "
+                      << hit["slug"].get<std::string>() << " - "
+                      << hit["project_id"].get<std::string>() << "\n";
         }
 
     } else if (operation == "install") {
@@ -196,6 +197,25 @@ int main(int argc, char* argv[]) {
         std::string install_path = argv[3]; // installation path
         iff(packages_path, install_path);
 
+    }else if(operation == "ck_upd"){
+        if (argc < 5) {
+            std::cerr << "Usage: mcmodm ck_upd <version to update> <loader> <path to req.json>\n";
+            return 1;
+        }
+        std::string version = argv[2];
+        std::string loader = argv[3];
+        std::string req_path = argv[4];
+        //std::ifstream sdata(req_path);
+
+        //std::ifstream sdat(reqjsonPath);
+        /*if (!sdata.is_open()) {
+            std::cerr << "Cannot open req.json\n";
+            //return 1;
+            throw std::runtime_error("Cannot open req.json");
+        }*/
+        //json req = json::parse (sdata);
+        //check_update(version, loader, req);
+        check_all_upgradeable(version, loader, req_path);
 
     } else {
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";

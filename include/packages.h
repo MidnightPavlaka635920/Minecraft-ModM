@@ -14,3 +14,4 @@ void mark_installed(
 void set_path(const std::string& p);
 json load_packages();
 void save_packages(const json& j);
+bool can_be_upgraded(const std::string& project_id, const std::string& game_version, const std::string& loader);
