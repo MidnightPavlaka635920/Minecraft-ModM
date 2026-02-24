@@ -22,7 +22,7 @@ Then, you have to install the program. Installation is different for both Window
 4. Run cmd.exe or something
 5. run
  ```cmd
- cd "C:\Path\To\Installed\File"
+ cd "C:\Program Files\mcmodm\"
  ```
 6. Run file
 ### Linux (Debian)
