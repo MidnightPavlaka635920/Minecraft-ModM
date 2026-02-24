@@ -26,35 +26,41 @@ void update_all_packages(std::string& version, std::string& install_path, std::s
     bool all_updatable = true;
 
     for (auto& [project_id, info] : packgs["installed"].items()) {
-        bool upgradable = can_be_upgraded(project_id, version, loader);
-        if (!can_be_upgraded(project_id, version, loader)) {
-            all_updatable = false;
-            //std::cout << "Package " << project_id << " cannot be upgraded to version " << version << " with loader " << loader << ".\n";
-            //continue;
-        }
-        std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << ": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
+ 
+            bool upgradable = can_be_upgraded(project_id, version, loader);
+            if (!can_be_upgraded(project_id, version, loader)) {
+                all_updatable = false;
+                //std::cout << "Package " << project_id << " cannot be upgraded to version " << version << " with loader " << loader << ".\n";
+                //continue;
+            }
+            std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << ": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
+        
     }
     if (!all_updatable) {
         std::cout << "Not all packages can be upgraded. Wait for all the packages to become upgradable to the specified version " << version << ", or, run 'mcmodm ck_upd <version to update> <loader> <path to req.json>' to check that.\n";
         return;
     }
     for (auto& [project_id, info] : packgs["installed"].items()) {
-        bool up_to_date = false;
-        /*std::cout << "Project ID: " << project_id << "\n";
-        std::cout << "  File: " << info["file"] << "\n";    
-        std::cout << "  Game version: " << info["game_version"] << "\n";
-        std::cout << "  Loader: " << info["loader"] << "\n";*/
-        if(info["game_version"] == version && info["loader"] == loader){
-            std::cout << "Package " << project_id << " is already up to date for version " << version << ". Skipping.\n";
-            up_to_date = true;
-            continue;
-        }
-        if(!up_to_date){
-            remove_package(project_id, install_path, true);
-            json ti;
-            ti.push_back({{"version", version}, {"loader", loader}});
-            install_mod(project_id, install_path, ti, true);
-            continue;
+        if (project_id.starts_with("local:")){
+            std::cout << "\033[33mPackages installed from a file will not be updated.\033[0m\n";
+        } else {
+            bool up_to_date = false;
+            /*std::cout << "Project ID: " << project_id << "\n";
+            std::cout << "  File: " << info["file"] << "\n";    
+            std::cout << "  Game version: " << info["game_version"] << "\n";
+            std::cout << "  Loader: " << info["loader"] << "\n";*/
+            if(info["game_version"] == version && info["loader"] == loader){
+                std::cout << "Package " << project_id << " is already up to date for version " << version << ". Skipping.\n";
+                up_to_date = true;
+                continue;
+            }
+            if(!up_to_date){
+                remove_package(project_id, install_path, true);
+                json ti;
+                ti.push_back({{"version", version}, {"loader", loader}});
+                install_mod(project_id, install_path, ti, true);
+                continue;
+            }
         }
     }
     std::string req_path = install_path;

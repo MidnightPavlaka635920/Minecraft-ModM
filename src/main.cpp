@@ -27,24 +27,26 @@
 #include "../include/setup.h"
 #include "../include/easy.h"
 #include "../include/iff.h"
+#include "../include/il.h"
 using json = nlohmann::json;
 void help(){
     std::cout << "Available commands:\n"
-    << "  search <modname>                           - List online mods matching <modname>\n"
-    << "  install <modname> <path>                   - Install mod <modname> to <path>\n"
-    << "  remove <modname> <path>                    - Remove mod <modname> from <path>\n"
-    << "  updateall <version> <path>                 - Update all mods in <path> for game version <version>\n"
-    << "  list <path>                                - List installed mods in <path>\n"
-    << "  setup <path> <version> <loader>            - Setup req.json in <path> with specified version and loader\n"
-    << "  easy_install <path>                        - Easy install mods from a list in <path>\n"
-    << "  easy_remove <path>                         - Easy remove mods from a list in <path>\n"
-    << "  iff <path-to-packages.json> <install_path> - Install from a list of packages\n"
-    << "  ck_upd <version> <loader> <path-to-req.json> - Check if all packages can be upgraded\n"
-    << "Version 1.3\n";
+    << "  search <modname>                                  - List online mods matching <modname>\n"
+    << "  install <modname> <path>                          - Install mod <modname> to <path>\n"
+    << "  remove <modname> <path>                           - Remove mod <modname> from <path>\n"
+    << "  updateall <version> <path>                        - Update all mods in <path> for game version <version>\n"
+    << "  list <path>                                       - List installed mods in <path>\n"
+    << "  setup <path> <version> <loader>                   - Setup req.json in <path> with specified version and loader\n"
+    << "  easy_install <path>                               - Easy install mods from a list in <path>\n"
+    << "  easy_remove <path>                                - Easy remove mods from a list in <path>\n"
+    << "  iff <path-to-packages.json> <install_path>        - Install from a list of packages\n"
+    << "  ck_upd <version> <loader> <path-to-req.json>      - Check if all packages can be upgraded\n"
+    << "  il <file_to_install> <path_to_install> <name>     - Install a local file to the destination.\n"
+    << "Version 1.4\n";
 }
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: mcmodm <operation> <modname>\n";
+        std::cerr << "Usage: mcmodm <operation>\n";
         return 1;
     }
 
@@ -217,7 +219,35 @@ int main(int argc, char* argv[]) {
         //check_update(version, loader, req);
         check_all_upgradeable(version, loader, req_path);
 
-    } else {
+    } else if (operation == "il"){
+        if (argc < 5){
+            std::cerr << "Usage: mcmodm il <file_to_install> <path_to_install> <name>\n";
+            return 1;
+        }
+        std::string fti = argv[2]; // game version
+        std::string install_path = argv[3]; // installation path
+        std::string req_path = install_path;
+        std::string name = "N/A";
+        name = argv[4];
+        if (!req_path.empty() && req_path.back() != '/'){
+            req_path += '/';
+        }
+        req_path += "req.json";
+
+        std::ifstream sdata(req_path);
+
+        //std::ifstream sdat(reqjsonPath);
+        if (!sdata.is_open()) {
+            std::cerr << "Cannot open req.json\n";
+            //return 1;
+            throw std::runtime_error("Cannot open req.json");
+        }
+        json req = json::parse (sdata);
+        std::string loader = req[0]["loader"];
+        std::string version = req[0]["version"];
+        install_local(install_path, fti, name, version, loader);
+    
+    }else {
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();
         return 1;

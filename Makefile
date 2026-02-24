@@ -1,25 +1,31 @@
 CXX = g++
 CXXFLAGS = -O2 -Wall -std=c++20 -Iinclude
 LDFLAGS = -lcurl
-TARGET = mcmodm
 
-SRC = $(wildcard src/*.cpp)
-OBJ = $(SRC:.cpp=.o)
+# put artifacts in bin/ so the workspace stays clean
+BINDIR := bin
+TARGET := mcmodm
+
+SRC := $(wildcard src/*.cpp)
+OBJ := $(patsubst src/%.cpp,$(BINDIR)/%.o,$(SRC))
 
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
+$(TARGET): $(OBJ) | $(BINDIR)
 	$(CXX) $(OBJ) -o $(TARGET) $(LDFLAGS)
 
-main.o: src/main.cpp
-	$(CXX) $(CXXFLAGS) -c src/main.cpp -o src/main.o
+$(BINDIR):
+	@mkdir -p $(BINDIR)
 
-%.o: %.cpp
+# pattern rule for object files
+$(BINDIR)/%.o: src/%.cpp | $(BINDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -rf $(BINDIR)/* $(TARGET)
+
 install:
-	install -Dm755 $(TARGET) /usr/local/bin/$(TARGET)
+	install -Dm755 $(TARGET) /usr/local/bin/$(notdir $(TARGET))
+
 uninstall:
-	rm -f /usr/local/bin/$(TARGET)
+	rm -f /usr/local/bin/$(notdir $(TARGET))
