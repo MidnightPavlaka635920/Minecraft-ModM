@@ -49,6 +49,7 @@ Commands:
 - Remove packages easily (follow instructiosn that appear): `mcmodm easy_remove <path>`
 - Install all packages from a file: `mcmodm iff <path_to/packages.json>`<install-path>`
 - Check if all of installed packages are available for updating to a specific version and loader: `mcmodm ck_upd <update_version> <loader> <installation_folder>`
+- Install from a local .jar file: `mcmodm il <file_to_install> <path_to_install - destination> <name>`
 ## Compiling yourself
 There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide. Source files are in src/ and header files are in include/
 On WIndoes, steps are simmilar after installing dependencies, using a MINGW64 shell.
