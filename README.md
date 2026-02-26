@@ -37,7 +37,9 @@ dpkg-deb -i mcmodm.deb
 ```bash
 mcmodm setup <path> <version> <loader>
 ```
-2. You are ready 
+2. You are ready
+### AUR
+This project is available on AUR with name `mcmodm`, you can use any AUR helper to install it.
 ## Usage
 Commands:
 - Search for mod/plugins: `mcmodm <mod/plugin name>
