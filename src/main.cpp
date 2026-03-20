@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 	    for(const auto& l:req[0]["loader"]){loader.push_back(l.get<std::string>());}
 	}
         std::string version = overwrite_version.empty() ? req[0]["version"].get<std::string>() : overwrite_version;
-        req = json::array({{{"version", version}, {"loader", json::array({loader})}}});
+        req = json::array({{{"version", version}, {"loader", {loader}}}});
         for (int i = 2; i < (argc - 1); i++){
             std::string pn = argv[i];          // mod name or slug
             install_mod(pn, install_path, req, false);
