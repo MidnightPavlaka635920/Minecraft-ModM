@@ -124,7 +124,11 @@ int main(int argc, char* argv[]) {
             return 1;
 
         }
-        std::string loader = overwrite_loader.empty() ? req[0]["loader"].get<std::string>() : overwrite_loader;
+	std::vector<std::string> overwrite_loader_vector;
+	std::vector<std::string> loader;
+	if(!overwrite_loader.empty()){loader.push_back(overwrite_loader);} else{
+	    for(const auto& l:req[0]["loader"]){loader.push_back(l.get<std::string>());}
+	}
         std::string version = overwrite_version.empty() ? req[0]["version"].get<std::string>() : overwrite_version;
         req = json::array({{{"version", version}, {"loader", json::array({loader})}}});
         for (int i = 2; i < (argc - 1); i++){
