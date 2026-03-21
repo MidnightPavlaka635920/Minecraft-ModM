@@ -35,14 +35,15 @@ dpkg-deb -i mcmodm.deb
 ## Setting up
 1. To create a version file, run
 ```bash
-mcmodm setup <path> <version> <loader>
+mcmodm setup <path> <version> <loader (loader)>
 ```
+Multiple loaders can be set
 2. You are ready
 ### AUR
 This project is available on AUR with name `mcmodm`, you can use any AUR helper to install it.
 ## Usage
 Commands:
-- Search for mod/plugins: `mcmodm <mod/plugin name>
+- Search for mod/plugins: `mcmodm <mod/plugin name>`
 - Then, use project ID and run `mcmodm install <Project ID> (Project ID ) <Install Path>`. Dependencies will be installed. Multiple packages could be installed.
 - List installed plugins: `mcmodm list <Install path>`
 - Remove mod/plugin: `mcmodm remove <Project ID> (Project ID ) <Install Path>`. Just specified package will be removed
@@ -51,7 +52,8 @@ Commands:
 - Remove packages easily (follow instructiosn that appear): `mcmodm easy_remove <path>`
 - Install all packages from a file: `mcmodm iff <path_to/packages.json>`<install-path>`
 - Check if all of installed packages are available for updating to a specific version and loader: `mcmodm ck_upd <update_version> <loader> <installation_folder>`
-- Install from a local .jar file: `mcmodm il <file_to_install> <path_to_install - destination> <name>`
+- Install a local .jar file: `mcmodm il <file_to_install> <path_to_install - destination> <name>`
+- 
 ## Compiling yourself
 There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide. Source files are in src/ and header files are in include/
 On WIndoes, steps are simmilar after installing dependencies, using a MINGW64 shell.
