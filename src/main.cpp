@@ -153,8 +153,12 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error("Cannot open req.json");
         }
         json req = json::parse (sdata);
-        std::string loader = req[0]["loader"];
-        update_all_packages(version, install_path, loader, req);
+        //std::string loader = req[0]["loader"];
+        std::vector<std::string> loaders;
+        for (const auto& l : req[0]["loader"]){
+            loaders.push_back(l.get<std::string>());
+        }
+        update_all_packages(version, install_path, loaders, req);
     } else if (operation == "list") {
         if (argc < 3) {
             std::cerr << "Usage: mcmodm list <path>\n";
@@ -165,13 +169,17 @@ int main(int argc, char* argv[]) {
         list_packs(install_path);
     } else if (operation == "setup"){
         if (argc < 5){
-            std::cerr << "Usage: mcmodm setup <path> <version> <loader>\n";
+            std::cerr << "Usage: mcmodm setup <path> <version> <loader> (loader)\n";
             return 1;
         }
+        std::vector <std::string> loaders;
         std::string path = argv[2];
         std::string version = argv[3];
-        std::string loader = argv[4];
-        setup(path, version, loader);
+        //std::string loader = argv[4];
+        for (int i = 4; i < argc; i++) {
+            loaders.push_back(argv[i]);
+        }
+        setup(path, version, loaders);
     } else if (operation == "help"){
         help();
     } else if(operation == "3"){
@@ -217,6 +225,7 @@ int main(int argc, char* argv[]) {
         }*/
         //json req = json::parse (sdata);
         //check_update(version, loader, req);
+        std::cout << "\033[33mWarning: If you have multiple loaders set up for plugins, you might want to run this command multiple times!\033[0m\n";
         check_all_upgradeable(version, loader, req_path);
 
     } else if (operation == "il"){

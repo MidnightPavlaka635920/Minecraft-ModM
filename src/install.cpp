@@ -22,7 +22,16 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
     }
 
     std::string ver = req[0]["version"].get<std::string>();
-    std::string loader = req[0]["loader"].get<std::string>();
+    std::vector<std::string> loaders;
+    for (const auto& loader : req[0]["loader"]) {
+        loaders.push_back(loader.get<std::string>());
+    }
+     //std::string ver = req[0]["version"].get<std::string>();
+     if (loaders.empty()) {
+        throw std::runtime_error("No loaders specified in requirements.");
+
+    }
+    //std::string loader = req[0]["loader"].get<std::string>();
 
     // Fetch all versions for this project
     std::string url = "https://api.modrinth.com/v2/project/" + pn + "/version";
@@ -53,15 +62,21 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
         return;
     }
     bool found = false;
-
     for (auto& release : mainData) {
         bool ver_comp = false, loa_comp = false;
-
+        
         for (auto& gver : release["game_versions"])
             if (gver == ver) { ver_comp = true; break; }
-
-        for (auto& ldr : release["loaders"])
-            if (ldr == loader) { loa_comp = true; break; }
+        int lmn = 0;
+        for (const auto& ldr : release["loaders"]) {
+            std::string rel_loader = ldr.get<std::string>();
+            if (std::find(loaders.begin(), loaders.end(), rel_loader) != loaders.end()) {
+                loa_comp = true;
+                break;
+            }
+            lmn++;
+        }
+    
 
         if (ver_comp && loa_comp) {
             found = true;
@@ -80,7 +95,7 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
             }
-            if (just_install){mark_installed(pn, ver, loader, filename, name);continue;} else{mark_installed(pn, ver, loader, filename, name);
+            if (just_install){mark_installed(pn, ver, loaders[lmn], filename, name);continue;} else{mark_installed(pn, ver, loaders[lmn], filename, name);
 
             // ---- Install required dependencies ----
                 if (release.contains("dependencies")) {
@@ -92,7 +107,10 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
                         if (is_installed(dep_project)) continue;
 
                         json dep_req;
-                        dep_req.push_back({ {"version", ver}, {"loader", loader} });
+                        dep_req.push_back({
+                            {"version", ver},
+                            {"loader", {loaders}}
+                        });
 
                         install_mod(dep_project, install_path, dep_req, false);
                     }
@@ -101,6 +119,7 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
 
             break; // stop after first matching release
         }
+    
     }
 
     if (!found) {
