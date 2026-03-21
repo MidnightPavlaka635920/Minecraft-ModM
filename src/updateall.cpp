@@ -87,8 +87,8 @@ void check_all_upgradeable(std::string& version, std::string& loader, std::strin
     //bool all_updatable = true;
 
     for (auto& [project_id, info] : packgs["installed"].items()) {
-        bool upgradable = can_be_upgraded(project_id, version, loader);
+        bool upgradable = can_be_upgraded(project_id, version, info["loader"]);
         
-        std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << ": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
+        std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << "and loader" << info["loader"]<<": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
     }
 }

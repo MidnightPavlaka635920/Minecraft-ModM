@@ -32,7 +32,7 @@ using json = nlohmann::json;
 void help(){
     std::cout << "Available commands:\n"
     << "  search <modname>                                  - List online mods matching <modname>\n"
-    << "  install <modname> <path>                          - Install mod <modname> to <path>\n"
+    << "  install <modname> <path> (options)                - Install mod <modname> to <path>\n"
     << "  remove <modname> <path>                           - Remove mod <modname> from <path>\n"
     << "  updateall <version> <path>                        - Update all mods in <path> for game version <version>\n"
     << "  list <path>                                       - List installed mods in <path>\n"
@@ -88,6 +88,19 @@ int main(int argc, char* argv[]) {
             std::cerr << "Usage: mcmodm install <modname> <path>\n";
             return 1;
         }
+        std::string overwrite_loader, overwrite_version = "";
+        for (int i = 4; i < argc; i++){
+            std::string arg = argv[i];
+            if (arg.rfind("--overwrite-loader=", 0) == 0){
+                overwrite_loader = arg.substr(std::string("--overwrite-loader=").length());
+
+            } else if(arg.rfind("--overwrite-version=", 0) == 0){
+                overwrite_version = arg.substr(std::string("--overwrite-version=").length());
+            } else {
+                std::cerr << "Unknown option: " << arg << "\n";
+                return 1;
+            }
+        }
         std::string install_path = argv[(argc - 1)]; // installation path
         
         // INSTALL operation: read requested version/loader from req.json
@@ -111,6 +124,9 @@ int main(int argc, char* argv[]) {
             return 1;
 
         }
+        std::string loader = overwrite_loader.empty() ? req[0]["loader"].get<std::string>() : overwrite_loader;
+        std::string version = overwrite_version.empty() ? req[0]["version"].get<std::string>() : overwrite_version;
+        json req = json::array({{{"version", version}, {"loader", json::array({loader})}}});
         for (int i = 2; i < (argc - 1); i++){
             std::string pn = argv[i];          // mod name or slug
             install_mod(pn, install_path, req, false);
