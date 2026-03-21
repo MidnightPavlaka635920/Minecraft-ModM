@@ -13,7 +13,7 @@
 #include "../include/install.h"
 using json = nlohmann::json;
 
-void update_all_packages(std::string& version, std::string& install_path, std::string& loader, json& req) {
+void update_all_packages(std::string& version, std::string& install_path, std::vector<std::string>& loaders, json& req) {
     if (req[0]["version"] == version) {
         std::cout << "No version change detected (" << version << "). Skipping update.\n";
         return;
@@ -26,11 +26,11 @@ void update_all_packages(std::string& version, std::string& install_path, std::s
     bool all_updatable = true;
 
     for (auto& [project_id, info] : packgs["installed"].items()) {
- 
-            bool upgradable = can_be_upgraded(project_id, version, loader);
-            if (!can_be_upgraded(project_id, version, loader)) {
+            bool upgradable = false;
+            upgradable = can_be_upgraded(project_id, version, info["loader"]);
+            if (!upgradable) {
                 all_updatable = false;
-                //std::cout << "Package " << project_id << " cannot be upgraded to version " << version << " with loader " << loader << ".\n";
+                //std::cout << "Package " << project_id << " cannot be upgraded to version " << version << " with info[loader] " << info[loader] << ".\n";
                 //continue;
             }
             std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << ": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
@@ -49,7 +49,7 @@ void update_all_packages(std::string& version, std::string& install_path, std::s
             std::cout << "  File: " << info["file"] << "\n";    
             std::cout << "  Game version: " << info["game_version"] << "\n";
             std::cout << "  Loader: " << info["loader"] << "\n";*/
-            if(info["game_version"] == version && info["loader"] == loader){
+            if(info["game_version"] == version){
                 std::cout << "Package " << project_id << " is already up to date for version " << version << ". Skipping.\n";
                 up_to_date = true;
                 continue;
@@ -57,7 +57,7 @@ void update_all_packages(std::string& version, std::string& install_path, std::s
             if(!up_to_date){
                 remove_package(project_id, install_path, true);
                 json ti;
-                ti.push_back({{"version", version}, {"loader", loader}});
+                ti.push_back({{"version", version}, {"loader", json::array({info["loader"]})}}); // keep the same loader(s) as before
                 install_mod(project_id, install_path, ti, true);
                 continue;
             }
@@ -68,7 +68,7 @@ void update_all_packages(std::string& version, std::string& install_path, std::s
         req_path += '/';
     req_path += "req.json";
     json req_s;
-    req_s.push_back({{"version", version}, {"loader", loader}});
+    req_s.push_back({{"version", version}, {"loader", loaders}});
     std::ofstream ofs(req_path);
     if (!ofs.is_open()) {
         std::cerr << "Failed to write req.json to " << req_path << "\n";
