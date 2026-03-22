@@ -29,4 +29,5 @@ void install_local(std::string& path_destination, std::string& path_tif, std::st
     
     mark_installed(pn, version, loader, filename, name);
     //save_packages();
+    std::cout << "Installed successfully\n";
 }
