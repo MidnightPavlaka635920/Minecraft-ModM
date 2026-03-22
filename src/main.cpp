@@ -294,8 +294,8 @@ int main(int argc, char* argv[]) {
         check_all_upgradeable(version, loader, req_path);
 
     } else if (operation == "il"){
-        if (argc < 5){
-            std::cerr << "Usage: mcmodm il <file_to_install> <path_to_install> <name>\n";
+        if (argc < 6){
+            std::cerr << "Usage: mcmodm il <file_to_install> <path_to_install> <name> <loader>\n";
             return 1;
         }
         std::string fti = argv[2]; // game version
@@ -317,7 +317,8 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error("Cannot open req.json");
         }
         json req = json::parse (sdata);
-        std::string loader = req[0]["loader"];
+        //std::string loader = req[0]["loader"];
+        std::string loader = argv[5];
         std::string version = req[0]["version"];
         install_local(install_path, fti, name, version, loader);
     
