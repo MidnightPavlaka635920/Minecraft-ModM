@@ -68,13 +68,15 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
         for (auto& gver : release["game_versions"])
             if (gver == ver) { ver_comp = true; break; }
         int lmn = 0;
+        std::string loader_to_use = "";
         for (const auto& ldr : release["loaders"]) {
             std::string rel_loader = ldr.get<std::string>();
             if (std::find(loaders.begin(), loaders.end(), rel_loader) != loaders.end()) {
                 loa_comp = true;
+                loader_to_use = rel_loader;
                 break;
             }
-            lmn++;
+            //lmn++;
         }
     
 
@@ -95,7 +97,7 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
             }
-            if (just_install){mark_installed(pn, ver, loaders[lmn], filename, name);continue;} else{mark_installed(pn, ver, loaders[lmn], filename, name);
+            if (just_install){mark_installed(pn, ver, loader_to_use, filename, name);continue;} else{mark_installed(pn, ver, loader_to_use, filename, name);
 
             // ---- Install required dependencies ----
                 if (release.contains("dependencies")) {
@@ -103,13 +105,13 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
                         std::string dep_type = dep["dependency_type"];
                         if (dep_type != "required") continue; // skip optional
 
-                        std::string dep_project = dep["project_id"];
+                        std::string dep_project = dep["project_id"].get<std::string>();
                         if (is_installed(dep_project)) continue;
 
                         json dep_req;
                         dep_req.push_back({
                             {"version", ver},
-                            {"loader", {loaders}}
+                            {"loader", loaders}
                         });
 
                         install_mod(dep_project, install_path, dep_req, false);

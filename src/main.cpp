@@ -29,10 +29,25 @@
 #include "../include/iff.h"
 #include "../include/il.h"
 using json = nlohmann::json;
+std::vector<std::string> get_loaders(const json& j) {
+    std::vector<std::string> loaders;
+
+    if (j.is_string()) {
+        loaders.push_back(j.get<std::string>());
+    } else if (j.is_array()) {
+        for (const auto& l : j) {
+            loaders.push_back(l.get<std::string>());
+        }
+    } else {
+        throw std::runtime_error("Invalid loader type (must be string or array)");
+    }
+
+    return loaders;
+}
 void help(){
     std::cout << "Available commands:\n"
     << "  search <modname>                                  - List online mods matching <modname>\n"
-    << "  install <modname> <path> (options)                - Install mod <modname> to <path>\n"
+    << "  install <modname> (options) <path>                - Install mod <modname> to <path>\n"
     << "  remove <modname> <path>                           - Remove mod <modname> from <path>\n"
     << "  updateall <version> <path>                        - Update all mods in <path> for game version <version>\n"
     << "  list <path>                                       - List installed mods in <path>\n"
@@ -89,19 +104,46 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         std::string overwrite_loader, overwrite_version = "";
-        for (int i = 4; i < argc; i++){
+        /*for (int i = 4; i < argc; i++){
             std::string arg = argv[i];
             if (arg.rfind("--overwrite-loader=", 0) == 0){
                 overwrite_loader = arg.substr(std::string("--overwrite-loader=").length());
-
             } else if(arg.rfind("--overwrite-version=", 0) == 0){
                 overwrite_version = arg.substr(std::string("--overwrite-version=").length());
-            } else {
-                std::cerr << "Unknown option: " << arg << "\n";
-                return 1;
+            }
+        }*/
+        std::vector<std::string> mods;  // project IDs
+        std::string install_path;
+
+        for (int i = 2; i < argc; i++) {
+            std::string arg = argv[i];
+
+            if (arg.rfind("--overwrite-loader=", 0) == 0) {
+                overwrite_loader = arg.substr(19);
+            }
+            else if (arg.rfind("--overwrite-version=", 0) == 0) {
+                overwrite_version = arg.substr(20);
+            }
+            else {
+                mods.push_back(arg); // temporarily push everything else
             }
         }
-        std::string install_path = argv[(argc - 1)]; // installation path
+
+        // Last element is always the install path
+        if (mods.empty()) {
+            std::cerr << "No install path provided\n";
+            return 1;
+        }
+
+        install_path = mods.back();  // correct
+        mods.pop_back();             // now mods only contains project IDs
+
+        // sanity check
+        if (mods.empty()) {
+            std::cerr << "No mods provided to install\n";
+            return 1;
+        }
+        //std::string install_path = argv[(argc - 1)]; // installation path
         
         // INSTALL operation: read requested version/loader from req.json
         std::string req_path = install_path;
@@ -124,13 +166,16 @@ int main(int argc, char* argv[]) {
             return 1;
 
         }
-	std::vector<std::string> overwrite_loader_vector;
+	/*std::vector<std::string> overwrite_loader_vector;
 	std::vector<std::string> loader;
 	if(!overwrite_loader.empty()){loader.push_back(overwrite_loader);} else{
 	    for(const auto& l:req[0]["loader"]){loader.push_back(l.get<std::string>());}
-	}
+	}*/
+        auto loaders = overwrite_loader.empty()
+            ? get_loaders(req[0]["loader"])
+            : std::vector<std::string>{overwrite_loader};
         std::string version = overwrite_version.empty() ? req[0]["version"].get<std::string>() : overwrite_version;
-        req = json::array({{{"version", version}, {"loader", {loader}}}});
+        req = json::array({{{"version", version}, {"loader", loaders}}});
         for (int i = 2; i < (argc - 1); i++){
             std::string pn = argv[i];          // mod name or slug
             install_mod(pn, install_path, req, false);
