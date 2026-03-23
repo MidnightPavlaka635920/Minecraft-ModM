@@ -17,7 +17,7 @@ In order to install this program, you should download a file from `releases` sec
 Then, you have to install the program. Installation is different for both Windows and Linux users.
 ### Windows
 #### Step 1
-Install MinGW that has MSYS2 (blue icon). **THAT IS WHAT YOU WILL BE RUNNING YOUR PROGRAM FROM!!!**
+Install MSYS2, then use the MINGW64 shell **THAT IS WHAT YOU WILL BE RUNNING YOUR PROGRAM FROM!!!**
 #### Step 2
 Open the blue icon of MinGW (I believe it is MSYS2). Youw will be prompted by a shell. **DON'T WORRY ITS NOT SCARY!!!**
 #### Step 3
@@ -31,7 +31,7 @@ Run `./installwin.sh`
 1. Download `.deb` file
 2. Run
   ```bash
-dpkg-deb -i mcmodm.deb
+sudo dpkg-deb -i mcmodm.deb
 ```
 3. Simply run `mcmodem <option>`
 ### Arch Linux
@@ -56,7 +56,7 @@ Commands:
 - Update all packages: `mcmodm updateall <new Game version> <Install path>`
 - Install packages easily (follow instructions that appear): `mcmodm easy_install <path>`
 - Remove packages easily (follow instructiosn that appear): `mcmodm easy_remove <path>`
-- Install all packages from a file: `mcmodm iff <path_to/packages.json>`<install-path>`
+- Install all packages from a file: `mcmodm iff <path_to/packages.json> <install-path>` There, `path_to/packages.json` should point ot a file.
 - Check if all of installed packages are available for updating to a specific version and loader: `mcmodm ck_upd <update_version> <loader> <installation_folder>`
 - Install a local .jar file: `mcmodm il <file_to_install> <path_to_install - destination> <name>`
 ## Compiling yourself
