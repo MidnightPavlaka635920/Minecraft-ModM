@@ -23,7 +23,7 @@ Open the blue icon of MinGW (I believe it is MSYS2). Youw will be prompted by a 
 #### Step 3
 run
 ```bash
- git clone https://github.com/MidnightPavlaka635920/Minecraft-ModM.git
+ pacman -S git && git clone https://github.com/MidnightPavlaka635920/Minecraft-ModM.git
 ```
 #### Step 4
 Run `./installwin.sh`
