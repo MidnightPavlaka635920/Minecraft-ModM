@@ -24,7 +24,7 @@ void install_local(std::string& path_destination, std::string& path_tif, std::st
         std::cerr << "Something went wrong and I don't know what. Hope this helps." << e.what();
     }
     fs::path p = (path_tif);
-    std::string filename = p.filename();
+    std::string filename = p.filename().string();
     std::string pn = "local:" + filename;
     
     mark_installed(pn, version, loader, filename, name);
