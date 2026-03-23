@@ -16,17 +16,17 @@ mcmodm
 In order to install this program, you should download a file from `releases` section.
 Then, you have to install the program. Installation is different for both Windows and Linux users.
 ### Windows
-#### 1
-Install MinGW that has MSYS2 (blue icon)
-#### 2
+#### Step 1
+Install MinGW that has MSYS2 (blue icon). **THAT IS WHAT YOU WILL BE RUNNING YOUR PROGRAM FROM!!!**
+#### Step 2
 Open the blue icon of MinGW (I believe it is MSYS2). Youw will be prompted by a shell. **DON'T WORRY ITS NOT SCARY!!!**
-#### 3
+#### Step 3
 run
 ```bash
  git clone https://github.com/MidnightPavlaka635920/Minecraft-ModM.git
 ```
-#### 4
-Run ./installwin.sh
+#### Step 4
+Run `./installwin.sh`
 ### Linux (Debian)
 1. Download `.deb` file
 2. Run
@@ -40,14 +40,13 @@ I've made AUR package called `mcmodm`. Use your favorite AUR helper to install i
 yay -S mcmodm
 ```
 ## Setting up
-1. To create a version file, run
+1. `cd` into the minecraft directory. *For Windows users in MinGW64 shell, usr home directory is `/C/Users/Username/`*
+2. To create a version file, run
 ```bash
-mcmodm setup <path> <version> <loader (loader)>
+mcmodm setup <path> <version> <loader> (loader)
 ```
 Multiple loaders can be set
 2. You are ready
-### AUR
-This project is available on AUR with name `mcmodm`, you can use any AUR helper to install it.
 ## Usage
 Commands:
 - Search for mod/plugins: `mcmodm <mod/plugin name>`
@@ -60,7 +59,12 @@ Commands:
 - Install all packages from a file: `mcmodm iff <path_to/packages.json>`<install-path>`
 - Check if all of installed packages are available for updating to a specific version and loader: `mcmodm ck_upd <update_version> <loader> <installation_folder>`
 - Install a local .jar file: `mcmodm il <file_to_install> <path_to_install - destination> <name>`
-- 
 ## Compiling yourself
 There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide. Source files are in src/ and header files are in include/
-On WIndoes, steps are simmilar after installing dependencies, using a MINGW64 shell.
+On Windows, steps are simmilar after installing dependencies, using a MINGW64 shell.
+## Notes
+In command above, `Install path` or `Path to req.json` is a directory and thus shouldn't contain `req.json`.
+## How to use this program?
+- Open the shell (**NOT** CMD for Windows, use MinGW as I said)
+- If you wish, cd into the directory you will be using.
+- Run desired command.
