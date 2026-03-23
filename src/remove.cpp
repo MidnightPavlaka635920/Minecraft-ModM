@@ -27,7 +27,6 @@ void remove_package(std::string package_id, std::string install_path, bool just_
         } else {
             std::perror(("Failed to remove file: " + file_path).c_str());
         }
-        std::cout << "Updating package DB." << "\n";
         if(just_remove){return;}else{
         j["installed"].erase(package_id);
         save_packages(j);

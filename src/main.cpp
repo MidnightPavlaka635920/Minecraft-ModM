@@ -28,6 +28,7 @@
 #include "../include/easy.h"
 #include "../include/iff.h"
 #include "../include/il.h"
+#include "../include/ck_vers.h"
 using json = nlohmann::json;
 std::vector<std::string> get_loaders(const json& j) {
     std::vector<std::string> loaders;
@@ -322,7 +323,32 @@ int main(int argc, char* argv[]) {
         std::string version = req[0]["version"];
         install_local(install_path, fti, name, version, loader);
     
-    }else {
+    }else if(operation == "listver"){
+        if (argc < 3){
+            std::cerr << "Usage: mcmodm listver <project_id>\n";
+            return 1;
+        }
+        std::string project_id = argv[2];
+        auto compatible_versions = list_compatible_versions(project_id);
+        std::cout << "Compatible versions for project '" << project_id << "':\n";
+        int per_line = 3;
+
+        for (size_t i = 0; i < compatible_versions.size(); i++) {
+            std::cout << compatible_versions[i];
+            if ((i + 1) % per_line != 0 && i != compatible_versions.size() - 1) {
+                std::cout << " - ";
+            }
+            if ((i + 1) % per_line == 0) {
+                std::cout << "\n";
+            }
+        }
+
+        // final newline if needed
+        if (compatible_versions.size() % per_line != 0) {
+            std::cout << "\n";
+        }
+        std::cout << std::endl;
+    } else{
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();
         return 1;
