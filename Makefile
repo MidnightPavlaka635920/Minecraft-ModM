@@ -29,3 +29,7 @@ install:
 
 uninstall:
 	rm -f /usr/local/bin/$(notdir $(TARGET))
+installwin:
+	install -Dm755 $(TARGET) /mingw64/usr/local/bin/$(notdir $(TARGET))
+uninstallwin:
+	rm -f /mingw64/usr/local/bin/$(notdir $(TARGET))
