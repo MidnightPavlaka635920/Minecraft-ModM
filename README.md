@@ -16,15 +16,17 @@ mcmodm
 In order to install this program, you should download a file from `releases` section.
 Then, you have to install the program. Installation is different for both Windows and Linux users.
 ### Windows
-1. Download .exe file
-2. Double-click the file
-3. Follow installation guide
-4. Run cmd.exe or something
-5. run
- ```cmd
- cd "C:\Program Files\mcmodm\"
- ```
-6. Run file
+#### 1
+Install MinGW that has MSYS2 (blue icon)
+#### 2
+Open the blue icon of MinGW (I believe it is MSYS2). Youw will be prompted by a shell. **DON'T WORRY ITS NOT SCARY!!!**
+#### 3
+run
+```bash
+ git clone https://github.com/MidnightPavlaka635920/Minecraft-ModM.git
+```
+#### 4
+Run ./installwin.sh
 ### Linux (Debian)
 1. Download `.deb` file
 2. Run
@@ -32,6 +34,11 @@ Then, you have to install the program. Installation is different for both Window
 dpkg-deb -i mcmodm.deb
 ```
 3. Simply run `mcmodem <option>`
+### Arch Linux
+I've made AUR package called `mcmodm`. Use your favorite AUR helper to install it. Example:
+```bash
+yay -S mcmodm
+```
 ## Setting up
 1. To create a version file, run
 ```bash
