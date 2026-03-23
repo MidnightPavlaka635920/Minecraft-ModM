@@ -20,6 +20,7 @@ Then, you have to install the program. Installation is different for both Window
 Install MSYS2, then use the MINGW64 shell **THAT IS WHAT YOU WILL BE RUNNING YOUR PROGRAM FROM!!!**
 #### Step 2
 Open the blue icon of MinGW (I believe it is MSYS2). Youw will be prompted by a shell. **DON'T WORRY ITS NOT SCARY!!!**
+Run `pacman -Syu` and press Y when asked. Restart shell.
 #### Step 3
 run
 ```bash
