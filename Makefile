@@ -4,7 +4,7 @@ LDFLAGS = -lcurl
 
 # put artifacts in bin/ so the workspace stays clean
 BINDIR := bin
-TARGET := mcmodm
+TARGET ?= mcmodm
 
 SRC := $(wildcard src/*.cpp)
 OBJ := $(patsubst src/%.cpp,$(BINDIR)/%.o,$(SRC))
@@ -33,3 +33,5 @@ installwin:
 	install $(TARGET) /mingw64/bin/$(notdir $(TARGET))
 uninstallwin:
 	rm -f /mingw64/bin/$(notdir $(TARGET))
+win:
+	$(MAKE) TARGET=$(TARGET).exe LDFLAGS="-lcurl -static -static-libgcc -static-libstdc++"
