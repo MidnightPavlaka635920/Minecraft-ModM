@@ -17,8 +17,8 @@ In order to install this program, you should download a file from `releases` sec
 Then, you have to install the program. Installation is different for both Windows and Linux users.
 ### Windows
 1. Download .exe from `releases` section
-2. Copy it into your minecraft folder, it should work.
-3. Run `cmd.exe` (`Win+R`, type `cmd`, press `Enter`), or easier, open terminal from the Minecraft folder. If you do so, skip step 4.
+2. Copy it into your home directory, it should work.
+3. Run `cmd.exe` (`Win+R`, type `cmd`, press `Enter`), or easier, open terminal from the folder where `mcmodm.exe` is sotred. If you do so, skip step 4.
 4. `cd` into your minecraft folder
 5. Run `.\mcmodm.exe <options>`
 ### Linux (Debian)
@@ -34,7 +34,7 @@ I've made AUR package called `mcmodm`. Use your favorite AUR helper to install i
 yay -S mcmodm
 ```
 ## Setting up
-1. `cd` into the minecraft directory. *For Windows users in MinGW64 shell, user home directory is `/C/Users/Username/`*
+1. `cd` into the minecraft mod/plugin directory. *For Windows users in MinGW64 shell, user home directory is `/C/Users/Username/`*
 2. To create a version file, run
 ```bash
 mcmodm setup <path> <version> <loader> (loader)
@@ -60,5 +60,5 @@ On Windows, steps are simmilar after installing dependencies, using a MINGW64 sh
 In command above, `Install path` or `Path to req.json` is a directory and thus shouldn't contain `req.json`.
 ## How to use this program?
 - Open the shell
-- On windows, cd into the directory where the `mcmodm.exe` is. *It is recomended to intsll it into your Minecraft folder.*
+- On windows, cd into the directory where the `mcmodm.exe` is. *It is recomended to intsll it into your home folder.*
 - Run desired command.
