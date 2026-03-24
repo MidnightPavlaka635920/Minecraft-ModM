@@ -28,7 +28,14 @@ std::string curl_to_string(const std::string& url)
         throw std::runtime_error("curl_easy_init failed");
 
     std::string result;
-
+    #ifdef _WIN32
+        char exe_path[MAX_PATH];
+        GetModuleFileNameA(NULL, exe_path, MAX_PATH);
+        std::string exe_dir = std::string(exe_path);
+        exe_dir = exe_dir.substr(0, exe_dir.find_last_of("\\/"));
+        std::string ca_path = exe_dir + "\\cacert.pem";
+        curl_easy_setopt(curl, CURLOPT_CAINFO, ca_path.c_str());
+    #endif
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);   // -L
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);      // -f
