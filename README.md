@@ -16,18 +16,11 @@ mcmodm
 In order to install this program, you should download a file from `releases` section.
 Then, you have to install the program. Installation is different for both Windows and Linux users.
 ### Windows
-#### Step 1
-Install MSYS2, then use the MINGW64 shell **THAT IS WHAT YOU WILL BE RUNNING YOUR PROGRAM FROM!!!**
-#### Step 2
-Open the blue icon of MinGW (I believe it is MSYS2). Youw will be prompted by a shell. **DON'T WORRY ITS NOT SCARY!!!**
-Run `pacman -Syu` and press Y when asked. Restart shell.
-#### Step 3
-run
-```bash
- pacman -S git && git clone https://github.com/MidnightPavlaka635920/Minecraft-ModM.git
-```
-#### Step 4
-Run `./installwin.sh`
+1. Download .exe from `releases` section
+2. Copy it into your minecraft folder, it should work.
+3. Run `cmd.exe` (`Win+R`, type `cmd`, press `Enter`), or easier, open terminal from the Minecraft folder. If you do so, skip step 4.
+4. `cd` into your minecraft folder
+5. Run `.\mcmodm.exe <options>`
 ### Linux (Debian)
 1. Download `.deb` file
 2. Run
@@ -41,7 +34,7 @@ I've made AUR package called `mcmodm`. Use your favorite AUR helper to install i
 yay -S mcmodm
 ```
 ## Setting up
-1. `cd` into the minecraft directory. *For Windows users in MinGW64 shell, usr home directory is `/C/Users/Username/`*
+1. `cd` into the minecraft directory. *For Windows users in MinGW64 shell, user home directory is `/C/Users/Username/`*
 2. To create a version file, run
 ```bash
 mcmodm setup <path> <version> <loader> (loader)
@@ -66,6 +59,6 @@ On Windows, steps are simmilar after installing dependencies, using a MINGW64 sh
 ## Notes
 In command above, `Install path` or `Path to req.json` is a directory and thus shouldn't contain `req.json`.
 ## How to use this program?
-- Open the shell (**NOT** CMD for Windows, use MinGW as I said)
-- If you wish, cd into the directory you will be using.
+- Open the shell
+- On windows, cd into the directory where the `mcmodm.exe` is. *It is recomended to intsll it into your Minecraft folder.*
 - Run desired command.
