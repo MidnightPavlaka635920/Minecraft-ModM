@@ -35,7 +35,7 @@ I've made AUR package called `mcmodm`. Use your favorite AUR helper to install i
 yay -S mcmodm
 ```
 ## Setting up
-1. `cd` into the minecraft mod/plugin directory. *For Windows users in MinGW64 shell, user home directory is `/C/Users/Username/`*
+1. `cd` into the minecraft directory where you extracted the zip. *For Windows users in MinGW64 shell, user home directory is `/C/Users/Username/`*
 2. To create a version file, run
 ```bash
 mcmodm setup <path> <version> <loader> (loader)
@@ -59,6 +59,7 @@ There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` t
 On Windows, steps are simmilar after installing dependencies, using a MINGW64 shell.
 ## Notes
 In command above, `Install path` or `Path to req.json` is a directory and thus shouldn't contain `req.json`.
+- (OPTIONAL, BUT USEFUL) Add folder where `mcmodm.exe` is located to the PATH, there are online tutorials for that.
 ## How to use this program?
 - Open the shell
 - On windows, cd into the directory where the `mcmodm.exe` is. *It is recomended to intsll it into your home folder.*
