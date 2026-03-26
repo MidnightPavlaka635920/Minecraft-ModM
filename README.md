@@ -58,8 +58,8 @@ Commands:
 There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide. Source files are in src/ and header files are in include/
 On Windows, steps are simmilar after installing dependencies, using a MINGW64 shell.
 ## Notes
-In command above, `Install path` or `Path to req.json` is a directory and thus shouldn't contain `req.json`.
-- (OPTIONAL, BUT USEFUL) Add folder where `mcmodm.exe` is located to the PATH, there are online tutorials for that.
+- In commands above, `Install path` or `Path to req.json` is a directory and thus shouldn't contain `req.json`.
+- (OPTIONAL, BUT USEFUL) Add folder where `mcmodm.exe` is located to the PATH, there are online tutorials for that. If you do that, you can run the program from any place on disk inside of CMD.
 ## How to use this program?
 - Open the shell
 - On windows, cd into the directory where the `mcmodm.exe` is. *It is recomended to intsll it into your home folder.*
