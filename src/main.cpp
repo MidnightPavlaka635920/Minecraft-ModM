@@ -29,6 +29,7 @@
 #include "../include/iff.h"
 #include "../include/il.h"
 #include "../include/ck_vers.h"
+#include "../include/search.h"
 using json = nlohmann::json;
 std::vector<std::string> get_loaders(const json& j) {
     std::vector<std::string> loaders;
@@ -77,27 +78,14 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         std::string pn = argv[2];          // mod name or slug
-        curl_global_init(CURL_GLOBAL_DEFAULT);
-        // Perform a search query on Modrinth
-        std::string search_url = "https://api.modrinth.com/v2/search?query=" + url_encode(pn);
-        std::string oData;
-
-        try {
-            oData = curl_to_string(search_url);
-        } catch (const std::exception& e) {
-            std::cerr << "Error fetching search results: " << e.what() << "\n";
-            return 1;
-        }
-
-        json search_results = json::parse(oData);
-        // LIST operation: display search results
-        json hits = search_results["hits"];
-        std::cout << "Search results for '" << pn << "':\n";
-        std::cout << "Title - Slug - Project ID\n";
-        for (const auto& hit : hits) {
-            std::cout << hit["title"].get<std::string>() << " - "
-                      << hit["slug"].get<std::string>() << " - "
-                      << hit["project_id"].get<std::string>() << "\n";
+        auto results = search_mods(pn);
+        if (results.empty()) {
+            std::cout << "No results found for query: " << pn << "\n";
+        } else {
+            std::cout << "Search results for query: " << pn << "\n";
+            for (const auto& res : results) {
+                std::cout << "\033[33mTitle:\033[0m " << res.title << ", \033[33mAuthor:\033[0m " << res.author << "\033[33m, Project ID:\033[0m " << res.project_id << "\n";
+            }
         }
 
     } else if (operation == "install") {
@@ -233,7 +221,16 @@ int main(int argc, char* argv[]) {
         }
         std::string install_path = argv[2]; // installation path
         // Call the function to list installed packages
-        list_packs(install_path);
+        std::vector<list_info> installed_packages = list_packs(install_path);
+        if (installed_packages.empty()) {
+            std::cout << "No packages installed. If that seems wrong, try again with a different path.\n";
+        } else {
+            std::cout << "Installed packages (" << installed_packages.size() << "):\n";
+            std::cout << "File Name - Project ID - Game Version\n";
+            for (const auto& pkg : installed_packages) {
+                std::cout << pkg.name << " \033[36m- \033[0m" << pkg.project_id << " \033[36m- \033[0m" << pkg.game_version << "\n";
+            }
+        }
     } else if (operation == "setup"){
         if (argc < 5){
             std::cerr << "Usage: mcmodm setup <path> <version> <loader> (loader)\n";
@@ -282,18 +279,12 @@ int main(int argc, char* argv[]) {
         std::string version = argv[2];
         std::string loader = argv[3];
         std::string req_path = argv[4];
-        //std::ifstream sdata(req_path);
-
-        //std::ifstream sdat(reqjsonPath);
-        /*if (!sdata.is_open()) {
-            std::cerr << "Cannot open req.json\n";
-            //return 1;
-            throw std::runtime_error("Cannot open req.json");
-        }*/
-        //json req = json::parse (sdata);
-        //check_update(version, loader, req);
         std::cout << "\033[33mWarning: If you have multiple loaders set up for plugins, you might want to run this command multiple times!\033[0m\n";
-        check_all_upgradeable(version, loader, req_path);
+        auto packagesChecked = check_all_upgradeable(version, loader, req_path);
+        //size_t checked_count = packagesChecked.size();
+        for (const auto& pkg : packagesChecked) {
+            std::cout << "Is " << pkg.name <<" (" <<pkg.project_id<< ") upgradable to version " << version <<":"<<(pkg.updatable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
+        }
 
     } else if (operation == "il"){
         if (argc < 6){

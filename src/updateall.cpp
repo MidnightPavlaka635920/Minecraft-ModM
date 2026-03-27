@@ -78,17 +78,16 @@ void update_all_packages(std::string& version, std::string& install_path, std::v
     ofs.close();
     std::cout << "Updated req.json with new version " << version << ".\n";
 }
-void check_all_upgradeable(std::string& version, std::string& loader, std::string& install_path){
+std::vector<areUpdatable> check_all_upgradeable(std::string& version, std::string& loader, std::string& install_path){
     set_path(install_path);
     json packgs = load_packages();
-    size_t packgs_instal = packgs["installed"].size();
-    std::cout << "Found " << packgs_instal << " packages to upgrade.\n";
-    //std::cout << packgs["installed"].dump(4) << "\n";
-    //bool all_updatable = true;
+    //size_t packgs_instal = packgs["installed"].size();
+    std::vector<areUpdatable> updatables;
 
     for (auto& [project_id, info] : packgs["installed"].items()) {
         bool upgradable = can_be_upgraded(project_id, version, info["loader"]);
-        
-        std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << "and loader" << info["loader"]<<": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
+        updatables.push_back({info["name"].get<std::string>(), project_id, upgradable});
+        //std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << "and loader" << info["loader"]<<": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
     }
+    return updatables;
 }
