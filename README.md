@@ -19,7 +19,7 @@ Then, you have to install the program. Installation is different for both Window
 1. Download .zip (not the 'Source code' one) from `releases` section
 2. Copy it into your home directory, it should work.
 3. Run `cmd.exe` (`Win+R`, type `cmd`, press `Enter`), or easier, open terminal from the folder where `mcmodm.exe` is sotred. If you do so, skip step 4.
-4. `cd` into your minecraft folder
+4. `cd` into folder where you extracted zip, the folder is called `wb`.
 5. Run `.\mcmodm.exe <options>`
 6. You should downlaod CA certificate from <a href='https://curl.se/docs/caextract.html'>here</a> and copy them into the same folder as `mcmodm.exe`.
 ### Linux (Debian)
