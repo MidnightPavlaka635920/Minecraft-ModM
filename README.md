@@ -40,6 +40,7 @@ yay -S mcmodm
 ```bash
 mcmodm setup <path> <version> <loader> (loader)
 ```
+- `req.json` should be in the same folder where mods/plugins will be installed to.
 Multiple loaders can be set
 2. You are ready
 ## Usage
@@ -64,3 +65,12 @@ On Windows, steps are simmilar after installing dependencies, using a MINGW64 sh
 - Open the shell
 - On windows, cd into the directory where the `mcmodm.exe` is. *It is recomended to intsll it into your home folder.*
 - Run desired command.
+## Examples
+Let's say that I have a minecraft server at `~/.server/`. Plugins are in `plugins/` folder, so this is how you initialize.
+```bash
+mcmodm setup ~/server/plugins/ 26.1 paper bukkit spigot
+```
+Then, you can do easy_install like this, follow instructions that you get by the program
+```bash
+mcmodm easy_install ~/server/plugins/
+``
