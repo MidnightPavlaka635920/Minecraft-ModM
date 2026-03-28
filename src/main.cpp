@@ -61,7 +61,7 @@ void help(){
     << "  ck_upd <version> <loader> <path-to-req.json>      - Check if all packages can be upgraded\n"
     << "  il <file_to_install> <path_to_install> <name>     - Install a local file to the destination.\n"
     << "  listver <project_id>                              - List compatible versions for a project\n"
-    << "Version 1.5\n";
+    << "Version 1.5.1\n";
 }
 int main(int argc, char* argv[]) {
     if (argc < 2) {
