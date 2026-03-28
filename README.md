@@ -45,6 +45,7 @@ Multiple loaders can be set
 2. You are ready
 ## Usage
 Commands:
+**When you have multiple words in some text, put that text in quutes.**
 - Search for mod/plugins: `mcmodm <mod/plugin name>`
 - Then, use project ID and run `mcmodm install <Project ID> (Project ID ) <Install Path>`. Dependencies will be installed. Multiple packages could be installed.
 - List installed plugins: `mcmodm list <Install path>`
