@@ -1,0 +1,11 @@
+mcmodm-deb/*
+bin/*
+mcmodm-deb.deb
+main
+mcmodm
+mcmodm.exe
+.vscode/*
+*.o
+mods/*
+a.out
+dricca
