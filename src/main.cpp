@@ -1,15 +1,16 @@
 #ifdef _WIN32
 #include <windows.h>
-/*void enable_ansi() {
+bool enable_ansi() {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE) return;
+    if (hOut == INVALID_HANDLE_VALUE) return false;
 
     DWORD dwMode = 0;
-    if (!GetConsoleMode(hOut, &dwMode)) return;
-
+    if (!GetConsoleMode(hOut, &dwMode)) return false;
+    if (!SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) return false;
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hOut, dwMode);
-}*/
+    return true;
+}
 #endif
 #include <iostream>
 #include <fstream>
@@ -69,9 +70,22 @@ int main(int argc, char* argv[]) {
     }
 
     std::string operation = argv[1];   // "ls" or "i"
-    /*#ifdef _WIN32
-        enable_ansi();
-    #endif*/
+    #ifdef _WIN32
+        if (!enable_ansi()) {
+            std::cerr << "Warning: Failed to enable ANSI escape codes. Output may not be colored.\n";
+        }
+        const std::string reset_color = "";
+        const std::string yellow = "";
+        const std::string cyan = "";
+        const std::string red = "";
+        const std::string green = "";
+    #else
+        const std::string reset_color = "\033[0m";
+        const std::string yellow = "\033[33m";
+        const std::string cyan = "\033[36m";
+        const std::string red = "\033[31m";
+        const std::string green = "\033[32m";
+    #endif
     if (operation == "search") {
         if(argc < 3){
             std::cout << "Not enough arguments provided\n Usage: mcmodm search <modname>\n";
@@ -84,7 +98,7 @@ int main(int argc, char* argv[]) {
         } else {
             std::cout << "Search results for query: " << pn << "\n";
             for (const auto& res : results) {
-                std::cout << "\033[33mTitle:\033[0m " << res.title << ", \033[33mAuthor:\033[0m " << res.author << "\033[33m, Project ID:\033[0m " << res.project_id << "\n";
+                std::cout <<yellow<< "Title: " << reset_color << res.title << yellow << ", Author: " << reset_color << res.author <<yellow<< ", Project ID: " << reset_color << res.project_id << "\n";
             }
         }
 
@@ -228,7 +242,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Installed packages (" << installed_packages.size() << "):\n";
             std::cout << "File Name - Project ID - Game Version\n";
             for (const auto& pkg : installed_packages) {
-                std::cout << pkg.name << " \033[36m- \033[0m" << pkg.project_id << " \033[36m- \033[0m" << pkg.game_version << "\n";
+                std::cout << pkg.name << cyan << " - " << reset_color << pkg.project_id << cyan << " - " << reset_color << pkg.game_version << "\n";
             }
         }
     } else if (operation == "setup"){
@@ -279,11 +293,11 @@ int main(int argc, char* argv[]) {
         std::string version = argv[2];
         std::string loader = argv[3];
         std::string req_path = argv[4];
-        std::cout << "\033[33mWarning: If you have multiple loaders set up for plugins, you might want to run this command multiple times!\033[0m\n";
+        std::cout << yellow<<"Warning: If you have multiple loaders set up for plugins, you might want to run this command multiple times!\n" <<  reset_color;
         auto packagesChecked = check_all_upgradeable(version, loader, req_path);
         //size_t checked_count = packagesChecked.size();
         for (const auto& pkg : packagesChecked) {
-            std::cout << "Is " << pkg.name <<" (" <<pkg.project_id<< ") upgradable to version " << version <<":"<<(pkg.updatable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
+            std::cout << "Is " << pkg.name <<" (" <<pkg.project_id<< ") upgradable to version " << version <<":"<<(pkg.updatable ? green + "Yes" + reset_color : red + "No" + reset_color) << ".\n";
         }
 
     } else if (operation == "il"){
