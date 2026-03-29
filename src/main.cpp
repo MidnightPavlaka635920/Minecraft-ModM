@@ -68,18 +68,28 @@ int main(int argc, char* argv[]) {
         std::cerr << "Usage: mcmodm <operation>\n";
         return 1;
     }
-
+    bool color = false;
     std::string operation = argv[1];   // "ls" or "i"
     #ifdef _WIN32
         if (!enable_ansi()) {
             std::cerr << "Warning: Failed to enable ANSI escape codes. Output may not be colored.\n";
+            color = false;
+            const std::string reset_color = "";
+            const std::string yellow = "";
+            const std::string cyan = "";
+            const std::string red = "";
+            const std::string green = "";
+        } else {
+            color = true;
+            const std::string reset_color = "\033[0m";
+            const std::string yellow = "\033[33m";
+            const std::string cyan = "\033[36m";
+            const std::string red = "\033[31m";
+            const std::string green = "\033[32m";
         }
-        const std::string reset_color = "";
-        const std::string yellow = "";
-        const std::string cyan = "";
-        const std::string red = "";
-        const std::string green = "";
+
     #else
+        color = true;
         const std::string reset_color = "\033[0m";
         const std::string yellow = "\033[33m";
         const std::string cyan = "\033[36m";
@@ -268,14 +278,14 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         std::string install_path = argv[2]; // installation path
-        easy_install(install_path);
+        easy_install(install_path, color);
     } else if(operation == "easy_remove"){
         if (argc < 3) {
             std::cerr << "Usage: mcmodm easy_remove <path>\n";
             return 1;
         }
         std::string install_path = argv[2]; // installation path
-        easy_remove(install_path);
+        easy_remove(install_path, color);
     } else if(operation == "iff"){
         if (argc < 4) {
             std::cerr << "Usage: mcmodm iff <path-to-packages.json> <install-path>\n";

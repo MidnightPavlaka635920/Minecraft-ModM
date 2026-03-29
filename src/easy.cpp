@@ -5,52 +5,58 @@
 #include <fstream>
 #include "../include/install.h"
 #include "../include/remove.h"
-#include "../include/curl_access.h"
-#include "../include/packages.h"
+//#include "../include/curl_access.h"
+//#include "../include/packages.h"
+#include "../include/search.h"
+#include "../include/list.h"
 #include <sstream>
 #include <vector>
 using json = nlohmann::json;
-void easy_install(std::string& install_path){
+using string = std::string;
+string reset_color = "";
+string yellow = "";
+string cyan = "";
+string red = "";
+string green = "";
+void easy_install(std::string& install_path, bool color){
+    if (color){
+        reset_color = "\033[0m";
+        yellow = "\033[33m";
+        cyan = "\033[36m";
+        red = "\033[31m";
+        green = "\033[32m";
+    } else {
+        reset_color = "";
+        yellow = "";
+        cyan = "";
+        red = "";
+        green = "";
+    }
     while (true){
         std::string query;
-        std::cout << "Searching for (use q to quit, not just here): ";
+        std::cout << "Searching for: ";
         std::getline(std::cin, query);
-        if (query == "q"){
+        std::vector<search_result> hits = search_mods(query);
+        size_t hits_index =0;
+        for (auto& result: hits){
+            std::cout << cyan << hits_index << reset_color << " - " << yellow << "Title: " << reset_color << result.title << yellow << ", Author: " << reset_color << result.author << yellow << ", Project ID: " << reset_color << result.project_id << "\n";
+            hits_index++;
+        }
+        if (hits.empty()) {
+            std::cout << "No results found for query: " << query << "\n";
             break;
         }
-        std::string search_url = "https://api.modrinth.com/v2/search?query=" + url_encode(query);
-        json search;
-        try{
-            search = json::parse(curl_to_string(search_url));
-        } catch (...){
-            std::cerr << "Something did not work. I don't know on which side the God is.\n" << std::endl;
-            break;
-        }
-        json hits = search["hits"];
-        if (hits.empty()){
-            std::cout << "No results found for what you were searching. Did you type it in correctly? I can't help you. Quitting.\n" << std::endl;
-            break;
-        }
-        std::cout << "This is what is found:\n";
-        for (size_t h = 0;h < hits.size();h++){
-            std::cout << h << ") " << hits[h]["title"].get<std::string>() << " - " << hits[h]["description"].get<std::string>() << " - " << hits[h]["project_id"].get<std::string>() << std::endl;
-        }
-        std::cout << "Which one to install? (type number in front of the item, a for all, or more seperated by commas without a space):";
-        //unsigned int choice;
-        //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Which one to install? (type number in front of the item, a for all, or more seperated by commas without a space), q to quit: ";
         std::string choice_line;
         std::getline(std::cin, choice_line);
-        //std::cin >> choice;
-
-        /*if (choice < 0 || choice >= (int)hits.size()) {
-            std::cerr << "Invalid selection.\n";
+        if (choice_line == "q"){
             break;
-        }*/
+        }
+        
         std::vector<std::string> to_install;
-
         if (choice_line == "a" || choice_line == "A") {
             for (auto& hit : hits) {
-                to_install.push_back(hit["project_id"]);
+                to_install.push_back(hit.project_id);
             }
         } else{
             std::stringstream ss(choice_line);
@@ -63,7 +69,7 @@ void easy_install(std::string& install_path){
                         std::cerr << "Invalid selection: " << idx <<" Use a number from the list, or a for all.\n";
                         continue;
                     }
-                    to_install.push_back(hits[idx]["project_id"]);
+                    to_install.push_back(hits[idx].project_id);
                 } catch (...) {
                     std::cerr << "Invalid input: " << token << "\n";
                 }
@@ -94,21 +100,30 @@ void easy_install(std::string& install_path){
     }
 }
 
-void easy_remove(std::string& install_path){
+void easy_remove(std::string& install_path, bool color){
+    if (color){
+        string reset_color = "\033[0m";
+        string yellow = "\033[33m";
+        string cyan = "\033[36m";
+        string red = "\033[31m";
+        string green = "\033[32m";
+    } else {
+        string reset_color = "";
+        string yellow = "";
+        string cyan = "";
+        string red = "";
+        string green = "";
+    }
     while (true){
-        set_path(install_path);
-        json packgs = load_packages();
-        auto& installed = packgs["installed"];
+        std::vector<list_info> installed_packages = list_packs(install_path);
         std::vector<std::string> ids;
-        //size_t packgs_instal = packgs["installed"].size();
         size_t idx = 0;
-        std::cout << "Name - File - Game Version\n";
-        for (auto& [project_id, info] : installed.items()) {
-            std::cout << idx << ") " << info["name"].get<std::string>()
-                    << " (" << info["file"].get<std::string>() << ") " << info["game_version"].get<std::string>() << "\n";
-            ids.push_back(project_id);
+        for (const auto& pkg : installed_packages) {
+            std::cout << yellow << idx << reset_color << " - " << cyan << "Name: " << reset_color << pkg.name << cyan << ", Project ID: " << reset_color << pkg.project_id << cyan << ", Installed version: " << reset_color << pkg.game_version << "\n";
+            ids.push_back(pkg.project_id);
             idx++;
         }
+        
         std::cout << "\n";
         if (idx == 0) {
             std::cout << "No packages installed.\n";
