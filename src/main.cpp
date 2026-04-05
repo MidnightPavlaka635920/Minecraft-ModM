@@ -49,18 +49,19 @@ std::vector<std::string> get_loaders(const json& j) {
 }
 void help(){
     std::cout << "Available commands:\n"
-    << "  search <modname>                                  - List online mods matching <modname>\n"
-    << "  install <modname> (options) <path>                - Install mod <modname> to <path>\n"
-    << "  remove <modname> <path>                           - Remove mod <modname> from <path>\n"
-    << "  updateall <version> <path>                        - Update all mods in <path> for game version <version>\n"
-    << "  list <path>                                       - List installed mods in <path>\n"
-    << "  setup <path> <version> <loader>                   - Setup req.json in <path> with specified version and loader\n"
-    << "  easy_install <path>                               - Easy install mods from a list in <path>\n"
-    << "  easy_remove <path>                                - Easy remove mods from a list in <path>\n"
-    << "  iff <path-to-packages.json> <install_path>        - Install from a list of packages\n"
-    << "  ck_upd <version> <loader> <path-to-req.json>      - Check if all packages can be upgraded\n"
-    << "  il <file_to_install> <path_to_install> <name>     - Install a local file to the destination.\n"
-    << "  listver <project_id>                              - List compatible versions for a project\n"
+    << "  search <modname>                                       - List online mods matching <modname>\n"
+    << "  install <modname> [options] [path]                     - Install mod <modname> to [path] (uses default if not specified)\n"
+    << "  remove <modname> [path]                                - Remove mod <modname> from [path] (uses default if not specified)\n"
+    << "  updateall <version> [path]                             - Update all mods in [path] for game version <version> (uses default if not specified)\n"
+    << "  list [path]                                            - List installed mods in [path] (uses default if not specified)\n"
+    << "  setup <path> <version> <loader>                        - Setup req.json in <path> with specified version and loader\n"
+    << "  easy_install [path]                                    - Easy install mods from a list in [path] (uses default if not specified)\n"
+    << "  easy_remove [path]                                     - Easy remove mods from a list in [path] (uses default if not specified)\n"
+    << "  iff <path-to-packages.json> <install_path>             - Install from a list of packages\n"
+    << "  ck_upd <version> <loader> [path-to-req.json]           - Check if all packages can be upgraded (uses default if not specified)\n"
+    << "  il <file_to_install> <name> <loader> [path_to_install] - Install a local file to the destination (uses default if not specified).\n"
+    << "  listver <project_id>                                   - List compatible versions for a project\n"
+    << "Note: [path] arguments are optional if a default path is configured via config file.\n"
     << "Version 1.5.1\n";
 }
 int main(int argc, char* argv[]) {
@@ -70,6 +71,33 @@ int main(int argc, char* argv[]) {
     }
     bool color = false;
     std::string operation = argv[1];   // "ls" or "i"
+    std::string default_path = "";
+    #ifdef _WIN32
+        const char* appdata = std::getenv("APPDATA");
+        if (!appdata) appdata = ".";
+        std::string folder = std::string(appdata) + "\\mcmodm\\";
+        //filesystem::create_directories(folder);
+        std::string config_path = folder + "defpath.json";
+    #else
+        const char* home = std::getenv("HOME");
+        if (!home) home = ".";
+        std::string folder = std::string(home) + "/.config/mcmodm/";
+        //std::filesystem::create_directories(folder);
+        std::string config_path = folder + "defpath.json";
+    #endif
+    if (std::filesystem::exists(config_path)) {
+        std::ifstream config_pt(config_path);
+        if (config_pt.is_open()) {
+            json config_json;
+            config_json = json::parse(config_pt);
+            if (config_json.contains("default_path")) {
+                default_path = config_json["default_path"];
+                //std::cout << "Default path loaded from config: " << default_path << "\n";
+            } else {
+                std::cerr << "Config file does not contain 'default_path'.\n";
+            }
+        }
+    }
     #ifdef _WIN32
         if (!enable_ansi()) {
             std::cerr << "Warning: Failed to enable ANSI escape codes. Output may not be colored.\n";
@@ -113,19 +141,11 @@ int main(int argc, char* argv[]) {
         }
 
     } else if (operation == "install") {
-        if (argc < 4) {
-            std::cerr << "Usage: mcmodm install <modname> <path>\n";
+        if (argc < 3) {
+            std::cerr << "Usage: mcmodm install <modname> [options] [path]\n";
             return 1;
         }
         std::string overwrite_loader, overwrite_version = "";
-        /*for (int i = 4; i < argc; i++){
-            std::string arg = argv[i];
-            if (arg.rfind("--overwrite-loader=", 0) == 0){
-                overwrite_loader = arg.substr(std::string("--overwrite-loader=").length());
-            } else if(arg.rfind("--overwrite-version=", 0) == 0){
-                overwrite_version = arg.substr(std::string("--overwrite-version=").length());
-            }
-        }*/
         std::vector<std::string> mods;  // project IDs
         std::string install_path;
 
@@ -143,14 +163,21 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // Last element is always the install path
         if (mods.empty()) {
-            std::cerr << "No install path provided\n";
+            std::cerr << "No arguments provided for install\n";
             return 1;
         }
 
-        install_path = mods.back();  // correct
-        mods.pop_back();             // now mods only contains project IDs
+        if (default_path.empty() || mods.size() > 1) {
+            if (mods.size() < 2) {
+                std::cerr << "No install path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm install <modname> [options] <path>\n";
+                return 1;
+            }
+            install_path = mods.back();
+            mods.pop_back();
+        } else {
+            install_path = default_path;
+        }
 
         // sanity check
         if (mods.empty()) {
@@ -199,24 +226,52 @@ int main(int argc, char* argv[]) {
 
         
     } else if (operation =="remove"){
-        if (argc < 4) {
-            std::cerr << "Usage: mcmodm remove <modname> <path>\n";
+        if (argc < 3) {
+            std::cerr << "Usage: mcmodm remove <modname> [path]\n";
             return 1;
         }
-        std::string install_path = argv[(argc - 1)]; // installation path
-        for (int i = 2; i < (argc - 1); i++){
-            std::string pn = argv[i];          // mod name or slug
+        std::vector<std::string> mods;
+        std::string install_path;
+        for (int i = 2; i < argc; i++) {
+            mods.push_back(argv[i]);
+        }
+        if (mods.empty()) {
+            std::cerr << "No mods provided\n";
+            return 1;
+        }
+        if (default_path.empty() || mods.size() > 1) {
+            if (mods.size() < 2) {
+                std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm remove <modname> [path]\n";
+                return 1;
+            }
+            install_path = mods.back();
+            mods.pop_back();
+        } else {
+            install_path = default_path;
+        }
+        
+        for (size_t i = 0; i < mods.size(); i++){
+            std::string pn = mods[i];          // mod name or slug
             remove_package(pn, install_path, false);
         }
         //std::string pn = argv[2]; 
         //remove_package(pn, install_path, false);
     } else if (operation == "updateall"){
-        if (argc < 4) {
-            std::cerr << "Usage: mcmodm updateall <version> <path>\n";
+        if (argc < 3) {
+            std::cerr << "Usage: mcmodm updateall <version> [path]\n";
             return 1;
         }
         std::string version = argv[2]; // game version
-        std::string install_path = argv[3]; // installation path
+        std::string install_path;
+        if (argc >= 4) {
+            install_path = argv[3];
+        } else if (!default_path.empty()) {
+            install_path = default_path;
+        } else {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm updateall <version> [path]\n";
+            return 1;
+        }
+        //install_path = argv[3]; // installation path
         std::string req_path = install_path;
         if (!req_path.empty() && req_path.back() != '/'){
             req_path += '/';
@@ -239,11 +294,21 @@ int main(int argc, char* argv[]) {
         }
         update_all_packages(version, install_path, loaders, req);
     } else if (operation == "list") {
-        if (argc < 3) {
-            std::cerr << "Usage: mcmodm list <path>\n";
+        if (argc < 2) {
+            std::cerr << "Usage: mcmodm list [path]\n";
             return 1;
         }
-        std::string install_path = argv[2]; // installation path
+        std::string install_path;
+        if (argc >= 3) {
+            install_path = argv[2];
+        } else if (!default_path.empty()) {
+            install_path = default_path;
+        } else {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm list [path]\n";
+            return 1;
+        }
+            //install_path = argv[2]; // installation path
+        //std::string install_path = argv[2]; // installation path
         // Call the function to list installed packages
         std::vector<list_info> installed_packages = list_packs(install_path);
         if (installed_packages.empty()) {
@@ -273,18 +338,36 @@ int main(int argc, char* argv[]) {
     } else if(operation == "3"){
         std::cout << "OP 3! Actual project name: dricca" << std::endl;
     } else if(operation == "easy_install"){
-        if (argc < 3) {
-            std::cerr << "Usage: mcmodm easy_install <path>\n";
+        if (argc < 2) {
+            std::cerr << "Usage: mcmodm easy_install [path]\n";
             return 1;
         }
-        std::string install_path = argv[2]; // installation path
+        std::string install_path;
+        if (argc >= 3) {
+            install_path = argv[2];
+        } else if (!default_path.empty()) {
+            install_path = default_path;
+        } else {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_install [path]\n";
+            return 1;
+        }
+        //install_path = argv[2]; // installation path
         easy_install(install_path, color);
     } else if(operation == "easy_remove"){
-        if (argc < 3) {
-            std::cerr << "Usage: mcmodm easy_remove <path>\n";
+        if (argc < 2) {
+            std::cerr << "Usage: mcmodm easy_remove [path]\n";
             return 1;
         }
-        std::string install_path = argv[2]; // installation path
+        std::string install_path;
+        if (argc >= 3) {
+            install_path = argv[2];
+        } else if (!default_path.empty()) {
+            install_path = default_path;
+        } else {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_remove [path]\n";
+            return 1;
+        }
+        //install_path = argv[2]; // installation path
         easy_remove(install_path, color);
     } else if(operation == "iff"){
         if (argc < 4) {
@@ -296,13 +379,22 @@ int main(int argc, char* argv[]) {
         iff(packages_path, install_path);
 
     }else if(operation == "ck_upd"){
-        if (argc < 5) {
-            std::cerr << "Usage: mcmodm ck_upd <version to update> <loader> <path to req.json>\n";
+        if (argc < 4) {
+            std::cerr << "Usage: mcmodm ck_upd <version to update> <loader> [path to req.json]\n";
             return 1;
         }
         std::string version = argv[2];
         std::string loader = argv[3];
-        std::string req_path = argv[4];
+        std::string req_path;
+        if (argc >= 5) {
+            req_path = argv[4];
+        } else if (!default_path.empty()) {
+            req_path = default_path;
+        } else {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm ck_upd <version> <loader> [install path]\n";
+            return 1;
+        }
+        //std::string req_path = argv[4];
         std::cout << yellow<<"Warning: If you have multiple loaders set up for plugins, you might want to run this command multiple times!\n" <<  reset_color;
         auto packagesChecked = check_all_upgradeable(version, loader, req_path);
         //size_t checked_count = packagesChecked.size();
@@ -311,15 +403,24 @@ int main(int argc, char* argv[]) {
         }
 
     } else if (operation == "il"){
-        if (argc < 6){
-            std::cerr << "Usage: mcmodm il <file_to_install> <path_to_install> <name> <loader>\n";
+        if (argc < 5) {
+            std::cerr << "Usage: mcmodm il <file_to_install> <name> <loader> [path_to_install]\n";
+            return 1;
+        }
+        std::string install_path;
+        if (argc >= 6) {
+            install_path = argv[5];
+        } else if (!default_path.empty()) {
+            install_path = default_path;
+        } else {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm il <file_to_install> <name> <loader> [path_to_install]\n";
             return 1;
         }
         std::string fti = argv[2]; // game version
-        std::string install_path = argv[3]; // installation path
+        //std::string install_path = argv[5]; // installation path
         std::string req_path = install_path;
         std::string name = "N/A";
-        name = argv[4];
+        name = argv[3];
         if (!req_path.empty() && req_path.back() != '/'){
             req_path += '/';
         }
@@ -335,7 +436,7 @@ int main(int argc, char* argv[]) {
         }
         json req = json::parse (sdata);
         //std::string loader = req[0]["loader"];
-        std::string loader = argv[5];
+        std::string loader = argv[4];
         std::string version = req[0]["version"];
         install_local(install_path, fti, name, version, loader);
     

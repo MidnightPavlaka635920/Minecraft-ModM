@@ -42,25 +42,28 @@ mcmodm setup <path> <version> <loader> (loader)
 ```
 - `req.json` should be in the same folder where mods/plugins will be installed to.
 Multiple loaders can be set
-2. You are ready
+3. (Optional) Set a default path by creating a config file when running `mcmodm setup ..`. You should press `y` when the setup asks you to, and it will be done.
+4. You are ready
 ## Usage
 Commands:
-**When you have multiple words in some text, put that text in quutes.**
-- Search for mod/plugins: `mcmodm <mod/plugin name>`
-- Then, use project ID and run `mcmodm install <Project ID> (Project ID ) <Install Path>`. Dependencies will be installed. Multiple packages could be installed.
-- List installed plugins: `mcmodm list <Install path>`
-- Remove mod/plugin: `mcmodm remove <Project ID> (Project ID ) <Install Path>`. Just specified package will be removed
-- Update all packages: `mcmodm updateall <new Game version> <Install path>`
-- Install packages easily (follow instructions that appear): `mcmodm easy_install <path>`
-- Remove packages easily (follow instructiosn that appear): `mcmodm easy_remove <path>`
-- Install all packages from a file: `mcmodm iff <path_to/packages.json> <install-path>` There, `path_to/packages.json` should point ot a file.
-- Check if all of installed packages are available for updating to a specific version and loader: `mcmodm ck_upd <update_version> <loader> <installation_folder>`
-- Install a local .jar file: `mcmodm il <file_to_install> <path_to_install - destination> <name>`
+**When you have multiple words in some text, put that text in quotes.**
+
+- Search for mod/plugins: `mcmodm search <mod/plugin name>`
+- Install mod/plugin: `mcmodm install <Project ID> [options] [Install Path]`. Dependencies will be installed. Multiple packages could be installed. Path is optional if default is set.
+- List installed plugins: `mcmodm list [Install path]`. Path is optional if default is set.
+- Remove mod/plugin: `mcmodm remove <Project ID> [Install Path]`. Just specified package will be removed. Path is optional if default is set.
+- Update all packages: `mcmodm updateall <new Game version> [Install path]`. Path is optional if default is set.
+- Install packages easily (follow instructions that appear): `mcmodm easy_install [path]`. Path is optional if default is set.
+- Remove packages easily (follow instructions that appear): `mcmodm easy_remove [path]`. Path is optional if default is set.
+- Install all packages from a file: `mcmodm iff <path_to/packages.json> <install-path>`. There, `path_to/packages.json` should point to a file.
+- Check if all of installed packages are available for updating to a specific version and loader: `mcmodm ck_upd <update_version> <loader> [installation_folder]`. Path is optional if default is set.
+- Install a local .jar file: `mcmodm il <file_to_install> <name> <loader> [path_to_install]`. Path is optional if default is set.
 ## Compiling yourself
 There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide. Source files are in src/ and header files are in include/
 On Windows, steps are simmilar after installing dependencies, using a MINGW64 shell.
 ## Notes
 - In commands above, `Install path` or `Path to req.json` is a directory and thus shouldn't contain `req.json`.
+- Paths in brackets `[path]` are optional if a default path is configured.
 - (OPTIONAL, BUT USEFUL) Add folder where `mcmodm.exe` is located to the PATH, there are online tutorials for that. If you do that, you can run the program from any place on disk inside of CMD.
 ## How to use this program?
 - Open the shell
