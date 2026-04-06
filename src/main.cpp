@@ -316,7 +316,7 @@ int main(int argc, char* argv[]) {
             std::cout << "No packages installed. If that seems wrong, try again with a different path.\n";
         } else {
             std::cout << "Installed packages (" << installed_packages.size() << "):\n";
-            std::cout << "File Name"<<cyan<< " - "<<reset_color<< "Project ID"<<cyan<< " - " <<reset_color<<"Game Version\n";
+            std::cout << yellow<<"File Name"<<cyan<< " - "<<reset_color<< yellow<<"Project ID"<<cyan<< " - " <<reset_color<<yellow<<"Game Version\n" << reset_color;
             for (const auto& pkg : installed_packages) {
                 std::cout << pkg.name << cyan << " - " << reset_color << pkg.project_id << cyan << " - " << reset_color << pkg.game_version << "\n";
             }
@@ -488,6 +488,8 @@ int main(int argc, char* argv[]) {
                 }
             }
             std::cout << "\n";
+            std::cout << yellow<<"Client Side: "<<reset_color << (mod.cs ? green + "Yes" + reset_color : red + "No" + reset_color) << "\n";
+            std::cout << yellow<<"Server Side: "<<reset_color << (mod.ss ? green + "Yes" + reset_color : red + "No" + reset_color) << "\n";
         }
 
     }

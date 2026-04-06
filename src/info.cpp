@@ -20,6 +20,16 @@ std::vector<ModInfo> mod_info(const std::string& query){
     info.description = response["description"].get<std::string>();
     info.project_type = response["project_type"].get<std::string>();
     info.project_id = response["id"].get<std::string>();
+    if (response["client_side"] == "required"){
+        info.cs = true;
+    } else if (response["client_side"] == "unsupported"){
+        info.cs = false;
+    }
+    if (response["server_side"] == "required"){
+        info.ss = true;
+    } else if (response["server_side"] == "unsupported"){
+        info.ss = false;
+    }
     std::vector<std::string> get_authors;
     if (response.contains("author")) {
         //info.author = response["author"].get<std::string>();
