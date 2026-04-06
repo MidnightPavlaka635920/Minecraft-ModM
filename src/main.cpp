@@ -31,6 +31,7 @@ bool enable_ansi() {
 #include "../include/il.h"
 #include "../include/ck_vers.h"
 #include "../include/search.h"
+#include "../include/info.h"
 using json = nlohmann::json;
 std::vector<std::string> get_loaders(const json& j) {
     std::vector<std::string> loaders;
@@ -315,7 +316,7 @@ int main(int argc, char* argv[]) {
             std::cout << "No packages installed. If that seems wrong, try again with a different path.\n";
         } else {
             std::cout << "Installed packages (" << installed_packages.size() << "):\n";
-            std::cout << "File Name - Project ID - Game Version\n";
+            std::cout << "File Name"<<cyan<< " - "<<reset_color<< "Project ID"<<cyan<< " - " <<reset_color<<"Game Version\n";
             for (const auto& pkg : installed_packages) {
                 std::cout << pkg.name << cyan << " - " << reset_color << pkg.project_id << cyan << " - " << reset_color << pkg.game_version << "\n";
             }
@@ -465,7 +466,32 @@ int main(int argc, char* argv[]) {
             std::cout << "\n";
         }
         std::cout << std::endl;
-    } else{
+    } else if(operation == "info"){
+        if (argc < 3){
+            std::cerr << "Usage: mcmodm info <project_id>\n";
+            return 1;
+        }
+        std::string project_id = argv[2];
+        auto info = mod_info(project_id);
+        if (info.empty()) {
+            std::cout << "No information found for project ID: " << project_id << "\n";
+        } else {
+            const auto& mod = info[0];
+            std::cout << yellow<<"Name: "<<reset_color << mod.name << cyan<<" Project ID: " <<reset_color<< mod.project_id << "\n";
+            std::cout << yellow<<"Description: "<<reset_color << mod.description << "\n";
+            std::cout << cyan<< "Project Type: " <<reset_color<< mod.project_type << "\n";
+            std::cout << yellow<<"Authors: "<<reset_color;
+            for (size_t i = 0; i < mod.authors.size(); i++) {
+                std::cout << mod.authors[i];
+                if (i != mod.authors.size() - 1) {
+                    std::cout << cyan<<", "<<reset_color;
+                }
+            }
+            std::cout << "\n";
+        }
+
+    }
+    else {
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();
         return 1;
