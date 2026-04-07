@@ -51,20 +51,23 @@ std::vector<std::string> get_loaders(const json& j) {
 void help(){
     std::cout << "Available commands:\n"
     << "  search <modname>                                       - List online mods matching <modname>\n"
-    << "  install <modname> [options] [path]                     - Install mod <modname> to [path] (uses default if not specified)\n"
-    << "  remove <modname> [path]                                - Remove mod <modname> from [path] (uses default if not specified)\n"
+    << "  install <modname>... [options] [path]                  - Install one or more mods to [path] (uses default if not specified)\n"
+    << "     --overwrite-loader=<loader> --overwrite-version=<version>\n"
+    << "  remove <modname>... [path]                             - Remove one or more mods from [path] (uses default if not specified)\n"
     << "  updateall <version> [path]                             - Update all mods in [path] for game version <version> (uses default if not specified)\n"
     << "  list [path]                                            - List installed mods in [path] (uses default if not specified)\n"
-    << "  setup <path> <version> <loader>                        - Setup req.json in <path> with specified version and loader\n"
+    << "  setup <path> <version> <loader> (loader)               - Setup req.json in <path> with specified version and one or more loaders\n"
     << "  easy_install [path]                                    - Easy install mods from a list in [path] (uses default if not specified)\n"
     << "  easy_remove [path]                                     - Easy remove mods from a list in [path] (uses default if not specified)\n"
     << "  iff <path-to-packages.json> <install_path>             - Install from a list of packages\n"
     << "  ck_upd <version> <loader> [path-to-req.json]           - Check if all packages can be upgraded (uses default if not specified)\n"
-    << "  il <file_to_install> <name> <loader> [path_to_install] - Install a local file to the destination (uses default if not specified).\n"
+    << "  il <file_to_install> <name> <loader> [path_to_install] - Install a local file to the destination (uses default if not specified)\n"
     << "  listver <project_id>                                   - List compatible versions for a project\n"
+    << "  info <project_id>                                      - Show detailed info for a project\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
-    << "Version 1.5.1\n";
+    << "Version 1.6\n";
 }
+// ...existing code...
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage: mcmodm <operation>\n";

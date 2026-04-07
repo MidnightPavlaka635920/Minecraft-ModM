@@ -95,7 +95,7 @@ void easy_install(std::string& install_path, bool color){
         std::cin >> again;
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         //if(again == ""){break;}
-        if (again != "y" && again != "Y" || again != ""){break;}
+        if (again != "y" && again != "Y" && again != ""){break;}
     
     }
 }
