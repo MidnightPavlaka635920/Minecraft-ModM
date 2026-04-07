@@ -20,10 +20,10 @@ void setup(std::string& path, std::string& version, std::vector<std::string>& lo
     ofs << req_s.dump(4);
     ofs.close();
     std::cout <<"Setup created successfully at " << req_path << ". Remember that!\n";
-    std::cout << "Do you want to save the path to a file in order not to type it every time you run the program? (y/n): ";
-    char save_choice;
-    std::cin >> save_choice;
-    if (save_choice == 'y' || save_choice == 'Y') {
+    std::cout << "Do you want to save the path to a file in order not to type it every time you run the program? (Y/n): ";
+    std::string save_choice;
+    std::getline(std::cin, save_choice);
+    if (save_choice == "y" || save_choice == "Y" || save_choice == "") {
         #ifdef _WIN32
             const char* appdata = std::getenv("APPDATA");
             if (!appdata) appdata = ".";
@@ -37,12 +37,14 @@ void setup(std::string& path, std::string& version, std::vector<std::string>& lo
             std::filesystem::create_directories(folder);
             std::string config_path = folder + "defpath.json";
         #endif
+        std::filesystem::path p(req_path);
+        std::string path_abs = std::filesystem::absolute(p);
         std::ofstream config_ofs(config_path);
         if (!config_ofs.is_open()) {
             std::cerr << "Failed to write config file to " << config_path << "\n";
             return;
         }
-        config_ofs << json{{"default_path", path}}.dump(4);
+        config_ofs << json{{"default_path", path_abs}}.dump(4);
         config_ofs.close();
     }
 }

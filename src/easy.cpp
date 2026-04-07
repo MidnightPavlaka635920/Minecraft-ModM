@@ -91,11 +91,11 @@ void easy_install(std::string& install_path, bool color){
             }
         }
         std::cout << "Install another? (y/n): ";
-        char again;
+        string again;
         std::cin >> again;
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         //if(again == ""){break;}
-        if (again != 'y' && again != 'Y'){break;}
+        if (again != "y" && again != "Y" || again != ""){break;}
     
     }
 }
