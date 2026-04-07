@@ -28,7 +28,7 @@ void setup(std::string& path, std::string& version, std::vector<std::string>& lo
             const char* appdata = std::getenv("APPDATA");
             if (!appdata) appdata = ".";
             std::string folder = std::string(appdata) + "\\mcmodm\\";
-            filesystem::create_directories(folder);
+            std::filesystem::create_directories(folder);
             std::string config_path = folder + "defpath.json";
         #else
             const char* home = std::getenv("HOME");
@@ -38,7 +38,7 @@ void setup(std::string& path, std::string& version, std::vector<std::string>& lo
             std::string config_path = folder + "defpath.json";
         #endif
         std::filesystem::path p(req_path);
-        std::string path_abs = std::filesystem::absolute(p);
+        std::string path_abs = std::filesystem::absolute(p).string();
         std::ofstream config_ofs(config_path);
         if (!config_ofs.is_open()) {
             std::cerr << "Failed to write config file to " << config_path << "\n";
