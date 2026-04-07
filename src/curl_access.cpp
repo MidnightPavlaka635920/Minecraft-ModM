@@ -12,7 +12,6 @@
 #include <curl/curl.h>
 #include <stdexcept>
 #include "../include/curl_access.h"
-
 static size_t curl_write_cb(void* contents, size_t size, size_t nmemb, void* userp)
 {
     size_t total = size * nmemb;
