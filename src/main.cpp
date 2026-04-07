@@ -103,21 +103,27 @@ int main(int argc, char* argv[]) {
         }
     }
     #ifdef _WIN32
+        std::string reset_color = "";
+        std::string yellow = "";
+        std::string cyan = "";
+        std::string red = "";
+        std::string green = "";
         if (!enable_ansi()) {
+            
             std::cerr << "Warning: Failed to enable ANSI escape codes. Output may not be colored.\n";
             color = false;
-            const std::string reset_color = "";
-            const std::string yellow = "";
-            const std::string cyan = "";
-            const std::string red = "";
-            const std::string green = "";
+            reset_color = "";
+            yellow = "";
+            cyan = "";
+            red = "";
+            green = "";
         } else {
             color = true;
-            const std::string reset_color = "\033[0m";
-            const std::string yellow = "\033[33m";
-            const std::string cyan = "\033[36m";
-            const std::string red = "\033[31m";
-            const std::string green = "\033[32m";
+        reset_color = "\033[0m";
+        yellow = "\033[33m";
+        cyan = "\033[36m";
+        red = "\033[31m";
+        green = "\033[32m";
         }
 
     #else
