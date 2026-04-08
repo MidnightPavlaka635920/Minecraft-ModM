@@ -26,7 +26,7 @@ void iff(const std::string& packages_path, const std::string& install_path){
     if (install_confirm != 'y' && install_confirm != 'Y'&& !install_path.empty()){return;}
     for (auto& [project_id, info] : packages["installed"].items()){
         if (project_id.starts_with("local:")){
-            std::cout << yellow<<"Warning: "<<reset_color<<"Package " << project_id << " is installed from a local file and will be skipped.\n Use mcmodm il to install the mmanually afterwards, and/or ask person that sent you packages.json to send the .jar-s.\n";
+            std::cout << yellow<<"Warning: "<<reset_color<<"Local package " << project_id << " is skipped.\n Use 'mcmodm il' to install it mmanually afterwards.\n" << cyan <<"File to install: " << reset_color << info["file"].get<std::string>() << "\n";
         } else{
             std::vector<std::string> loader_mod;
             loader_mod.push_back(info["loader"].get<std::string>());
