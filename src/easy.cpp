@@ -11,27 +11,10 @@
 #include "../include/list.h"
 #include <sstream>
 #include <vector>
+#include "../include/color.h"
 using json = nlohmann::json;
 using string = std::string;
-string reset_color = "";
-string yellow = "";
-string cyan = "";
-string red = "";
-string green = "";
 void easy_install(std::string& install_path, bool color){
-    if (color){
-        reset_color = "\033[0m";
-        yellow = "\033[33m";
-        cyan = "\033[36m";
-        red = "\033[31m";
-        green = "\033[32m";
-    } else {
-        reset_color = "";
-        yellow = "";
-        cyan = "";
-        red = "";
-        green = "";
-    }
     while (true){
         std::string query;
         std::cout << "Searching for: ";
@@ -101,19 +84,6 @@ void easy_install(std::string& install_path, bool color){
 }
 
 void easy_remove(std::string& install_path, bool color){
-    if (color){
-        string reset_color = "\033[0m";
-        string yellow = "\033[33m";
-        string cyan = "\033[36m";
-        string red = "\033[31m";
-        string green = "\033[32m";
-    } else {
-        string reset_color = "";
-        string yellow = "";
-        string cyan = "";
-        string red = "";
-        string green = "";
-    }
     while (true){
         std::vector<list_info> installed_packages = list_packs(install_path);
         std::vector<std::string> ids;

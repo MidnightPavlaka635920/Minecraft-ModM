@@ -32,6 +32,7 @@ bool enable_ansi() {
 #include "../include/ck_vers.h"
 #include "../include/search.h"
 #include "../include/info.h"
+#include "../include/color.h"
 using json = nlohmann::json;
 std::vector<std::string> get_loaders(const json& j) {
     std::vector<std::string> loaders;
@@ -103,36 +104,31 @@ int main(int argc, char* argv[]) {
         }
     }
     #ifdef _WIN32
-        std::string reset_color = "";
-        std::string yellow = "";
-        std::string cyan = "";
-        std::string red = "";
-        std::string green = "";
         if (!enable_ansi()) {
             
             std::cerr << "Warning: Failed to enable ANSI escape codes. Output may not be colored.\n";
             color = false;
-            reset_color = "";
-            yellow = "";
-            cyan = "";
-            red = "";
-            green = "";
+            std::string reset_color = "";
+            std::string yellow = "";
+            std::string cyan = "";
+            std::string red = "";
+            std::string green = "";
         } else {
             color = true;
-        reset_color = "\033[0m";
-        yellow = "\033[33m";
-        cyan = "\033[36m";
-        red = "\033[31m";
-        green = "\033[32m";
+        std::string reset_color = "\033[0m";
+        std::string yellow = "\033[33m";
+        std::string cyan = "\033[36m";
+        std::string red = "\033[31m";
+        std::string green = "\033[32m";
         }
 
     #else
         color = true;
-        const std::string reset_color = "\033[0m";
-        const std::string yellow = "\033[33m";
-        const std::string cyan = "\033[36m";
-        const std::string red = "\033[31m";
-        const std::string green = "\033[32m";
+        std::string reset_color = "\033[0m";
+        std::string yellow = "\033[33m";
+        std::string cyan = "\033[36m";
+        std::string red = "\033[31m";
+        std::string green = "\033[32m";
     #endif
     if (operation == "search") {
         if(argc < 3){
