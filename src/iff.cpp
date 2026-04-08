@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <nlohmann/json.hpp>
+#include "../include/color.h"
 #include "../include/install.h"
 using json = nlohmann::json;
 void iff(const std::string& packages_path, const std::string& install_path){    
@@ -19,26 +20,19 @@ void iff(const std::string& packages_path, const std::string& install_path){
         idx++;
     }
     std::cout << "Install these packages? (y/n, enter doesn't work): ";
-    std::string req_path = install_path;
-    if (!req_path.empty() && req_path.back() != '/'){
-        req_path += '/';
-    }
-    req_path += "req.json";
-
-    std::ifstream req_json(req_path);
-
-    if (!req_json.is_open()) {
-        std::cerr << "Cannot open req.json\n";
-        //return 1;
-        throw std::runtime_error("Cannot open req.json");
-    }
-    json req = json::parse(req_json);
     char install_confirm;
     std::cin >> install_confirm;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    if (install_confirm != 'y' && install_confirm != 'Y'&& !install_path.empty()){return;}
     for (auto& [project_id, info] : packages["installed"].items()){
-        install_mod(project_id, install_path, req, false);
+        if (project_id.starts_with("local:")){
+            std::cout << yellow<<"Warning: "<<reset_color<<"Package " << project_id << " is installed from a local file and will be skipped.\n Use mcmodm il to install the mmanually afterwards, and/or ask person that sent you packages.json to send the .jar-s.\n";
+        } else{
+            std::vector<std::string> loader_mod;
+            loader_mod.push_back(info["loader"].get<std::string>());
+            json req_mod = json::array({{"loader", loader_mod},{"version", info["version"].get<std::string>()}});
+            install_mod(project_id, install_path, req_mod, false);
+        }
     }
     std::cout << "Installation complete, unless everything was already installed.\n";
-    if (install_confirm != 'y' && install_confirm != 'Y'){return;}
 }
