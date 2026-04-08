@@ -37,7 +37,7 @@ void setup(std::string& path, std::string& version, std::vector<std::string>& lo
             std::filesystem::create_directories(folder);
             std::string config_path = folder + "defpath.json";
         #endif
-        std::filesystem::path p(req_path);
+        std::filesystem::path p(path);
         std::string path_abs = std::filesystem::absolute(p).string();
         std::ofstream config_ofs(config_path);
         if (!config_ofs.is_open()) {
@@ -45,6 +45,7 @@ void setup(std::string& path, std::string& version, std::vector<std::string>& lo
             return;
         }
         config_ofs << json{{"default_path", path_abs}}.dump(4);
+        std::cout << "Default path saved successfully\n";
         config_ofs.close();
     }
 }
