@@ -1,11 +1,12 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <string>
-#include "../include/info.h"
+// #include "../include/info.h"
+#include "../include/mcmodm.h"
 #include "../include/curl_access.h"
 using json = nlohmann::json;
 #include <vector>
-std::vector<ModInfo> mod_info(const std::string& query){
+std::vector<ModInfo> McModm::mod_info(const std::string& query){
     std::vector<ModInfo> information;
     std::string url = "https://api.modrinth.com/v2/project/" + query;
     json response;

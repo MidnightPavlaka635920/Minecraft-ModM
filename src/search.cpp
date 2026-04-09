@@ -1,14 +1,15 @@
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
-#include "../include/search.h"
+//#include "../include/search.h"
+#include "../include/mcmodm.h"
 #include "../include/curl_access.h"
 #include <curl/curl.h>
 #include <iostream>
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
 
-std::vector<search_result> search_mods(const std::string& query) {
+std::vector<search_result> McModm::search_mods(const std::string& query) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     // Perform a search query on Modrinth
     std::string search_url = "https://api.modrinth.com/v2/search?query=" + url_encode(query);

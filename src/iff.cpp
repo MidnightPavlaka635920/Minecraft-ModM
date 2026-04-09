@@ -3,9 +3,10 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "../include/color.h"
-#include "../include/install.h"
+// #include "../include/install.h"
+#include "../include/mcmodm.h"
 using json = nlohmann::json;
-void iff(const std::string& packages_path, const std::string& install_path){    
+void McModm::iff(const std::string& packages_path){    
     std::ifstream sdata(packages_path);
     if (!sdata.is_open()) {
         std::cerr << "Cannot open " << packages_path << "\n";
@@ -31,7 +32,7 @@ void iff(const std::string& packages_path, const std::string& install_path){
             std::vector<std::string> loader_mod;
             loader_mod.push_back(info["loader"].get<std::string>());
             json req_mod = json::array({{"loader", loader_mod},{"version", info["version"].get<std::string>()}});
-            install_mod(project_id, install_path, req_mod, false);
+            install_mod(project_id, req_mod, false);
         }
     }
     std::cout << "Installation complete, unless everything was already installed.\n";

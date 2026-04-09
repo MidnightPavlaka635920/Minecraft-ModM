@@ -7,12 +7,13 @@
 #include "../include/curl_access.h"
 #include <cstdio> // for FILE*, popen
 //#include <curl/curl.h>
-#include "../include/packages.h"
+//#include "../include/packages.h"
+#include "../include/mcmodm.h"
 using json = nlohmann::json;
 
 
-void remove_package(std::string package_id, std::string install_path, bool just_remove) {
-    set_path(install_path);
+void McModm::remove_package(std::string package_id, bool just_remove) {
+    //set_path(install_path);
     json j = load_packages();
     if (j["installed"].contains(package_id)) {
         std::cout << "Package found: " << package_id << "\n" << "Deleting the file" << "\n";

@@ -4,38 +4,40 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include "../include/curl_access.h"
+#include "../include/mcmodm.h"
 
 using json = nlohmann::json;
 
 //static const char* PKG_FILE = "packages.json";
-std::string PATH;
+/*
+std::string install_path;
 void set_path(const std::string& p) {
     PATH = p;                 // <-- assign to the global PATH
     if (!PATH.empty() && PATH.back() != '/'){
         PATH += '/';
     }
     PATH += "packages.json";
-}
+}*/
 
-json load_packages() {
-    std::ifstream f(PATH);
+json McModm::load_packages() {
+    std::ifstream f(install_path);
     if (!f.is_open())
         return json{{"installed", json::object()}};
 
     return json::parse(f);
 }
 
-void save_packages(const json& j) {
-    std::ofstream f(PATH);
+void McModm::save_packages(const json& j) {
+    std::ofstream f(install_path);
     f << j.dump(4);
 }
 
-bool is_installed(const std::string& project_id) {
+bool McModm::is_installed(const std::string& project_id) {
     json j = load_packages();
     return j["installed"].contains(project_id);
 }
 
-void mark_installed(
+void McModm::mark_installed(
     const std::string& project_id,
     const std::string& game_version,
     const std::string& loader,
@@ -53,7 +55,7 @@ void mark_installed(
 
     save_packages(j);
 }
-bool can_be_upgraded(const std::string& project_id, const std::string& game_version, const std::string& loader) {
+bool McModm::can_be_upgraded(const std::string& project_id, const std::string& game_version, const std::string& loader) {
     std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
     std::string verDataString;
     try {

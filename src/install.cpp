@@ -8,11 +8,11 @@
 #include <cstdio> // for FILE*, popen
 #include <curl/curl.h>
 using json = nlohmann::json;
-#include "../include/packages.h"
+#include "../include/mcmodm.h"
 std::string name;
 
-void install_mod(const std::string& pn, const std::string& install_path, const json& req, bool just_install) {
-    set_path(install_path);
+void McModm::install_mod(const std::string& pn, const json& req, bool just_install) {
+    //set_path(install_path);
     if(just_install){}
     else{
         if (is_installed(pn)) {
@@ -114,7 +114,7 @@ void install_mod(const std::string& pn, const std::string& install_path, const j
                             {"loader", loaders}
                         });
 
-                        install_mod(dep_project, install_path, dep_req, false);
+                        install_mod(dep_project, dep_req, false);
                     }
                 }
             }

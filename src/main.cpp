@@ -21,18 +21,24 @@ bool enable_ansi() {
 #include "../include/curl_access.h"
 #include <cstdio> // for FILE*, popen
 #include <curl/curl.h>
-#include "../include/install.h"
-#include "../include/remove.h"
-#include "../include/updateall.h"
-#include "../include/list.h"
+// #include "../include/install.h"
+// #include "../include/remove.h"
+// #include "../include/updateall.h"
+// #include "../include/list.h"
 #include "../include/setup.h"
-#include "../include/easy.h"
-#include "../include/iff.h"
-#include "../include/il.h"
-#include "../include/ck_vers.h"
-#include "../include/search.h"
-#include "../include/info.h"
+// #include "../include/easy.h"
+// #include "../include/iff.h"
+// #include "../include/il.h"
+// #include "../include/ck_vers.h"
+// #include "../include/search.h"
+// #include "../include/info.h"
 #include "../include/color.h"
+#include "../include/mcmodm.h"
+std::string reset_color;
+std::string yellow;
+std::string cyan;
+std::string red;
+std::string green;
 using json = nlohmann::json;
 std::vector<std::string> get_loaders(const json& j) {
     std::vector<std::string> loaders;
@@ -108,35 +114,36 @@ int main(int argc, char* argv[]) {
             
             std::cerr << "Warning: Failed to enable ANSI escape codes. Output may not be colored.\n";
             color = false;
-            std::string reset_color = "";
-            std::string yellow = "";
-            std::string cyan = "";
-            std::string red = "";
-            std::string green = "";
+            reset_color = "";
+            yellow = "";
+            cyan = "";
+            red = "";
+            green = "";
         } else {
             color = true;
-        std::string reset_color = "\033[0m";
-        std::string yellow = "\033[33m";
-        std::string cyan = "\033[36m";
-        std::string red = "\033[31m";
-        std::string green = "\033[32m";
+        reset_color = "\033[0m";
+        yellow = "\033[33m";
+        cyan = "\033[36m";
+        red = "\033[31m";
+        green = "\033[32m";
         }
 
     #else
         color = true;
-        std::string reset_color = "\033[0m";
-        std::string yellow = "\033[33m";
-        std::string cyan = "\033[36m";
-        std::string red = "\033[31m";
-        std::string green = "\033[32m";
+        reset_color = "\033[0m";
+        yellow = "\033[33m";
+        cyan = "\033[36m";
+        red = "\033[31m";
+        green = "\033[32m";
     #endif
     if (operation == "search") {
         if(argc < 3){
             std::cout << "Not enough arguments provided\n Usage: mcmodm search <modname>\n";
             return 1;
         }
+
         std::string pn = argv[2];          // mod name or slug
-        auto results = search_mods(pn);
+        auto results = McModm::search_mods(pn);
         if (results.empty()) {
             std::cout << "No results found for query: " << pn << "\n";
         } else {
@@ -198,7 +205,7 @@ int main(int argc, char* argv[]) {
             req_path += '/';
         }
         req_path += "req.json";
-
+        McModm modm(install_path);
         std::ifstream sdata(req_path);
 
         //std::ifstream sdat(reqjsonPath);
@@ -225,7 +232,7 @@ int main(int argc, char* argv[]) {
         req = json::array({{{"version", version}, {"loader", loaders}}});
         for (int i = 2; i < (argc - 1); i++){
             std::string pn = argv[i];          // mod name or slug
-            install_mod(pn, install_path, req, false);
+            modm.install_mod(pn, req, false);
         }
         //std::string pn = argv[2];          // mod name or slug
         //install_mod(pn, install_path, req, false);
@@ -255,12 +262,12 @@ int main(int argc, char* argv[]) {
         } else {
             install_path = default_path;
         }
-        
+        McModm modm(install_path);
         for (size_t i = 0; i < mods.size(); i++){
             std::string pn = mods[i];          // mod name or slug
-            remove_package(pn, install_path, false);
+            modm.remove_package(pn, false);
         }
-        //std::string pn = argv[2]; 
+        //std::string pn = argv[2];
         //remove_package(pn, install_path, false);
     } else if (operation == "updateall"){
         if (argc < 3) {
@@ -278,6 +285,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         //install_path = argv[3]; // installation path
+        McModm modm(install_path);
         std::string req_path = install_path;
         if (!req_path.empty() && req_path.back() != '/'){
             req_path += '/';
@@ -298,7 +306,7 @@ int main(int argc, char* argv[]) {
         for (const auto& l : req[0]["loader"]){
             loaders.push_back(l.get<std::string>());
         }
-        update_all_packages(version, install_path, loaders, req);
+        modm.update_all_packages(version, loaders, req);
     } else if (operation == "list") {
         if (argc < 2) {
             std::cerr << "Usage: mcmodm list [path]\n";
@@ -316,7 +324,8 @@ int main(int argc, char* argv[]) {
             //install_path = argv[2]; // installation path
         //std::string install_path = argv[2]; // installation path
         // Call the function to list installed packages
-        std::vector<list_info> installed_packages = list_packs(install_path);
+        McModm modm(install_path);
+        std::vector<list_info> installed_packages = modm.list_packs();
         if (installed_packages.empty()) {
             std::cout << "No packages installed. If that seems wrong, try again with a different path.\n";
         } else {
@@ -357,8 +366,9 @@ int main(int argc, char* argv[]) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_install [path]\n";
             return 1;
         }
+        McModm modm(install_path);
         //install_path = argv[2]; // installation path
-        easy_install(install_path, color);
+        modm.easy_install(color);
     } else if(operation == "easy_remove"){
         if (argc < 2) {
             std::cerr << "Usage: mcmodm easy_remove [path]\n";
@@ -373,16 +383,27 @@ int main(int argc, char* argv[]) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_remove [path]\n";
             return 1;
         }
+        McModm modm(install_path);
         //install_path = argv[2]; // installation path
-        easy_remove(install_path, color);
+        modm.easy_remove(color);
     } else if(operation == "iff"){
         if (argc < 4) {
             std::cerr << "Usage: mcmodm iff <path-to-packages.json> <install-path>\n";
             return 1;
         }
         std::string packages_path = argv[2]; // path to packages.json
-        std::string install_path = argv[3]; // installation path
-        iff(packages_path, install_path);
+        //std::string install_path = argv[3]; // installation path
+        std::string install_path;
+        if (argc >= 3) {
+            install_path = argv[2];
+        } else if (!default_path.empty()) {
+            install_path = default_path;
+        } else {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_remove [path]\n";
+            return 1;
+        }
+        McModm modm(install_path);
+        modm.iff(packages_path);
 
     }else if(operation == "ck_upd"){
         if (argc < 4) {
@@ -400,9 +421,10 @@ int main(int argc, char* argv[]) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm ck_upd <version> <loader> [install path]\n";
             return 1;
         }
+        McModm modm(req_path);
         //std::string req_path = argv[4];
         std::cout << yellow<<"Warning: If you have multiple loaders set up for plugins, you might want to run this command multiple times!\n" <<  reset_color;
-        auto packagesChecked = check_all_upgradeable(version, loader, req_path);
+        auto packagesChecked = modm.check_all_upgradeable(version, loader);
         //size_t checked_count = packagesChecked.size();
         for (const auto& pkg : packagesChecked) {
             std::cout << "Is " << pkg.name <<" (" <<pkg.project_id<< ") upgradable to version " << version <<":"<<(pkg.updatable ? green + "Yes" + reset_color : red + "No" + reset_color) << ".\n";
@@ -440,19 +462,20 @@ int main(int argc, char* argv[]) {
             //return 1;
             throw std::runtime_error("Cannot open req.json");
         }
+        McModm modm(install_path);
         json req = json::parse (sdata);
         //std::string loader = req[0]["loader"];
         std::string loader = argv[4];
         std::string version = req[0]["version"];
-        install_local(install_path, fti, name, version, loader);
-    
+        modm.install_local(fti, name, version, loader);
+
     }else if(operation == "listver"){
         if (argc < 3){
             std::cerr << "Usage: mcmodm listver <project_id>\n";
             return 1;
         }
         std::string project_id = argv[2];
-        auto compatible_versions = list_compatible_versions(project_id);
+        auto compatible_versions = McModm::list_compatible_versions(project_id);
         std::cout << "Compatible versions for project '" << project_id << "':\n";
         int per_line = 3;
 
@@ -477,7 +500,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         std::string project_id = argv[2];
-        auto info = mod_info(project_id);
+        auto info = McModm::mod_info(project_id);
         if (info.empty()) {
             std::cout << "No information found for project ID: " << project_id << "\n";
         } else {

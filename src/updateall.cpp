@@ -7,18 +7,21 @@
 #include "../include/curl_access.h"
 #include <cstdio> // for FILE*, popen
 //#include <curl/curl.h>
+#include "../include/mcmodm.h"
+/*
 #include "../include/packages.h"
 #include "../include/remove.h"
 #include "../include/updateall.h"
 #include "../include/install.h"
+*/
 using json = nlohmann::json;
 
-void update_all_packages(std::string& version, std::string& install_path, std::vector<std::string>& loaders, json& req) {
+void McModm::update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req) {
     if (req[0]["version"] == version) {
         std::cout << "No version change detected (" << version << "). Skipping update.\n";
         return;
     }
-    set_path(install_path);
+    //set_path(install_path);
     json packgs = load_packages();
     size_t packgs_instal = packgs["installed"].size();
     std::cout << "Found " << packgs_instal << " packages to upgrade.\n";
@@ -55,10 +58,10 @@ void update_all_packages(std::string& version, std::string& install_path, std::v
                 continue;
             }
             if(!up_to_date){
-                remove_package(project_id, install_path, true);
+                remove_package(project_id, true);
                 json ti;
                 ti.push_back({{"version", version}, {"loader", json::array({info["loader"]})}}); // keep the same loader(s) as before
-                install_mod(project_id, install_path, ti, true);
+                install_mod(project_id, ti, true);
                 continue;
             }
         }
@@ -78,8 +81,8 @@ void update_all_packages(std::string& version, std::string& install_path, std::v
     ofs.close();
     std::cout << "Updated req.json with new version " << version << ".\n";
 }
-std::vector<areUpdatable> check_all_upgradeable(std::string& version, std::string& loader, std::string& install_path){
-    set_path(install_path);
+std::vector<areUpdatable> McModm::check_all_upgradeable(std::string& version, std::string& loader){
+    //set_path(install_path);
     json packgs = load_packages();
     //size_t packgs_instal = packgs["installed"].size();
     std::vector<areUpdatable> updatables;

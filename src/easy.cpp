@@ -3,18 +3,20 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <fstream>
-#include "../include/install.h"
-#include "../include/remove.h"
+//#include "../include/install.h"
+//#include "../include/remove.h"
 //#include "../include/curl_access.h"
 //#include "../include/packages.h"
-#include "../include/search.h"
-#include "../include/list.h"
+//#include "../include/search.h"
+// #include "../include/list.h"
 #include <sstream>
 #include <vector>
+// #include "../include/color.h"
+#include "../include/mcmodm.h"
 #include "../include/color.h"
 using json = nlohmann::json;
 using string = std::string;
-void easy_install(std::string& install_path, bool color){
+void McModm::easy_install(bool color){
     while (true){
         std::string query;
         std::cout << "Searching for: ";
@@ -68,7 +70,7 @@ void easy_install(std::string& install_path, bool color){
         json req = json::parse(f);
         for (const auto& project_id : to_install) {
             try {
-                install_mod(project_id, install_path, req, false);
+                install_mod(project_id, req, false);
             } catch (const std::exception& e) {
                 std::cerr << "Something went wrong during installation and here is what: " << e.what() << std::endl;
             }
@@ -83,9 +85,9 @@ void easy_install(std::string& install_path, bool color){
     }
 }
 
-void easy_remove(std::string& install_path, bool color){
+void McModm::easy_remove(bool color){
     while (true){
-        std::vector<list_info> installed_packages = list_packs(install_path);
+        std::vector<list_info> installed_packages = list_packs();
         std::vector<std::string> ids;
         size_t idx = 0;
         for (const auto& pkg : installed_packages) {
@@ -132,7 +134,7 @@ void easy_remove(std::string& install_path, bool color){
         }
         for (const auto& project_id : to_remove) {
             try {
-                remove_package(project_id, install_path, false);
+                remove_package(project_id, false);
             } catch (const std::exception& e) {
                 std::cerr << "Something went wrong during removal and here is what: " << e.what() << " I can't help it." << std::endl;
             }

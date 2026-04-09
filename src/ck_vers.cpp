@@ -4,10 +4,11 @@
 #include <vector>
 #include "nlohmann/json.hpp"
 #include "../include/curl_access.h"
-#include "../include/ck_vers.h"
+// #include "../include/ck_vers.h"
+#include "../include/mcmodm.h"
 using json = nlohmann::json;
 
-std::vector<std::string> list_compatible_versions(std::string project_id){
+std::vector<std::string> McModm::list_compatible_versions(std::string project_id){
     std::vector<std::string> compatible_versions;
     std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
     std::string oVerData;

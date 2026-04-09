@@ -1,12 +1,13 @@
 #include <iostream>
 #include <string>
 #include <nlohmann/json.hpp>
-#include "../include/list.h"
-#include "../include/packages.h"
+//#include "../include/list.h"
+//#include "../include/packages.h"
+#include "../include/mcmodm.h"
 using json = nlohmann::json;
 
-std::vector<list_info> list_packs (std::string& install_path){
-    set_path(install_path);
+std::vector<list_info> McModm::list_packs(){
+    //set_path(install_path);
     json packgs = load_packages();
     size_t packgs_instal = packgs["installed"].size();
     std::vector<list_info> installed_packgs;
