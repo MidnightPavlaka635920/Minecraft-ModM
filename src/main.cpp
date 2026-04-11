@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
         //filesystem::create_directories(folder);
         std::string config_path = folder + "defpath.json";
         __attribute__((used))
-        const char* myFeelingsTowardsThisOS = "I hate Windows (11) and deving on it is fucked up. If you are reading this with strings, there is more..." 
+        const char* myFeelingsTowardsThisOS = "I hate Windows (11) and deving CLI on it is fucked up. If you are reading this with strings, there is more..." 
     #else
         const char* home = std::getenv("HOME");
         if (!home) home = ".";
