@@ -4,28 +4,23 @@
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-// Structure representing a search result for a mod/plugin
 struct search_result {
     std::string title;
     std::string author;
     std::string project_id;
 };
 
-// Structure representing whether a package is updatable
 struct areUpdatable{
     std::string name;
     std::string project_id;
     bool updatable;
 };
-
-// Structure representing information about an installed package
 struct list_info {
     std::string name;
     std::string project_id;
     std::string game_version;
 };
 
-// Structure representing detailed mod/plugin info
 struct ModInfo {
     std::string name;
     std::vector<std::string> authors;
@@ -38,7 +33,6 @@ struct ModInfo {
 
 class McModm{
     private:
-        // Path to the directory where mods/plugins are installed
         std::string install_path;
     public:
         McModm(std::string path): install_path(path){};
