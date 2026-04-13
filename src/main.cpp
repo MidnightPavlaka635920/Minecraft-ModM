@@ -136,6 +136,7 @@ int main(int argc, char* argv[]) {
         red = "\033[31m";
         green = "\033[32m";
     #endif
+    try{
     if (operation == "search") {
         if(argc < 3){
             std::cout << "Not enough arguments provided\n Usage: mcmodm search <modname>\n";
@@ -191,7 +192,9 @@ int main(int argc, char* argv[]) {
         } else {
             install_path = default_path;
         }
-
+        // for (const auto& mod : mods) {
+            // std::cout << mod << "\n";
+        // }
         // sanity check
         if (mods.empty()) {
             std::cerr << "No mods provided to install\n";
@@ -230,9 +233,10 @@ int main(int argc, char* argv[]) {
             : std::vector<std::string>{overwrite_loader};
         std::string version = overwrite_version.empty() ? req[0]["version"].get<std::string>() : overwrite_version;
         req = json::array({{{"version", version}, {"loader", loaders}}});
-        for (int i = 2; i < (argc - 1); i++){
-            std::string pn = argv[i];          // mod name or slug
-            modm.install_mod(pn, req, false);
+        for (const auto& mod:mods){
+                     // mod name or slug
+            std::cout << "Installing " << mod << "...\n";
+            modm.install_mod(mod, req, false);
         }
         //std::string pn = argv[2];          // mod name or slug
         //install_mod(pn, install_path, req, false);
@@ -524,6 +528,10 @@ int main(int argc, char* argv[]) {
     else {
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();
+        return 1;
+    }
+    } catch (const std::exception& ex) {
+        std::cerr << "Error: " << ex.what() << "\n";
         return 1;
     }
 

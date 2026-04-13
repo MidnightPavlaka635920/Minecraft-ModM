@@ -1,4 +1,4 @@
-#include "../include/packages.h"
+// #include "../include/packages.h"
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -20,7 +20,8 @@ void set_path(const std::string& p) {
 }*/
 
 json McModm::load_packages() {
-    std::ifstream f(install_path);
+    std::string packages_path = install_path + "/packages.json";
+    std::ifstream f(packages_path);
     if (!f.is_open())
         return json{{"installed", json::object()}};
 
@@ -28,7 +29,7 @@ json McModm::load_packages() {
 }
 
 void McModm::save_packages(const json& j) {
-    std::ofstream f(install_path);
+    std::ofstream f(install_path + "/packages.json");
     f << j.dump(4);
 }
 

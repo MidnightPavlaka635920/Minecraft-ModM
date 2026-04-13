@@ -22,9 +22,11 @@ void McModm::install_mod(const std::string& pn, const json& req, bool just_insta
     }
 
     std::string ver = req[0]["version"].get<std::string>();
+    // std::cout << ver << "\n";
     std::vector<std::string> loaders;
     for (const auto& loader : req[0]["loader"]) {
         loaders.push_back(loader.get<std::string>());
+        // std::cout << loader.get<std::string>() << "\n";
     }
      //std::string ver = req[0]["version"].get<std::string>();
      if (loaders.empty()) {
@@ -38,6 +40,7 @@ void McModm::install_mod(const std::string& pn, const json& req, bool just_insta
     std::string oVerData;
     std::string nurl = "https://api.modrinth.com/v2/project/" + pn;
     std::string ntf;
+    std::cout << "Fetching versions...\n";
     try {
         ntf = curl_to_string(nurl);
     } catch (const std::exception& e) {
@@ -93,7 +96,7 @@ void McModm::install_mod(const std::string& pn, const json& req, bool just_insta
 
             try {
                 curl_download_file(dl_url, out_file);
-                std::cout << "Download complete.\n";
+                std::cout << "\nDownload complete.\n";
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
             }
