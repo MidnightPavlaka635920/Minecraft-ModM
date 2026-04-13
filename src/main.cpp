@@ -210,7 +210,7 @@ int main(int argc, char* argv[]) {
             req_path += '/';
         }
         req_path += "req.json";
-        McModm modm(install_path);
+        McModm modm(install_path + "/");
         std::ifstream sdata(req_path);
 
         //std::ifstream sdat(reqjsonPath);
@@ -268,7 +268,7 @@ int main(int argc, char* argv[]) {
         } else {
             install_path = default_path;
         }
-        McModm modm(install_path);
+        McModm modm(install_path + "/");
         for (size_t i = 0; i < mods.size(); i++){
             std::string pn = mods[i];          // mod name or slug
             modm.remove_package(pn, false);
@@ -291,7 +291,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         //install_path = argv[3]; // installation path
-        McModm modm(install_path);
+        McModm modm(install_path + "/");
         std::string req_path = install_path;
         if (!req_path.empty() && req_path.back() != '/'){
             req_path += '/';
@@ -330,7 +330,7 @@ int main(int argc, char* argv[]) {
             //install_path = argv[2]; // installation path
         //std::string install_path = argv[2]; // installation path
         // Call the function to list installed packages
-        McModm modm(install_path);
+        McModm modm(install_path + "/");
         std::vector<list_info> installed_packages = modm.list_packs();
         if (installed_packages.empty()) {
             std::cout << "No packages installed. If that seems wrong, try again with a different path.\n";
@@ -372,7 +372,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_install [path]\n";
             return 1;
         }
-        McModm modm(install_path);
+        McModm modm(install_path + "/");
         //install_path = argv[2]; // installation path
         modm.easy_install(color);
     } else if(operation == "easy_remove"){
@@ -389,7 +389,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_remove [path]\n";
             return 1;
         }
-        McModm modm(install_path);
+        McModm modm(install_path + "/");
         //install_path = argv[2]; // installation path
         modm.easy_remove(color);
     } else if(operation == "iff"){
@@ -408,7 +408,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_remove [path]\n";
             return 1;
         }
-        McModm modm(install_path);
+        McModm modm(install_path + "/");
         modm.iff(packages_path);
 
     }else if(operation == "ck_upd"){
@@ -468,7 +468,7 @@ int main(int argc, char* argv[]) {
             //return 1;
             throw std::runtime_error("Cannot open req.json");
         }
-        McModm modm(install_path);
+        McModm modm(install_path + "/");
         json req = json::parse (sdata);
         //std::string loader = req[0]["loader"];
         std::string loader = argv[4];
