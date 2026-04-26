@@ -358,6 +358,7 @@ int main(int argc, char* argv[]) {
         help();
     } else if(operation == "3"){
         std::cout << "OP 3! Actual project name: dricca" << std::endl;
+return 3;
     } else if(operation == "easy_install"){
         if (argc < 2) {
             std::cerr << "Usage: mcmodm easy_install [path]\n";
