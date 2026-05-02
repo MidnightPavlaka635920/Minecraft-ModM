@@ -2,9 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <nlohmann/json.hpp>
-#include "../include/curl_access.h"
 #include <cstdio> // for FILE*, popen
 //#include <curl/curl.h>
 #include "../include/mcmodm.h"
@@ -16,7 +14,7 @@
 */
 using json = nlohmann::json;
 
-void McModm::update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req) {
+void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req) {
     if (req[0]["version"] == version) {
         std::cout << "No version change detected (" << version << "). Skipping update.\n";
         return;
@@ -81,7 +79,7 @@ void McModm::update_all_packages(std::string& version, std::vector<std::string>&
     ofs.close();
     std::cout << "Updated req.json with new version " << version << ".\n";
 }
-std::vector<areUpdatable> McModm::check_all_upgradeable(std::string& version, std::string& loader){
+std::vector<areUpdatable> pb::McModm::McModm::check_all_upgradeable(std::string& version, std::string& loader){
     //set_path(install_path);
     json packgs = load_packages();
     //size_t packgs_instal = packgs["installed"].size();

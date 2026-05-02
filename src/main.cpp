@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
         }
 
         std::string pn = argv[2];          // mod name or slug
-        auto results = McModm::search_mods(pn);
+        auto results = pb::McModm::McModm::search_mods(pn);
         if (results.empty()) {
             std::cout << "No results found for query: " << pn << "\n";
         } else {
@@ -205,12 +205,12 @@ int main(int argc, char* argv[]) {
         //std::string install_path = argv[(argc - 1)]; // installation path
         
         // INSTALL operation: read requested version/loader from req.json
-        std::string req_path = install_path;
+        std::string req_path =  install_path;
         if (!req_path.empty() && req_path.back() != '/'){
             req_path += '/';
         }
         req_path += "req.json";
-        McModm modm(install_path + "/");
+        pb::McModm::McModm modm(install_path + "/");
         std::ifstream sdata(req_path);
 
         //std::ifstream sdat(reqjsonPath);
@@ -268,7 +268,7 @@ int main(int argc, char* argv[]) {
         } else {
             install_path = default_path;
         }
-        McModm modm(install_path + "/");
+        pb::McModm::McModm modm(install_path + "/");
         for (size_t i = 0; i < mods.size(); i++){
             std::string pn = mods[i];          // mod name or slug
             modm.remove_package(pn, false);
@@ -291,7 +291,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         //install_path = argv[3]; // installation path
-        McModm modm(install_path + "/");
+        pb::McModm::McModm modm(install_path + "/");
         std::string req_path = install_path;
         if (!req_path.empty() && req_path.back() != '/'){
             req_path += '/';
@@ -330,7 +330,7 @@ int main(int argc, char* argv[]) {
             //install_path = argv[2]; // installation path
         //std::string install_path = argv[2]; // installation path
         // Call the function to list installed packages
-        McModm modm(install_path + "/");
+        pb::McModm::McModm modm(install_path + "/");
         std::vector<list_info> installed_packages = modm.list_packs();
         if (installed_packages.empty()) {
             std::cout << "No packages installed. If that seems wrong, try again with a different path.\n";
@@ -353,12 +353,12 @@ int main(int argc, char* argv[]) {
         for (int i = 4; i < argc; i++) {
             loaders.push_back(argv[i]);
         }
-        setup(path, version, loaders);
+        pb::McModm::setup(path, version, loaders);
     } else if (operation == "help"){
         help();
     } else if(operation == "3"){
         std::cout << "OP 3! Actual project name: dricca" << std::endl;
-return 3;
+        return 3;
     } else if(operation == "easy_install"){
         if (argc < 2) {
             std::cerr << "Usage: mcmodm easy_install [path]\n";
@@ -373,7 +373,7 @@ return 3;
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_install [path]\n";
             return 1;
         }
-        McModm modm(install_path + "/");
+        pb::McModm::McModm modm(install_path + "/");
         //install_path = argv[2]; // installation path
         modm.easy_install(color);
     } else if(operation == "easy_remove"){
@@ -390,7 +390,7 @@ return 3;
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_remove [path]\n";
             return 1;
         }
-        McModm modm(install_path + "/");
+        pb::McModm::McModm modm(install_path + "/");
         //install_path = argv[2]; // installation path
         modm.easy_remove(color);
     } else if(operation == "iff"){
@@ -409,7 +409,7 @@ return 3;
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_remove [path]\n";
             return 1;
         }
-        McModm modm(install_path + "/");
+        pb::McModm::McModm modm(install_path + "/");
         modm.iff(packages_path);
 
     }else if(operation == "ck_upd"){
@@ -428,7 +428,7 @@ return 3;
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm ck_upd <version> <loader> [install path]\n";
             return 1;
         }
-        McModm modm(req_path);
+        pb::McModm::McModm modm(req_path);
         //std::string req_path = argv[4];
         std::cout << yellow<<"Warning: If you have multiple loaders set up for plugins, you might want to run this command multiple times!\n" <<  reset_color;
         auto packagesChecked = modm.check_all_upgradeable(version, loader);
@@ -469,7 +469,7 @@ return 3;
             //return 1;
             throw std::runtime_error("Cannot open req.json");
         }
-        McModm modm(install_path + "/");
+        pb::McModm::McModm modm(install_path + "/");
         json req = json::parse (sdata);
         //std::string loader = req[0]["loader"];
         std::string loader = argv[4];
@@ -482,7 +482,7 @@ return 3;
             return 1;
         }
         std::string project_id = argv[2];
-        auto compatible_versions = McModm::list_compatible_versions(project_id);
+        auto compatible_versions = pb::McModm::McModm::list_compatible_versions(project_id);
         std::cout << "Compatible versions for project '" << project_id << "':\n";
         int per_line = 3;
 
@@ -507,7 +507,7 @@ return 3;
             return 1;
         }
         std::string project_id = argv[2];
-        auto info = McModm::mod_info(project_id);
+        auto info = pb::McModm::McModm::mod_info(project_id);
         if (info.empty()) {
             std::cout << "No information found for project ID: " << project_id << "\n";
         } else {
@@ -540,4 +540,5 @@ return 3;
 
     return 0;
     curl_global_cleanup();
+
 }

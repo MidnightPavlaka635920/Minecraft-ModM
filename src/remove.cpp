@@ -1,10 +1,6 @@
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <vector>
-#include <algorithm>
 #include <nlohmann/json.hpp>
-#include "../include/curl_access.h"
 #include <cstdio> // for FILE*, popen
 //#include <curl/curl.h>
 //#include "../include/packages.h"
@@ -12,7 +8,7 @@
 using json = nlohmann::json;
 
 
-void McModm::remove_package(std::string package_id, bool just_remove) {
+void pb::McModm::McModm::remove_package(std::string package_id, bool just_remove) {
     //set_path(install_path);
     json j = load_packages();
     if (j["installed"].contains(package_id)) {

@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -30,6 +31,7 @@ struct ModInfo {
     bool ss = false;
     bool cs = false;
 };
+namespace pb::McModm{
 
 class McModm{
     private:
@@ -90,3 +92,6 @@ class McModm{
         // Get detailed info for a project (static)
         static std::vector<ModInfo> mod_info(const std::string& query);
 };
+void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);
+
+}

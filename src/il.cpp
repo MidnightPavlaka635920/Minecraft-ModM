@@ -8,7 +8,7 @@
 #include "../include/mcmodm.h"
 using json = nlohmann::json;
 namespace fs = std::filesystem;
-void McModm::install_local(std::string& path_tif, std::string& name, std::string& version ,std::string& loader){
+void pb::McModm::McModm::install_local(std::string& path_tif, std::string& name, std::string& version ,std::string& loader){
     std::string v_pn = "local:" + name;
     if (is_installed(v_pn)){
         std::cerr << "This file is already installed. If you want to reinstall it, please remove it first.\n";

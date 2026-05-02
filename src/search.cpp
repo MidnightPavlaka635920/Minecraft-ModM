@@ -9,14 +9,14 @@
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
 
-std::vector<search_result> McModm::search_mods(const std::string& query) {
+std::vector<search_result> pb::McModm::McModm::search_mods(const std::string& query) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     // Perform a search query on Modrinth
-    std::string search_url = "https://api.modrinth.com/v2/search?query=" + url_encode(query);
+    std::string search_url = "https://api.modrinth.com/v2/search?query=" + curl_utils::url_encode(query);
     std::string oData;
 
     try {
-        oData = curl_to_string(search_url);
+        oData = curl_utils::curl_to_string(search_url);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching search results: " << e.what() << "\n";
         throw std::runtime_error("Error fetching search results");

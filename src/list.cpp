@@ -6,7 +6,7 @@
 #include "../include/mcmodm.h"
 using json = nlohmann::json;
 
-std::vector<list_info> McModm::list_packs(){
+std::vector<list_info> pb::McModm::McModm::list_packs(){
     //set_path(install_path);
     json packgs = load_packages();
     size_t packgs_instal = packgs["installed"].size();

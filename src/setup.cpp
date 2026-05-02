@@ -1,11 +1,10 @@
-#include <string>
 #include <nlohmann/json.hpp>
+#include <vector>
 #include <iostream>
 #include <fstream>
-#include <filesystem>
-#include <cstdlib>
+#include "../include/mcmodm.h"
 using json = nlohmann::json;
-void setup(std::string& path, std::string& version, std::vector<std::string>& loaders) {
+void pb::McModm::setup(std::string& path, std::string& version, std::vector<std::string>& loaders){
     std::string req_path = path;
     if (!req_path.empty() && req_path.back() != '/')
         req_path += '/';

@@ -8,12 +8,12 @@
 #include "../include/mcmodm.h"
 using json = nlohmann::json;
 
-std::vector<std::string> McModm::list_compatible_versions(std::string project_id){
+std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::string project_id){
     std::vector<std::string> compatible_versions;
     std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
     std::string oVerData;
     try {
-        oVerData = curl_to_string(url);
+        oVerData = curl_utils::curl_to_string(url);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions.");

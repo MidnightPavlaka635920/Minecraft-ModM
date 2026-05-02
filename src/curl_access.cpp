@@ -16,13 +16,18 @@
 size_t progress_print(void* ptr, curl_off_t total, curl_off_t now, curl_off_t, curl_off_t){
     if (total >0){
         float progress = (float)now / total;
+        int ppo = progress * 100;
+        int progress_old = 0.0;
         int barWidth = 50;
         int fill = barWidth * progress;
-        std::cout << "\r[";
-        for (int i = 0; i < barWidth; ++i) {
-            std::cout << (i < fill ? "#" : "-");
+        if (ppo != progress_old){
+            std::cout << "\r[";
+            for (int i = 0; i < barWidth; ++i) {
+                std::cout << (i < fill ? "#" : "-");
+            }
+            std::cout << "] " << int(progress * 100.0) << "%";
         }
-        std::cout << "] " << int(progress * 100.0) << "%";
+        progress_old = ppo;
     } else {
         std::cout << "\rDownloading... " << now << " bytes";
     }
@@ -36,7 +41,7 @@ static size_t curl_write_cb(void* contents, size_t size, size_t nmemb, void* use
     return total;
 }
 
-std::string curl_to_string(const std::string& url, bool doProgressAnimation)
+std::string pb::curl_utils::curl_to_string(const std::string& url, bool doProgressAnimation)
 {
     CURL* curl = curl_easy_init();
     if (!curl)
@@ -74,7 +79,7 @@ std::string curl_to_string(const std::string& url, bool doProgressAnimation)
 }
 
 
-std::string url_encode(const std::string &value) {
+std::string pb::curl_utils::url_encode(const std::string &value) {
     std::ostringstream escaped;
     escaped.fill('0');
     escaped << std::hex;
@@ -96,7 +101,7 @@ static size_t write_file(void* ptr, size_t size, size_t nmemb, void* stream) {
     return fwrite(ptr, size, nmemb, (FILE*)stream);
 }
 
-void curl_download_file(const std::string& url, const std::string& output_path, bool doProgressAnimation) {
+void pb::curl_utils::curl_download_file(const std::string& url, const std::string& output_path, bool doProgressAnimation) {
     CURL* curl = curl_easy_init();
     if (!curl)
         throw std::runtime_error("curl init failed");

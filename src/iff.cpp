@@ -6,7 +6,7 @@
 // #include "../include/install.h"
 #include "../include/mcmodm.h"
 using json = nlohmann::json;
-void McModm::iff(const std::string& packages_path){    
+void pb::McModm::McModm::iff(const std::string& packages_path){    
     std::ifstream sdata(packages_path);
     if (!sdata.is_open()) {
         std::cerr << "Cannot open " << packages_path << "\n";

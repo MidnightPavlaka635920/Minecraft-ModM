@@ -19,7 +19,7 @@ void set_path(const std::string& p) {
     PATH += "packages.json";
 }*/
 
-json McModm::load_packages() {
+json pb::McModm::McModm::load_packages() {
     std::string packages_path = install_path + "/packages.json";
     std::ifstream f(packages_path);
     if (!f.is_open())
@@ -28,17 +28,17 @@ json McModm::load_packages() {
     return json::parse(f);
 }
 
-void McModm::save_packages(const json& j) {
+void pb::McModm::McModm::save_packages(const json& j) {
     std::ofstream f(install_path + "/packages.json");
     f << j.dump(4);
 }
 
-bool McModm::is_installed(const std::string& project_id) {
+bool pb::McModm::McModm::is_installed(const std::string& project_id) {
     json j = load_packages();
     return j["installed"].contains(project_id);
 }
 
-void McModm::mark_installed(
+void pb::McModm::McModm::mark_installed(
     const std::string& project_id,
     const std::string& game_version,
     const std::string& loader,
@@ -56,11 +56,11 @@ void McModm::mark_installed(
 
     save_packages(j);
 }
-bool McModm::can_be_upgraded(const std::string& project_id, const std::string& game_version, const std::string& loader) {
+bool pb::McModm::McModm::can_be_upgraded(const std::string& project_id, const std::string& game_version, const std::string& loader) {
     std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
     std::string verDataString;
     try {
-        verDataString = curl_to_string(url);
+        verDataString = curl_utils::curl_to_string(url);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions."); 

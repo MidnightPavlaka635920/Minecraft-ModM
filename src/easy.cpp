@@ -16,7 +16,7 @@
 #include "../include/color.h"
 using json = nlohmann::json;
 using string = std::string;
-void McModm::easy_install(bool color){
+void pb::McModm::McModm::easy_install(bool color){
     while (true){
         std::string query;
         std::cout << "Searching for: ";
@@ -86,7 +86,7 @@ void McModm::easy_install(bool color){
     }
 }
 
-void McModm::easy_remove(bool color){
+void pb::McModm::McModm::easy_remove(bool color){
     while (true){
         std::vector<list_info> installed_packages = list_packs();
         std::vector<std::string> ids;

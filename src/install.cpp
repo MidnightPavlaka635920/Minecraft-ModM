@@ -11,7 +11,7 @@ using json = nlohmann::json;
 #include "../include/mcmodm.h"
 std::string name;
 
-void McModm::install_mod(const std::string& pn, const json& req, bool just_install) {
+void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool just_install) {
     //set_path(install_path);
     if(just_install){}
     else{
@@ -42,14 +42,14 @@ void McModm::install_mod(const std::string& pn, const json& req, bool just_insta
     std::string ntf;
     std::cout << "Fetching versions...\n";
     try {
-        ntf = curl_to_string(nurl);
+        ntf = curl_utils::curl_to_string(nurl);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching main page: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions.");
     }
     json pdata = json::parse(ntf);
     try {
-        oVerData = curl_to_string(url);
+        oVerData = curl_utils::curl_to_string(url);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions.");
@@ -70,7 +70,6 @@ void McModm::install_mod(const std::string& pn, const json& req, bool just_insta
         
         for (auto& gver : release["game_versions"])
             if (gver == ver) { ver_comp = true; break; }
-        int lmn = 0;
         std::string loader_to_use = "";
         for (const auto& ldr : release["loaders"]) {
             std::string rel_loader = ldr.get<std::string>();
@@ -95,7 +94,7 @@ void McModm::install_mod(const std::string& pn, const json& req, bool just_insta
             std::cout << "Downloading to: " << out_file << "\n";
 
             try {
-                curl_download_file(dl_url, out_file);
+                curl_utils::curl_download_file(dl_url, out_file);
                 std::cout << "\nDownload complete.\n";
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";

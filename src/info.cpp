@@ -6,12 +6,12 @@
 #include "../include/curl_access.h"
 using json = nlohmann::json;
 #include <vector>
-std::vector<ModInfo> McModm::mod_info(const std::string& query){
+std::vector<ModInfo> pb::McModm::McModm::mod_info(const std::string& query){
     std::vector<ModInfo> information;
-    std::string url = "https://api.modrinth.com/v2/project/" + query;
+    std::string url = "https://api.modrinth.com/v2/project/" + curl_utils::url_encode(query);
     json response;
     try {
-        std::string ret = curl_to_string(url);
+        std::string ret = curl_utils::curl_to_string(url);
         response = json::parse(ret);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching mod information: " << e.what() << "\n";
@@ -39,7 +39,7 @@ std::vector<ModInfo> McModm::mod_info(const std::string& query){
     } else if (response.contains("team")){
         std::string member_url = "https://api.modrinth.com/v2/project/" + query + "/members";
         try {
-            std::string ret = curl_to_string(member_url);
+            std::string ret = curl_utils::curl_to_string(member_url);
             json member_response = json::parse(ret);
             for (const auto& member : member_response) {
                 get_authors.push_back(member["user"]["username"].get<std::string>());

@@ -13,3 +13,8 @@ mods
 test
 test.cpp
 string
+test_mods/
+libpbmcmodm.so
+test_mcmodm.sh
+
+compile_commands.json
