@@ -2,6 +2,14 @@ CXX = g++
 CXXFLAGS = -O2 -Wall -std=c++20 -Iinclude
 LDFLAGS = -lcurl
 
+
+# put artifacts in bin/ so the workspace stays clean
+BINDIR := bin
+TARGET ?= mcmodm
+
+SRC := $(wildcard src/*.cpp)
+OBJ := $(patsubst src/%.cpp,$(BINDIR)/%.o,$(SRC))
+
 #.so stuf
 LIBNAME := pbmcmodm
 LIB := lib$(LIBNAME).so
@@ -11,12 +19,6 @@ MAIN_SRC := src/main.cpp
 LIB_SRC := $(filter-out $(MAIN_SRC), $(SRC))
 LIB_OBJ := $(patsubst src/%.cpp,$(BINDIR)/%.o,$(LIB_SRC))
 
-# put artifacts in bin/ so the workspace stays clean
-BINDIR := bin
-TARGET ?= mcmodm
-
-SRC := $(wildcard src/*.cpp)
-OBJ := $(patsubst src/%.cpp,$(BINDIR)/%.o,$(SRC))
 
 all: $(TARGET)
 
@@ -47,8 +49,8 @@ win:
 shared: CXXFLAGS += -fPIC
 shared: $(LIB)
 
-$(LIB):$(LIB_OBJ)
-	$(CXX) -shared $(LIB_ONJ) -o $(LIB) $(LDFLAGS)
+$(LIB): $(LIB_OBJ)
+	$(CXX) -shared $(LIB_OBJ) -o $(LIB) $(LDFLAGS)
 
 install-shared: $(LIB)
 	install -Dm755 $(LIB) $(LIBDIR)/$(LIB)
