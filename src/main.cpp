@@ -18,7 +18,6 @@ bool enable_ansi() {
 #include <vector>
 #include <algorithm>
 #include <nlohmann/json.hpp>
-#include "../include/curl_access.h"
 #include <cstdio> // for FILE*, popen
 #include <curl/curl.h>
 // #include "../include/install.h"
