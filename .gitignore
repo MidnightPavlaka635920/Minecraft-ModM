@@ -18,3 +18,4 @@ libpbmcmodm.so
 test_mcmodm.sh
 
 compile_commands.json
+modrinth.index.json

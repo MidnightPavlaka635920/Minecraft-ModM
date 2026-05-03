@@ -138,8 +138,15 @@ Let's say that I have a minecraft server at `~/.server/`. Plugins are in `plugin
 mcmodm setup ~/server/plugins/ 26.1 paper bukkit spigot
 ```
 
-Then, you can do easy_install like this, follow instructions that you get by the program
+Then, you can do `easy_install` like this, follow instructions that you get by the program
 
 ```bash
 mcmodm easy_install
 ```
+
+## Shared Library
+
+So, if you want to use my shared library with `main.cpp` of this program, you have to make a few changes:
+	- change this line `#include "../include/setup.h"` to `#include "pbmcmodm/setup.h"`
+	- repeat that for `color.h` and `mcmodm.h`
+	- That is it.
