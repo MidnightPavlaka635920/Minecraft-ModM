@@ -108,8 +108,14 @@ Commands:
 
 ## Compiling yourself
 
+### App
 There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide. Source files are in src/ and header files are in include/.  
-On Windows, steps are similar after installing dependencies, using a MINGW64 shell.
+On Windows, steps are similar after installing dependencies, using a MINGW64 shell. You should run `make win` in order to make a binary that is somewhat portable. Also, you should run `copyreq.sh` from a subfolder of `Minecraft-ModM` in order to make that binary work outside of MinGW, and also download `cacert.pem` and place it next to the binary.
+
+### Shared library
+**NOTE:** The shared library can be built only on Linux so far.
+You should run `make shared` to make tha shared object file, and then `sudo make install-shared` to install that shared object and headers to system PATH.
+
 
 ## Notes
 
