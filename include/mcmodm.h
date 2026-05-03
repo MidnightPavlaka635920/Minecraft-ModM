@@ -88,6 +88,7 @@ class McModm{
         //ck_vers.cpp
         // List all compatible versions for a project (static)
         static std::vector<std::string> list_compatible_versions(std::string project_id);
+        static std::vector<std::string> list_comp_loaders(std::string& loader, std::string& project_id);
         //info.cpp
         // Get detailed info for a project (static)
         static std::vector<ModInfo> mod_info(const std::string& query);

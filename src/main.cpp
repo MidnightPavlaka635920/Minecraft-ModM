@@ -526,8 +526,19 @@ int main(int argc, char* argv[]) {
             std::cout << yellow<<"Server Side: "<<reset_color << (mod.ss ? green + "Yes" + reset_color : red + "No" + reset_color) << "\n";
         }
 
-    }
-    else {
+    } else if(operation == "lscompl"){
+        if (argc < 4){
+            std::cerr << "Usage: mcmodm lscompl <version> <project_id>\n";
+            return 1;
+        }
+        std::string version = argv[2];
+        std::string project_id = argv[3];
+        auto compatible_loaders = pb::McModm::McModm::list_comp_loaders(version, project_id);
+        std::cout <<cyan<< "Compatible loaders for project '" <<yellow<< project_id <<cyan<< "' and version '" <<yellow<< version << reset_color<<"':\n";
+        for (const auto& loader : compatible_loaders) {
+            std::cout << yellow<<" - "<<reset_color<< loader << "\n";
+        }
+    } else {
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();
         return 1;
