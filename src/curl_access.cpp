@@ -127,3 +127,44 @@ void pb::curl_utils::curl_download_file(const std::string& url, const std::strin
     if (res != CURLE_OK)
         throw std::runtime_error("download failed");
 }
+std::string pb::curl_utils::curl_to_string_with_http_header(std::string url, std::vector<std::string> headersVec, bool doProgressAnimation){
+    CURL* curl = curl_easy_init();
+    if (!curl)
+        throw std::runtime_error("curl_easy_init failed");
+
+    std::string result;
+    #ifdef _WIN32
+        char exe_path[MAX_PATH];
+        GetModuleFileNameA(NULL, exe_path, MAX_PATH);
+        std::string exe_dir = std::string(exe_path);
+        exe_dir = exe_dir.substr(0, exe_dir.find_last_of("\\/"));
+        std::string ca_path = exe_dir + "\\cacert.pem";
+        curl_easy_setopt(curl, CURLOPT_CAINFO, ca_path.c_str());
+    #endif
+    struct curl_slist* headers = nullptr;
+    for (const auto& h : headersVec) {
+        headers = curl_slist_append(headers, h.c_str());
+    }
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);   // -L
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);      // -f
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "mcpm/0.1 (libcurl)");
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result);
+    if (doProgressAnimation){
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_print);
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    } else {
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+    }
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+
+    if (res != CURLE_OK)
+        throw std::runtime_error(curl_easy_strerror(res));
+
+    return result;
+
+}
