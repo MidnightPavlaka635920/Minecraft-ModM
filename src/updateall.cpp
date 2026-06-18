@@ -27,12 +27,16 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
     bool all_updatable = true;
 
     for (auto& [project_id, info] : packgs["installed"].items()) {
-            bool upgradable = false;
+        bool upgradable = false;
+        if (project_id.starts_with("local:")){
+            std::cout << "\033[33mPackages installed from a file will not be updated.\033[0m\n";
+        } else{
             upgradable = can_be_upgraded(project_id, version, info["loader"]);
             if (!upgradable) {
                 all_updatable = false;
                 //std::cout << "Package " << project_id << " cannot be upgraded to version " << version << " with info[loader] " << info[loader] << ".\n";
                 //continue;
+            }
             }
             std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << ": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
         
@@ -60,7 +64,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
                 json ti;
                 ti.push_back({{"version", version}, {"loader", json::array({info["loader"]})}}); // keep the same loader(s) as before
                 install_mod(project_id, ti, true);
-                continue;
+                //continue;
             }
         }
     }

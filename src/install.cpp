@@ -13,14 +13,7 @@ std::string name;
 
 void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool just_install) {
     //set_path(install_path);
-    if(just_install){}
-    else{
-        if (is_installed(pn)) {
-            std::cout << "[skip] Already installed: " << pn << "\n";
-            return;
-        }
-    }
-
+    
     std::string ver = req[0]["version"].get<std::string>();
     // std::cout << ver << "\n";
     std::vector<std::string> loaders;
@@ -99,7 +92,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
             }
-            if (just_install){mark_installed(pn, ver, loader_to_use, filename, name);continue;} else{mark_installed(pn, ver, loader_to_use, filename, name);
+            if (just_install){mark_installed(pn, ver, loader_to_use, filename, name);break;} else{mark_installed(pn, ver, loader_to_use, filename, name);
 
             // ---- Install required dependencies ----
                 if (release.contains("dependencies")) {

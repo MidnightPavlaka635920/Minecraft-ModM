@@ -236,6 +236,9 @@ int main(int argc, char* argv[]) {
         req = json::array({{{"version", version}, {"loader", loaders}}});
         for (const auto& mod:mods){
                      // mod name or slug
+            if (modm.is_installed(mod)) {
+                std::cout << "[skip] Already installed: " << mod << "\n";
+            }
             std::cout << "Installing " << mod << "...\n";
             modm.install_mod(mod, req, false);
         }
