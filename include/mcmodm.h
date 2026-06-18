@@ -49,7 +49,7 @@ class McModm{
         // Save the installed packages information to disk
         void save_packages(const json& j);
         // Check if a package can be upgraded to a specific game version and loader
-        bool can_be_upgraded(const std::string& project_id, const std::string& game_version, const std::string& loader);
+        static bool can_be_upgraded(const std::string& project_id, const std::string& game_version, const std::string& loader);
         // Check if a package is already installed
         bool is_installed(const std::string& project_id);
         // Mark a package as installed in the packages database
