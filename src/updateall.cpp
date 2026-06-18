@@ -86,6 +86,7 @@ std::vector<areUpdatable> pb::McModm::McModm::check_all_upgradeable(std::string&
     std::vector<areUpdatable> updatables;
 
     for (auto& [project_id, info] : packgs["installed"].items()) {
+        if(project_id.starts_with("local:")){std::cout<< "Package " << project_id << " Is a local package. Skipping.\n";continue;}
         bool upgradable = can_be_upgraded(project_id, version, info["loader"]);
         updatables.push_back({info["name"].get<std::string>(), project_id, upgradable});
         //std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << "and loader" << info["loader"]<<": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
