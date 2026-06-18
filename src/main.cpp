@@ -236,9 +236,6 @@ int main(int argc, char* argv[]) {
         req = json::array({{{"version", version}, {"loader", loaders}}});
         for (const auto& mod:mods){
                      // mod name or slug
-            if (modm.is_installed(mod)) {
-                std::cout << "[skip] Already installed: " << mod << "\n";
-            }
             std::cout << "Installing " << mod << "...\n";
             modm.install_mod(mod, req, false);
         }
@@ -375,7 +372,8 @@ int main(int argc, char* argv[]) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_install [path]\n";
             return 1;
         }
-        pb::McModm::McModm modm(install_path + "/");
+        std::cout << install_path<<std::endl;
+        pb::McModm::McModm modm(install_path);
         //install_path = argv[2]; // installation path
         modm.easy_install(color);
     } else if(operation == "easy_remove"){

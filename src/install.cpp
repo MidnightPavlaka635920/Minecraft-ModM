@@ -13,7 +13,12 @@ std::string name;
 
 void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool just_install) {
     //set_path(install_path);
-    
+    if(!just_install){
+        if (is_installed(pn)) {
+            std::cout << "[skip] Already installed: " << pn << "\n";return;
+        }
+
+    } 
     std::string ver = req[0]["version"].get<std::string>();
     // std::cout << ver << "\n";
     std::vector<std::string> loaders;

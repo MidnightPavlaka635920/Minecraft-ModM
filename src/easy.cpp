@@ -62,7 +62,8 @@ void pb::McModm::McModm::easy_install(bool color){
         }
 
 //        std::string project_id = hits[choice]["project_id"];
-        std::filesystem::path req_path = std::filesystem::current_path() / "req.json";
+        std::filesystem::path req_path(install_path + "/req.json");
+        std::cout << req_path<<std::endl;
         std::ifstream f(req_path);
         if (!f.is_open()) {
             std::cerr << "req.json not found in path.\n";
@@ -77,12 +78,13 @@ void pb::McModm::McModm::easy_install(bool color){
             }
         }
         std::cout << "Install another? (y/n): ";
-        string again;
-        std::cin >> again;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        //if(again == ""){break;}
-        if (again != "y" && again != "Y" && again != ""){break;}
-    
+        std::string again;
+        std::getline(std::cin, again);
+         if (again.empty() || again == "Y" || again == "y") {
+             continue;
+        } else {
+            break;
+        }   
     }
 }
 
