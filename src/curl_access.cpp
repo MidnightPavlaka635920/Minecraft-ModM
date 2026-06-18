@@ -58,11 +58,11 @@ std::string pb::curl_utils::curl_to_string(const std::string& url, bool doProgre
     #endif
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);   // -L
-    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);      // -f
+    //curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);      // -f
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "mcpm/0.1 (libcurl)");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result);
-    if (doProgressAnimation){
+        if (doProgressAnimation){
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_print);
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
     } else {
@@ -71,10 +71,13 @@ std::string pb::curl_utils::curl_to_string(const std::string& url, bool doProgre
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
+    if (res != CURLE_OK){
+    long response_code;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
-    if (res != CURLE_OK)
+    std::cerr << "HTTP " << response_code << "\n"<<"URL: "<<url<<"\n";
         throw std::runtime_error(curl_easy_strerror(res));
-
+    }
     return result;
 }
 

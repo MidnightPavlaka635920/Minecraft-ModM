@@ -431,12 +431,11 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         pb::McModm::McModm modm(req_path);
-        //std::string req_path = argv[4];
         std::cout << yellow<<"Warning: If you have multiple loaders set up for plugins, you might want to run this command multiple times!\n" <<  reset_color;
-        auto packagesChecked = modm.check_all_upgradeable(version, loader);
-        //size_t checked_count = packagesChecked.size();
-        for (const auto& pkg : packagesChecked) {
-            std::cout << "Is " << pkg.name <<" (" <<pkg.project_id<< ") upgradable to version " << version <<":"<<(pkg.updatable ? green + "Yes" + reset_color : red + "No" + reset_color) << ".\n";
+        json mods = modm.load_packages();
+        for(auto& [project_id, info]:mods["installed"].items()){
+            bool updatable = modm.can_be_upgraded(project_id, version, info["loader"]);
+            std::cout << "Is " << info["name"] <<" (" <<project_id<< ") upgradable to version " << version <<":"<<(updatable ? green + "Yes" + reset_color : red + "No" + reset_color) << ".\n";
         }
 
     } else if (operation == "il"){
