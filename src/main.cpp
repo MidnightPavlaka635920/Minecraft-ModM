@@ -280,16 +280,30 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         std::string version = argv[2]; // game version
+        bool force = false;
         std::string install_path;
-        if (argc >= 4) {
-            install_path = argv[3];
-        } else if (!default_path.empty()) {
+
+        for (int i = 3; i < argc; i++) {
+            std::string arg = argv[i];
+
+            if (arg == "-f" || arg == "--force") {
+                force = true;
+            } else if (install_path.empty()) {
+                install_path = arg; // first non-flag becomes path
+            }
+        }
+
+        // fallback to default path
+        if (install_path.empty() && !default_path.empty()) {
             install_path = default_path;
-        } else {
-            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm updateall <version> [path]\n";
+        }
+
+        // still no path? error
+        if (install_path.empty()) {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\n"
+                      << "Usage: mcmodm updateall <version> [path] [--force]\n";
             return 1;
         }
-        //install_path = argv[3]; // installation path
         pb::McModm::McModm modm(install_path + "/");
         std::string req_path = install_path;
         if (!req_path.empty() && req_path.back() != '/'){
@@ -311,7 +325,7 @@ int main(int argc, char* argv[]) {
         for (const auto& l : req[0]["loader"]){
             loaders.push_back(l.get<std::string>());
         }
-        modm.update_all_packages(version, loaders, req);
+        modm.update_all_packages(version, loaders, req, force);
     } else if (operation == "list") {
         if (argc < 2) {
             std::cerr << "Usage: mcmodm list [path]\n";

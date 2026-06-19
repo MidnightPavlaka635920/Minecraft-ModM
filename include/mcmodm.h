@@ -68,7 +68,7 @@ class McModm{
         void remove_package(std::string package_id, bool just_remove);
         //updateall.cpp
         // Update all installed packages to a new game version and loaders
-        void update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req);
+        void update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req, bool force = false);
         // Check if all packages are upgradeable to a specific version and loader
         std::vector<areUpdatable> check_all_upgradeable(std::string& version, std::string& loader);
         //list.cpp

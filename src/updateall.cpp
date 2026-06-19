@@ -6,6 +6,7 @@
 #include <cstdio> // for FILE*, popen
 //#include <curl/curl.h>
 #include "../include/mcmodm.h"
+#include "../include/color.h"
 /*
 #include "../include/packages.h"
 #include "../include/remove.h"
@@ -13,9 +14,9 @@
 #include "../include/install.h"
 */
 using json = nlohmann::json;
-
-void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req) {
-    if (req[0]["version"] == version) {
+#include <unordered_set>
+void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req, bool force) {
+    if (req[0]["version"] == version&&!force) {
         std::cout << "No version change detected (" << version << "). Skipping update.\n";
         return;
     }
@@ -25,13 +26,16 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
     std::cout << "Found " << packgs_instal << " packages to upgrade.\n";
     //std::cout << packgs["installed"].dump(4) << "\n";
     bool all_updatable = true;
-
+    //std::vector<bool> upgradibleList;
+    std::unordered_set<std::string> upgradeableMods;
     for (auto& [project_id, info] : packgs["installed"].items()) {
         bool upgradable = false;
         if (project_id.starts_with("local:")){
             std::cout << "\033[33mPackages installed from a file will not be updated.\033[0m\n";
+            continue;
         } else{
             upgradable = can_be_upgraded(project_id, version, info["loader"]);
+            if (force&&upgradable){upgradeableMods.insert(project_id);}
             if (!upgradable) {
                 all_updatable = false;
                 //std::cout << "Package " << project_id << " cannot be upgraded to version " << version << " with info[loader] " << info[loader] << ".\n";
@@ -42,8 +46,24 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
         
     }
     if (!all_updatable) {
-        std::cout << "Not all packages can be upgraded. Wait for all the packages to become upgradable to the specified version " << version << ", or, run 'mcmodm ck_upd <version to update> <loader> <path to req.json>' to check that.\n";
-        return;
+        if (!force){
+            std::cout << "Not all packages can be upgraded. Wait for all the packages to become upgradable to the specified version " << version << ", or, run 'mcmodm ck_upd <version to update> <loader> <path to req.json>' to check that.\n";
+        return;}
+        std::cout << yellow<<"You are forcing this upgrade. ONLY the packages that can be upgraded will be upgraded. Run this in future to update more."<<reset_color<<std::endl;
+        for (auto& [project_id, info] : packgs["installed"].items()) {
+            if (project_id.starts_with("local:")){
+                std::cout << "\033[33mPackages installed from a file will not be updated.\033[0m\n";
+                continue;
+            }
+            if(!upgradeableMods.contains(project_id)){
+                //std::cout<< yellow << "Package "<<cyan<<project_id<<yellow<<" Is not upgradible to version" << cyan<<version<<reset_color<<std::endl;
+                continue;
+            }
+            remove_package(project_id, true);
+            json ti;
+            ti.push_back({{"version", version}, {"loader", json::array({info["loader"]})}}); // keep the same loader(s) as before
+            install_mod(project_id, ti, true);
+        }
     }
     for (auto& [project_id, info] : packgs["installed"].items()) {
         if (project_id.starts_with("local:")){
