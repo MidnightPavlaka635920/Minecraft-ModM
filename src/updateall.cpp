@@ -14,6 +14,10 @@
 #include "../include/install.h"
 */
 using json = nlohmann::json;
+struct upgradeableModInfo{
+    std::string project_id;
+    json info;
+};
 #include <unordered_set>
 void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req, bool force) {
     if (req[0]["version"] == version&&!force) {
@@ -28,6 +32,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
     bool all_updatable = true;
     //std::vector<bool> upgradibleList;
     std::unordered_set<std::string> upgradeableMods;
+    std::vector<upgradeableModInfo> plan;
     for (auto& [project_id, info] : packgs["installed"].items()) {
         bool upgradable = false;
         if (project_id.starts_with("local:")){
@@ -35,6 +40,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
             continue;
         } else{
             upgradable = can_be_upgraded(project_id, version, info["loader"]);
+            plan.push_back({project_id, info});
             if (force&&upgradable){upgradeableMods.insert(project_id);}
             if (!upgradable) {
                 all_updatable = false;
@@ -50,43 +56,32 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
             std::cout << "Not all packages can be upgraded. Wait for all the packages to become upgradable to the specified version " << version << ", or, run 'mcmodm ck_upd <version to update> <loader> <path to req.json>' to check that.\n";
         return;}
         std::cout << yellow<<"You are forcing this upgrade. ONLY the packages that can be upgraded will be upgraded. Run this in future to update more."<<reset_color<<std::endl;
-        for (auto& [project_id, info] : packgs["installed"].items()) {
-            if (project_id.starts_with("local:")){
-                std::cout << "\033[33mPackages installed from a file will not be updated.\033[0m\n";
-                continue;
-            }
-            if(!upgradeableMods.contains(project_id)){
+        for (auto& mod : plan) {
+            if(!upgradeableMods.contains(mod.project_id)){
                 //std::cout<< yellow << "Package "<<cyan<<project_id<<yellow<<" Is not upgradible to version" << cyan<<version<<reset_color<<std::endl;
                 continue;
             }
-            remove_package(project_id, true);
+            remove_package(mod.project_id, true);
             json ti;
-            ti.push_back({{"version", version}, {"loader", json::array({info["loader"]})}}); // keep the same loader(s) as before
-            install_mod(project_id, ti, true);
+            ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
+            install_mod(mod.project_id, ti, true);
         }
     }
-    for (auto& [project_id, info] : packgs["installed"].items()) {
-        if (project_id.starts_with("local:")){
-            std::cout << "\033[33mPackages installed from a file will not be updated.\033[0m\n";
-        } else {
+    for (auto& mod:plan) {
             bool up_to_date = false;
-            /*std::cout << "Project ID: " << project_id << "\n";
-            std::cout << "  File: " << info["file"] << "\n";    
-            std::cout << "  Game version: " << info["game_version"] << "\n";
-            std::cout << "  Loader: " << info["loader"] << "\n";*/
-            if(info["game_version"] == version){
-                std::cout << "Package " << project_id << " is already up to date for version " << version << ". Skipping.\n";
+            if(mod.info["game_version"] == version){
+                std::cout << "Package " << mod.project_id << " is already up to date for version " << version << ". Skipping.\n";
                 up_to_date = true;
                 continue;
             }
             if(!up_to_date){
-                remove_package(project_id, true);
+                remove_package(mod.project_id, true);
                 json ti;
-                ti.push_back({{"version", version}, {"loader", json::array({info["loader"]})}}); // keep the same loader(s) as before
-                install_mod(project_id, ti, true);
+                ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
+                install_mod(mod.project_id, ti, true);
                 //continue;
             }
-        }
+        
     }
     std::string req_path = install_path;
     if (!req_path.empty() && req_path.back() != '/')
