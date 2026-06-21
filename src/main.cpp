@@ -446,6 +446,10 @@ int main(int argc, char* argv[]) {
         std::cout << yellow<<"Warning: If you have multiple loaders set up for plugins, you might want to run this command multiple times!\n" <<  reset_color;
         json mods = modm.load_packages();
         for(auto& [project_id, info]:mods["installed"].items()){
+            if (project_id.starts_with("local:")){
+                std::cout<<green<<"Skipping local package: " <<cyan<<project_id<<reset_color<<std::endl;
+                continue;
+            }
             bool updatable = modm.can_be_upgraded(project_id, version, info["loader"]);
             std::cout << "Is " << info["name"] <<" (" <<project_id<< ") upgradable to version " << version <<":"<<(updatable ? green + "Yes" + reset_color : red + "No" + reset_color) << ".\n";
         }
