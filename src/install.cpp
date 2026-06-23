@@ -9,13 +9,14 @@
 #include <curl/curl.h>
 using json = nlohmann::json;
 #include "../include/mcmodm.h"
+#include "../include/color.h"
 std::string name;
 
 void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool just_install) {
     //set_path(install_path);
     if(!just_install){
         if (is_installed(pn)) {
-            std::cout << "[skip] Already installed: " << pn << "\n";return;
+            std::cout << cyan<<"[skip] Already installed: " <<yellow<< pn<<reset_color<<"\n";return;
         }
 
     } 
@@ -46,6 +47,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
         throw std::runtime_error("Error fetching versions.");
     }
     json pdata = json::parse(ntf);
+    name = pdata["title"];
     try {
         oVerData = curl_utils::curl_to_string(url);
     } catch (const std::exception& e) {
@@ -86,7 +88,6 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
             std::string dl_url = release["files"][0]["url"];
             std::string filename = release["files"][0]["filename"];
             std::string out_file = install_path + "/" + filename;
-            name = pdata["title"];
 
             std::cout << "Found matching version for " << name << release["name"].get<std::string>() << " (" << pn << ")"<< std::endl;
             std::cout << "Downloading to: " << out_file << "\n";
@@ -125,6 +126,6 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
     }
 
     if (!found) {
-        throw std::runtime_error("No matching version found for " + name + " (" + pn + ")");
+        std::cout << red<<("No matching version found for " + cyan+name+red + " (" + cyan+pn+red + ")")<<reset_color<<"\n";
     }
 }

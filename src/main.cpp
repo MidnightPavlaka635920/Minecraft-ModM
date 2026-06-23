@@ -234,10 +234,13 @@ int main(int argc, char* argv[]) {
             : std::vector<std::string>{overwrite_loader};
         std::string version = overwrite_version.empty() ? req[0]["version"].get<std::string>() : overwrite_version;
         req = json::array({{{"version", version}, {"loader", loaders}}});
+        size_t modsamm = mods.size();
+        int index = 0;
         for (const auto& mod:mods){
                      // mod name or slug
-            std::cout << "Installing " << mod << "...\n";
+            std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n";
             modm.install_mod(mod, req, false);
+            ++index;
         }
         //std::string pn = argv[2];          // mod name or slug
         //install_mod(pn, install_path, req, false);
@@ -270,6 +273,7 @@ int main(int argc, char* argv[]) {
         pb::McModm::McModm modm(install_path + "/");
         for (size_t i = 0; i < mods.size(); i++){
             std::string pn = mods[i];          // mod name or slug
+            std::cout << green << "["<<std::to_string(i)<<"/"<<std::to_string(mods.size())<<"] "<<"Remving " << pn << "...\n";
             modm.remove_package(pn, false);
         }
         //std::string pn = argv[2];
@@ -427,15 +431,15 @@ int main(int argc, char* argv[]) {
         modm.iff(packages_path);
 
     }else if(operation == "ck_upd"){
-        if (argc < 4) {
-            std::cerr << "Usage: mcmodm ck_upd <version to update> <loader> [path to req.json]\n";
+        if (argc < 3) {
+            std::cerr << "Usage: mcmodm ck_upd <version to update> [path to req.json]\n";
             return 1;
         }
         std::string version = argv[2];
-        std::string loader = argv[3];
+        //std::string loader = argv[3];
         std::string req_path;
-        if (argc >= 5) {
-            req_path = argv[4];
+        if (argc >= 4) {
+            req_path = argv[3];
         } else if (!default_path.empty()) {
             req_path = default_path;
         } else {
