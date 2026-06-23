@@ -8,9 +8,11 @@
 #include "../include/mcmodm.h"
 using json = nlohmann::json;
 namespace fs = std::filesystem;
-void pb::McModm::McModm::install_local(std::string& path_tif, std::string& name, std::string& version ,std::string& loader){
-    std::string v_pn = "local:" + name;
-    if (is_installed(v_pn)){
+void pb::McModm::McModm::install_local(std::string& pathToInstallFrom, std::string& name, std::string& version ,std::string& loader){
+    fs::path p = (pathToInstallFrom);
+    std::string filename = p.filename().string();
+    std::string pn = "local:" + filename;
+    if (is_installed(pn)){
         std::cerr << "This file is already installed. If you want to reinstall it, please remove it first.\n";
 
     }
@@ -20,13 +22,10 @@ void pb::McModm::McModm::install_local(std::string& path_tif, std::string& name,
     std::cout << "Installing...\n";
     std::string dest = install_path + "/";
     try{
-        fs::copy(path_tif, install_path);
+        fs::copy(pathToInstallFrom, install_path);
     } catch (const fs::filesystem_error& e) {
         std::cerr << "Something went wrong and I don't know what. Hope this helps." << e.what();
     }
-    fs::path p = (path_tif);
-    std::string filename = p.filename().string();
-    std::string pn = "local:" + filename;
     
     mark_installed(pn, version, loader, filename, name);
     //save_packages();
