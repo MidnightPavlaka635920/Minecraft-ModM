@@ -13,17 +13,17 @@ std::vector<search_result> pb::McModm::McModm::search_mods(const std::string& qu
     curl_global_init(CURL_GLOBAL_DEFAULT);
     // Perform a search query on Modrinth
     std::string search_url = "https://api.modrinth.com/v2/search?query=" + curl_utils::url_encode(query);
-    std::string oData;
+    std::string resultData;
 
     try {
-        oData = curl_utils::curl_to_string(search_url);
+        resultData = curl_utils::curl_to_string(search_url);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching search results: " << e.what() << "\n";
         throw std::runtime_error("Error fetching search results");
     }
     std::vector<search_result> results;
 
-    json search_results = json::parse(oData);
+    json search_results = json::parse(resultData);
     // LIST operation: display search results
     json hits = search_results["hits"];
     for (const auto& hit : hits) {

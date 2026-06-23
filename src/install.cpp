@@ -36,31 +36,31 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
 
     // Fetch all versions for this project
     std::string url = "https://api.modrinth.com/v2/project/" + pn + "/version";
-    std::string oVerData;
-    std::string nurl = "https://api.modrinth.com/v2/project/" + pn;
-    std::string ntf;
+    std::string aboutVersionData;
+    std::string projectUrl = "https://api.modrinth.com/v2/project/" + pn;
+    std::string projectDataRaw;
     std::cout << "Fetching versions...\n";
     try {
-        ntf = curl_utils::curl_to_string(nurl);
+        projectDataRaw = curl_utils::curl_to_string(projectUrl);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching main page: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions.");
     }
-    json pdata = json::parse(ntf);
-    name = pdata["title"];
+    json projectData = json::parse(projectDataRaw);
+    name = projectData["title"];
     try {
-        oVerData = curl_utils::curl_to_string(url);
+        aboutVersionData= curl_utils::curl_to_string(url);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions.");
     }
 
-    //json mainData = json::parse(oVerData);
+    //json mainData = json::parse(aboutVersionData);
     json mainData;
     try {
-        mainData = json::parse(oVerData);
+        mainData = json::parse(aboutVersionData);
     } catch (const std::exception& e) {
-        std::cerr << "Failed to parse JSON: [" << oVerData << "]\n";
+        std::cerr << "Failed to parse JSON: [" << aboutVersionData << "]\n";
         std::cerr << "Error: " << e.what() << "\n";
         return;
     }
