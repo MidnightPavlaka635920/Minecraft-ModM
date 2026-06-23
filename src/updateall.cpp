@@ -70,6 +70,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
             index++;
         }
     }
+    int index = 0;
     for (auto& mod:plan) {
             bool up_to_date = false;
             if(mod.info["game_version"] == version){
@@ -81,8 +82,10 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
                 remove_package(mod.project_id, true);
                 json ti;
                 ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
+                ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
                 install_mod(mod.project_id, ti, true);
                 //continue;
+                index++;
             }
         
     }
