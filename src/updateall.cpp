@@ -82,7 +82,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
                 remove_package(mod.project_id, true);
                 json ti;
                 ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
-                ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
+                std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
                 install_mod(mod.project_id, ti, true);
                 //continue;
                 index++;
