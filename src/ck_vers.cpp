@@ -11,24 +11,24 @@ using json = nlohmann::json;
 std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::string project_id){
     std::vector<std::string> compatible_versions;
     std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
-    std::string oVerData;
+    std::string aboutVersionData;
     try {
-        oVerData = curl_utils::curl_to_string(url);
+        aboutVersionData = curl_utils::curl_to_string(url);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions.");
     }
 
-    //json mainData = json::parse(oVerData);
-    json mainData;
+    //json versionData = json::parse(aboutVersionData);
+    json versionData;
     try {
-        mainData = json::parse(oVerData);
+        versionData = json::parse(aboutVersionData);
     } catch (const std::exception& e) {
-        std::cerr << "Failed to parse JSON: [" << oVerData << "]\n";
+        std::cerr << "Failed to parse JSON: [" << aboutVersionData << "]\n";
         std::cerr << "Error: " << e.what() << "\n";
         throw std::runtime_error("Failed to parse JSON.");
     }
-    for (const auto& release : mainData){
+    for (const auto& release : versionData){
         for (const auto& ver: release["game_versions"]){
             if (std::find(compatible_versions.begin(),
               compatible_versions.end(),
@@ -43,24 +43,24 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
 std::vector<std::string> pb::McModm::McModm::list_comp_loaders(std::string& version, std::string& project_id){
     std::vector<std::string> compatible_versions;
     std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
-    std::string oVerData;
+    std::string aboutVersionData;
     try {
-        oVerData = curl_utils::curl_to_string(url);
+        aboutVersionData = curl_utils::curl_to_string(url);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions.");
     }
 
-    //json mainData = json::parse(oVerData);
-    json mainData;
+    //json versionData = json::parse(aboutVersionData);
+    json versionData;
     try {
-        mainData = json::parse(oVerData);
+        versionData = json::parse(aboutVersionData);
     } catch (const std::exception& e) {
-        std::cerr << "Failed to parse JSON: [" << oVerData << "]\n";
+        std::cerr << "Failed to parse JSON: [" << aboutVersionData << "]\n";
         std::cerr << "Error: " << e.what() << "\n";
         throw std::runtime_error("Failed to parse JSON.");
     }
-    for (const auto& release: mainData){
+    for (const auto& release: versionData){
         for (const auto& ver: release["game_versions"]){
             if (ver.get<std::string>() == version){
                 for (const auto& loader: release["loaders"]){
