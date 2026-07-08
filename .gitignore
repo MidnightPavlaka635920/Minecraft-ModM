@@ -16,6 +16,7 @@ string
 test_mods/
 libpbmcmodm.so
 test_mcmodm.sh
-
+build/
 compile_commands.json
 modrinth.index.json
+cacert.pem
