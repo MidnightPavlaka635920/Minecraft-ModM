@@ -33,7 +33,7 @@ Then, you have to install the program. Installation is different for both Window
 3. Run `cmd.exe` (`Win+R`, type `cmd`, press `Enter`), or easier, open terminal from the folder where `mcmodm.exe` is stored. If you do so, skip step 4.
 4. `cd` into folder where you extracted zip, the folder is called `wb`.
 5. Run `.\mcmodm.exe <options>`
-6. You should download CA certificate from <a href='https://curl.se/docs/caextract.html'>here</a> and copy them into the same folder as `mcmodm.exe` if it doesn't work, but now it is included in `.zip`
+6. You should download CA certificate from <a href='https://curl.se/docs/caextract.html'>here</a> and copy them into the same folder as `mcmodm.exe` if it doesn't work, but now it is included in `.zip`. **Note** that you will have to rename file co `cacert.pem`.
 
 ### Linux (Debian)
 
