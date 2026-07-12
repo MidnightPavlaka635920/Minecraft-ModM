@@ -70,9 +70,10 @@ void pb::McModm::McModm::easy_install(bool color){
             continue;
         }
         json req = json::parse(f);
+        const bool apm = req[0].value("apm", false);
         for (const auto& project_id : to_install) {
             try {
-                install_mod(project_id, req, false);
+                install_mod(project_id, req, apm,false);
             } catch (const std::exception& e) {
                 std::cerr << "Something went wrong during installation and here is what: " << e.what() << std::endl;
             }
@@ -98,7 +99,10 @@ void pb::McModm::McModm::easy_remove(bool color){
             ids.push_back(pkg.project_id);
             idx++;
         }
-        
+        std::string req_path = install_path + "//req.json";
+        std::ifstream sdata(req_path);
+        json maindata = json::parse(sdata);
+        const bool apm = maindata[0].value("apm",false);
         std::cout << "\n";
         if (idx == 0) {
             std::cout << "No packages installed.\n";
@@ -137,7 +141,7 @@ void pb::McModm::McModm::easy_remove(bool color){
         }
         for (const auto& project_id : to_remove) {
             try {
-                remove_package(project_id, false);
+                remove_package(project_id, false,apm);
             } catch (const std::exception& e) {
                 std::cerr << "Something went wrong during removal and here is what: " << e.what() << " I can't help it." << std::endl;
             }

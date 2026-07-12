@@ -229,17 +229,20 @@ int main(int argc, char* argv[]) {
 	if(!overwrite_loader.empty()){loader.push_back(overwrite_loader);} else{
 	    for(const auto& l:req[0]["loader"]){loader.push_back(l.get<std::string>());}
 	}*/
+        bool apm = req[0].value("apm", false);
         auto loaders = overwrite_loader.empty()
             ? get_loaders(req[0]["loader"])
             : std::vector<std::string>{overwrite_loader};
         std::string version = overwrite_version.empty() ? req[0]["version"].get<std::string>() : overwrite_version;
-        req = json::array({{{"version", version}, {"loader", loaders}}});
+        //req = json::array({{{"version", version}, {"loader", loaders}}});
+        req[0]["version"] = version;
+        req[0]["loaders"] = loaders;
         size_t modsamm = mods.size();
         int index = 0;
         for (const auto& mod:mods){
                      // mod name or slug
-            std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n";
-            modm.install_mod(mod, req, false);
+            std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
+            modm.install_mod(mod, req, apm,false);
             ++index;
         }
         //std::string pn = argv[2];          // mod name or slug
@@ -271,10 +274,13 @@ int main(int argc, char* argv[]) {
             install_path = default_path;
         }
         pb::McModm::McModm modm(install_path + "/");
+        std::ifstream sdata(install_path+"/req.json");
+        json req = json::parse(sdata);
+        bool apm = req[0].value("apm", false);
         for (size_t i = 0; i < mods.size(); i++){
             std::string pn = mods[i];          // mod name or slug
             std::cout << green << "["<<std::to_string(i)<<"/"<<std::to_string(mods.size())<<"] "<<"Remving " << pn << "...\n";
-            modm.remove_package(pn, false);
+            modm.remove_package(pn, false,apm);
         }
         //std::string pn = argv[2];
         //remove_package(pn, install_path, false);

@@ -12,7 +12,7 @@ using json = nlohmann::json;
 #include "../include/color.h"
 std::string name;
 
-void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool just_install) {
+void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool autoPathManagement,bool just_install) {
     //set_path(install_path);
     if(!just_install){
         if (is_installed(pn)) {
@@ -84,12 +84,20 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
     
 
         if (ver_comp && loa_comp) {
-            ProjectType ty = getProjectType(p_type);
             found = true;
             std::string dl_url = release["files"][0]["url"];
             std::string filename = release["files"][0]["filename"];
-            auto subfolder = getInstallDirectory(ty);
-            std::string out_file = install_path +"/"+ subfolder.string() +"/"+ filename;
+            std::string out_file;
+            std::cout << "autoPathManagement = " << std::boolalpha
+          << autoPathManagement << '\n';
+            if (autoPathManagement){
+                ProjectType ty = getProjectType(p_type);
+                auto subfolder = getInstallDirectory(ty);
+                std::cout <<subfolder;
+                out_file = install_path +"/"+ subfolder.string() +"/"+ filename;
+            } else{
+                out_file = install_path +"/"+filename;
+            }
 
             std::cout << "Found matching version for " << name << release["name"].get<std::string>() << " (" << pn << ")"<< std::endl;
             std::cout << "Downloading to: " << out_file << "\n";
@@ -117,7 +125,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
                             {"loader", loaders}
                         });
 
-                        install_mod(dep_project, dep_req, false);
+                        install_mod(dep_project, dep_req, autoPathManagement,false);
                     }
                 }
             }

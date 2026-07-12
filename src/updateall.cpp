@@ -24,6 +24,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
         std::cout << "No version change detected (" << version << "). Skipping update.\n";
         return;
     }
+    const bool apm = req[0].value("apm", false);
     //set_path(install_path);
     json packgs = load_packages();
     size_t packgs_instal = packgs["installed"].size();
@@ -62,11 +63,11 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
                 //std::cout<< yellow << "Package "<<cyan<<project_id<<yellow<<" Is not upgradible to version" << cyan<<version<<reset_color<<std::endl;
                 continue;
             }
-            remove_package(mod.project_id, true);
+            remove_package(mod.project_id, true,apm);
             json ti;
             ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
             std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
-            install_mod(mod.project_id, ti, true);
+            install_mod(mod.project_id, ti, apm, true);
             index++;
         }
     }
@@ -79,11 +80,11 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
                 continue;
             }
             if(!up_to_date){
-                remove_package(mod.project_id, true);
+                remove_package(mod.project_id, true,apm);
                 json ti;
                 ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
                 std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
-                install_mod(mod.project_id, ti, true);
+                install_mod(mod.project_id, ti, apm,true);
                 //continue;
                 index++;
             }

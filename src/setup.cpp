@@ -10,7 +10,15 @@ void pb::McModm::setup(std::string& path, std::string& version, std::vector<std:
         req_path += '/';
     req_path += "req.json";
     json req_s;
-    req_s.push_back({{"version", version}, {"loader",loaders}});
+    std::cout << "Should this be auto-managed path (you should enter minecraft path for this)?\nIt automatically downloads right type to right folder.(Y/n): ";
+    std::string apm_choice;
+    bool useAPM = false;
+    std::getline(std::cin, apm_choice);
+    if(apm_choice == "Y" || apm_choice == "y" or apm_choice==""){
+        useAPM = true;
+        std::cout << "Y";
+    }
+    req_s.push_back({{"version", version}, {"loader",loaders},{"apm",useAPM}});
     std::ofstream ofs(req_path);
     if (!ofs.is_open()) {
         std::cerr << "Failed to write req.json to " << req_path << "\n";

@@ -25,6 +25,9 @@ void pb::McModm::McModm::iff(const std::string& packages_path){
     std::cin >> install_confirm;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (install_confirm != 'y' && install_confirm != 'Y'&& !install_path.empty()){return;}
+    std::ifstream sdata2(install_path+"/req.json");
+    json req = json::parse(sdata2);
+    const bool apm = req[0].value("apm",false);
     for (auto& [project_id, info] : packages["installed"].items()){
         if (project_id.starts_with("local:")){
             std::cout << yellow<<"Warning: "<<reset_color<<"Local package " << project_id << " is skipped.\n Use 'mcmodm il' to install it mmanually afterwards.\n" << cyan <<"File to install: " << reset_color << info["file"].get<std::string>() << "\n";
@@ -32,7 +35,7 @@ void pb::McModm::McModm::iff(const std::string& packages_path){
             std::vector<std::string> loader_mod;
             loader_mod.push_back(info["loader"].get<std::string>());
             json req_mod = json::array({{"loader", loader_mod},{"version", info["version"].get<std::string>()}});
-            install_mod(project_id, req_mod, false);
+            install_mod(project_id, req_mod, apm,false);
         }
     }
     std::cout << "Installation complete, unless everything was already installed.\n";

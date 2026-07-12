@@ -66,10 +66,10 @@ class McModm{
         static std::filesystem::path getInstallDirectory(ProjectType type);
         //install.cpp
         // Install a mod/plugin by project ID and requirements
-        void install_mod(const std::string& pn, const json& req, bool just_install);
+        void install_mod(const std::string& pn, const json& req, bool autoPathManagement,bool just_install);
         //remove.cpp
         // Remove a package by project ID
-        void remove_package(std::string package_id, bool just_remove);
+        void remove_package(std::string package_id, bool just_remove, bool autoPathHandling);
         //updateall.cpp
         // Update all installed packages to a new game version and loaders
         void update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req, bool force = false);
