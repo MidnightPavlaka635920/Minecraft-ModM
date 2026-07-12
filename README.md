@@ -122,8 +122,8 @@ You should run `make shared` to make tha shared object file, and then `sudo make
 - In commands above, `Install path` or `Path to req.json` is a directory and thus shouldn't contain `req.json`.
 - Paths in brackets `[path]` are optional if a default path is configured.
 - (OPTIONAL, BUT USEFUL) Add folder where `mcmodm.exe` is located to the PATH, there are online tutorials for that. If you do that, you can run the program from any place on disk inside of CMD.
-- Modrinth API works with both slugs and project IDs, but this tool uses project IDs since they are more reliable, don’t change, and you can't run `mcmodm install sodium [path]`. I tried, it failed.
-
+- Modrinth API works with both slugs and project IDs, but this tool uses project IDs since they are more reliable, don’t change, and you can't run `mcmodm install sodium [path]`. I tried, it failed
+- For Resource packs or datapacks, the loader is called `minecraft`!
 ## How to use this program?
 
 - Open the shell
