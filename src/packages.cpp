@@ -93,3 +93,23 @@ bool pb::McModm::McModm::can_be_upgraded(const std::string& project_id, const st
     }
     return found;
 }
+ProjectType getProjectType(const std::string& type){
+    if(type=="mod"){return ProjectType::Mod;}
+    else if(type=="resourcepack"){return ProjectType::ResourcePack;}
+    else if(type=="modpack"){return ProjectType::ModPack;}
+    else if(type=="shader"){return ProjectType::Shader;}
+}
+std::filesystem::path getInstallDirectory(ProjectType type) {
+    switch (type) {
+        case ProjectType::Mod:
+            return "mods";
+        case ProjectType::ResourcePack:
+            return "resourcepacks";
+        case ProjectType::Shader:
+            return "shaderpacks";
+        case ProjectType::ModPack:
+            throw std::runtime_error("Modpacks are not supported");
+        default:
+            throw std::runtime_error("Unsupported project type");
+    }
+}

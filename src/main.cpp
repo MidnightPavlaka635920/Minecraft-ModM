@@ -459,7 +459,7 @@ int main(int argc, char* argv[]) {
         }
 
     } else if (operation == "il"){
-        if (argc < 5) {
+        if (argc < 6) {
             std::cerr << "Usage: mcmodm il <file_to_install> <name> <loader> [path_to_install]\n";
             return 1;
         }
@@ -494,8 +494,9 @@ int main(int argc, char* argv[]) {
         json req = json::parse (sdata);
         //std::string loader = req[0]["loader"];
         std::string loader = argv[4];
+        std::string type = argv[5];
         std::string version = req[0]["version"];
-        modm.install_local(fti, name, version, loader);
+        modm.install_local(fti, name, version, loader,type);
 
     }else if(operation == "listver"){
         if (argc < 3){

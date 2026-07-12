@@ -3,8 +3,9 @@
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
+#include <filesystem>
 using json = nlohmann::json;
-
+enum class ProjectType{Mod, ModPack, ResourcePack, Shader, NONE};
 struct search_result {
     std::string title;
     std::string author;
@@ -61,6 +62,8 @@ class McModm{
             const std::string& name,
             const std::string& type
         );
+        static ProjectType getProjectType(const std::string& type);
+        static std::filesystem::path getInstallDirectory(ProjectType type);
         //install.cpp
         // Install a mod/plugin by project ID and requirements
         void install_mod(const std::string& pn, const json& req, bool just_install);
@@ -85,7 +88,7 @@ class McModm{
         void iff(const std::string& packages_path);
         //il.cpp
         // Install a local file as a mod/plugin
-        void install_local(std::string& path_tif, std::string& name, std::string& version ,std::string& loader);
+        void install_local(std::string& path_tif, std::string& name, std::string& version ,std::string& loader, std::string& type);
         //ck_vers.cpp
         // List all compatible versions for a project (static)
         static std::vector<std::string> list_compatible_versions(std::string project_id);

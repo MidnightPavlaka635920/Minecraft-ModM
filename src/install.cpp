@@ -84,11 +84,12 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
     
 
         if (ver_comp && loa_comp) {
+            ProjectType ty = getProjectType(p_type);
             found = true;
-
             std::string dl_url = release["files"][0]["url"];
             std::string filename = release["files"][0]["filename"];
-            std::string out_file = install_path + "/" + filename;
+            auto subfolder = getInstallDirectory(ty);
+            std::string out_file = install_path +"/"+ subfolder.string() +"/"+ filename;
 
             std::cout << "Found matching version for " << name << release["name"].get<std::string>() << " (" << pn << ")"<< std::endl;
             std::cout << "Downloading to: " << out_file << "\n";
@@ -131,6 +132,4 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
     }
 }
 
-void autoPathInstall(){
-    
-}
+
