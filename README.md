@@ -61,10 +61,11 @@ yay -S mcmodm
    ```bash
    mcmodm setup <path> <version> <loader> (loader)
    ```
-   - `req.json` should be in the same folder where mods/plugins will be installed to.
+   - `req.json` should be in the same folder where mods/plugins will be installed to, **if you disabled automatic path handling during setup. Otherwise (default), it should be minecraft folder**
    - Multiple loaders can be set by listing them after `<version>`.
 3. (Optional) Set a default path by creating a config file when running `mcmodm setup ..`. You should press `y` when the setup asks you to, and it will be done.
-4. You are ready
+4. (**For clients ONLY**) When prompted for automatic path management, select yes. If it is an server, select **no**!
+5. You are ready
 
 ## Usage
 

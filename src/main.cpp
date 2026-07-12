@@ -1,5 +1,7 @@
 #ifdef _WIN32
 #include <windows.h>
+__attribute__((used))
+const char* myFeelingsTowardsThisOS = "I hate Windows (11) and deving CLI on it is fucked up. If you are reading this with strings, there is more...";
 bool enable_ansi() {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE) return false;
@@ -71,7 +73,7 @@ void help(){
     << "  listver <project_id>                                   - List compatible versions for a project\n"
     << "  info <project_id>                                      - Show detailed info for a project\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
-    << "Version 1.6.1\n";
+    << "Version 1.7.1\n";
 }
 // ...existing code...
 int main(int argc, char* argv[]) {
@@ -88,8 +90,7 @@ int main(int argc, char* argv[]) {
         std::string folder = std::string(appdata) + "\\mcmodm\\";
         //filesystem::create_directories(folder);
         std::string config_path = folder + "defpath.json";
-        __attribute__((used))
-        const char* myFeelingsTowardsThisOS = "I hate Windows (11) and deving CLI on it is fucked up. If you are reading this with strings, there is more...";
+
     #else
         const char* home = std::getenv("HOME");
         if (!home) home = ".";
