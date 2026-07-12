@@ -27,7 +27,7 @@ void pb::McModm::McModm::install_local(std::string& pathToInstallFrom, std::stri
         std::cerr << "Something went wrong and I don't know what. Hope this helps." << e.what();
     }
     
-    mark_installed(pn, version, loader, filename, name);
+    mark_installed(pn, version, loader, filename, name, "unknown");
     //save_packages();
     std::cout << "Installed successfully\n";
 }

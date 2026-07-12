@@ -58,7 +58,8 @@ class McModm{
             const std::string& game_version,
             const std::string& loader,
             const std::string& file,
-            const std::string& name
+            const std::string& name,
+            const std::string& type
         );
         //install.cpp
         // Install a mod/plugin by project ID and requirements

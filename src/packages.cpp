@@ -43,7 +43,8 @@ void pb::McModm::McModm::mark_installed(
     const std::string& game_version,
     const std::string& loader,
     const std::string& file,
-    const std::string& name
+    const std::string& name,
+    const std::string& type
 ) {
     json j = load_packages();
 
@@ -51,7 +52,8 @@ void pb::McModm::McModm::mark_installed(
         {"game_version", game_version},
         {"loader", loader},
         {"file", file},
-        {"name", name}
+        {"name", name},
+        {"type", type}
     };
 
     save_packages(j);

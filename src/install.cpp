@@ -48,6 +48,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
     }
     json projectData = json::parse(projectDataRaw);
     name = projectData["title"];
+    const std::string p_type = projectData["project_type"];
     try {
         aboutVersionData= curl_utils::curl_to_string(url);
     } catch (const std::exception& e) {
@@ -98,7 +99,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
             }
-            if (just_install){mark_installed(pn, ver, loader_to_use, filename, name);break;} else{mark_installed(pn, ver, loader_to_use, filename, name);
+            if (just_install){mark_installed(pn, ver, loader_to_use, filename, name,p_type);break;} else{mark_installed(pn, ver, loader_to_use, filename, name, p_type);
 
             // ---- Install required dependencies ----
                 if (release.contains("dependencies")) {
@@ -128,4 +129,8 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
     if (!found) {
         std::cout << red<<("No matching version found for " + cyan+name+red + " (" + cyan+pn+red + ")")<<reset_color<<"\n";
     }
+}
+
+void autoPathInstall(){
+    
 }
