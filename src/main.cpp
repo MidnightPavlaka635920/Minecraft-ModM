@@ -242,7 +242,7 @@ int main(int argc, char* argv[]) {
         int index = 0;
         for (const auto& mod:mods){
                      // mod name or slug
-            std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
+            std::cout << green << "["<<std::to_string(index+1)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
             modm.install_mod(mod, req, apm,false);
             ++index;
         }

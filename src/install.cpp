@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <ostream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -66,8 +67,8 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
         return;
     }
     bool found = false;
+    bool ver_comp = false, loa_comp = false;
     for (auto& release : mainData) {
-        bool ver_comp = false, loa_comp = false;
         
         for (auto& gver : release["game_versions"])
             if (gver == ver) { ver_comp = true; break; }
@@ -137,6 +138,11 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
 
     if (!found) {
         std::cout << red<<("No matching version found for " + cyan+name+red + " (" + cyan+pn+red + ")")<<reset_color<<"\n";
+        if(ver_comp){
+            std::cout<<cyan<<"Version is compatible with yours"<<reset_color<<"\n";
+        }else if (loa_comp){
+            std::cout<<cyan<<"Loader is compatible with one of yours"<<reset_color<<"\n";
+        } else{std::cout<<"Nor loader nor version are compatible!"<<reset_color<<"'n";}
     }
 }
 

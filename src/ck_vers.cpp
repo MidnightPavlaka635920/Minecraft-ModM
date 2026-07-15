@@ -8,9 +8,9 @@
 #include "../include/mcmodm.h"
 using json = nlohmann::json;
 
-std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::string project_id){
+std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::string project_id, const std::string& loader){
     std::vector<std::string> compatible_versions;
-    std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
+    std::string url = "https://api.modrinth.com/v2/project/" + project_id;
     std::string aboutVersionData;
     try {
         aboutVersionData = curl_utils::curl_to_string(url);
@@ -28,13 +28,17 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
         std::cerr << "Error: " << e.what() << "\n";
         throw std::runtime_error("Failed to parse JSON.");
     }
-    for (const auto& release : versionData){
-        for (const auto& ver: release["game_versions"]){
-            if (std::find(compatible_versions.begin(),
-              compatible_versions.end(),
-              ver.get<std::string>()) == compatible_versions.end()) {
+    if(loader.empty()){
+        for (const auto& ver : versionData["game_versions"]){
+            if (std::find(compatible_versions.begin(),compatible_versions.end(),ver.get<std::string>()) == compatible_versions.end()) {
                 compatible_versions.push_back(ver.get<std::string>());
             }
+            
+        }
+        return compatible_versions;
+    } else{
+        for(const auto& release:versionData){
+                for(const auto& loader:release["loaders"]){}
         }
     }
     return compatible_versions;

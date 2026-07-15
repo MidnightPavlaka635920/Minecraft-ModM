@@ -91,7 +91,7 @@ class McModm{
         void install_local(std::string& path_tif, std::string& name, std::string& version ,std::string& loader, std::string& type);
         //ck_vers.cpp
         // List all compatible versions for a project (static)
-        static std::vector<std::string> list_compatible_versions(std::string project_id);
+        static std::vector<std::string> list_compatible_versions(std::string project_id, const std::string& loader = "");
         static std::vector<std::string> list_comp_loaders(std::string& loader, std::string& project_id);
         //info.cpp
         // Get detailed info for a project (static)
