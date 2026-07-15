@@ -102,8 +102,8 @@ Commands:
 - Install a local .jar file:  
   `mcmodm il <file_to_install> <name> <loader> [path_to_install]`  
   Path is optional if default is set.
-- List compatible versions for a project:  
-  `mcmodm listver <project_id>`
+- List compatible versions for a project with a specifiable loader:  
+  `mcmodm listver <project_id> (loader)`
 - Show detailed info for a project:  
   `mcmodm info <project_id>`
 

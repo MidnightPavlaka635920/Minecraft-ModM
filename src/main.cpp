@@ -70,7 +70,7 @@ void help(){
     << "  iff <path-to-packages.json> <install_path>             - Install from a list of packages\n"
     << "  ck_upd <version> path-to-req.json]                     - Check if all packages can be upgraded (uses default if not specified)\n"
     << "  il <file_to_install> <name> <loader> [path_to_install] - Install a local file to the destination (uses default if not specified)\n"
-    << "  listver <project_id>                                   - List compatible versions for a project\n"
+    << "  listver <project_id> [loader]                          - List compatible versions for a project with a specifiable loader\n"
     << "  info <project_id>                                      - Show detailed info for a project\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
     << "Version 1.7.1\n";
@@ -511,7 +511,10 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         std::string project_id = argv[2];
-        auto compatible_versions = pb::McModm::McModm::list_compatible_versions(project_id);
+        std::string loader="";
+        if(argc>3)
+            loader = argv[3];
+        auto compatible_versions = pb::McModm::McModm::list_compatible_versions(project_id,loader);
         std::cout << "Compatible versions for project '" << project_id << "':\n";
         int per_line = 3;
 

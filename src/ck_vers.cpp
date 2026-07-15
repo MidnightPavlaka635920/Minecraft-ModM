@@ -11,9 +11,14 @@ using json = nlohmann::json;
 std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::string project_id, const std::string& loader){
     std::vector<std::string> compatible_versions;
     std::string url = "https://api.modrinth.com/v2/project/" + project_id;
+    std::string versionURL = "https://api.modrinth.com/v2/project/" + project_id+"/version";
     std::string aboutVersionData;
     try {
-        aboutVersionData = curl_utils::curl_to_string(url);
+        if(loader.empty()){
+            aboutVersionData = curl_utils::curl_to_string(url);
+        } else{
+            aboutVersionData = curl_utils::curl_to_string(versionURL);
+        }
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions.");
@@ -38,7 +43,15 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
         return compatible_versions;
     } else{
         for(const auto& release:versionData){
-                for(const auto& loader:release["loaders"]){}
+            for(const auto& local_loader:release["loaders"]){
+                if(local_loader.get<std::string>() == loader){
+                    for(auto& ver:release["game_versions"]){
+                        if (std::find(compatible_versions.begin(),compatible_versions.end(),ver.get<std::string>()) == compatible_versions.end()) {
+                            compatible_versions.push_back(ver.get<std::string>());
+                        }
+                    }
+                }
+            }
         }
     }
     return compatible_versions;
