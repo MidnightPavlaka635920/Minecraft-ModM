@@ -69,7 +69,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
     bool found = false;
     bool ver_comp = false, loa_comp = false;
     for (auto& release : mainData) {
-        
+        bool ver_comp = false, loa_comp = false;
         for (auto& gver : release["game_versions"])
             if (gver == ver) { ver_comp = true; break; }
         std::string loader_to_use = "";
@@ -89,12 +89,10 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
             std::string dl_url = release["files"][0]["url"];
             std::string filename = release["files"][0]["filename"];
             std::string out_file;
-            std::cout << "autoPathManagement = " << std::boolalpha
-          << autoPathManagement << '\n';
             if (autoPathManagement){
                 ProjectType ty = getProjectType(p_type);
                 auto subfolder = getInstallDirectory(ty);
-                std::cout <<subfolder;
+                //std::cout <<subfolder;
                 out_file = install_path +"/"+ subfolder.string() +"/"+ filename;
             } else{
                 out_file = install_path +"/"+filename;

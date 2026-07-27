@@ -20,3 +20,4 @@ build/
 compile_commands.json
 modrinth.index.json
 cacert.pem
+tests/
