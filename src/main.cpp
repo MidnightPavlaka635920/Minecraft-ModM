@@ -72,6 +72,8 @@ void help(){
     << "  il <file_to_install> <name> <loader> [path_to_install] - Install a local file to the destination (uses default if not specified)\n"
     << "  listver <project_id> [loader]                          - List compatible versions for a project with a specifiable loader\n"
     << "  info <project_id>                                      - Show detailed info for a project\n"
+    << "  lscompl <version> <project_id>                         - Lists compatible loaders for specific version of the project\n"
+    << "  setupinfo [path]                                       - Prints information about setup at path\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
     << "Version 1.7.1\n";
 }
@@ -571,6 +573,22 @@ int main(int argc, char* argv[]) {
         for (const auto& loader : compatible_loaders) {
             std::cout << yellow<<" - "<<reset_color<< loader << "\n";
         }
+    }else if(operation =="setupinfo"){
+        if (argc < 2) {
+            std::cerr << "Usage: mcmodm setupinfo [path]\n";
+            return 1;
+        }
+        std::string install_path;
+        if (argc >= 3) {
+            install_path = argv[2];
+        } else if (!default_path.empty()) {
+            install_path = default_path;
+        } else {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmmodm setupinfo [path]\n";
+            return 1;
+        }
+    pb::McModm::McModm modm(install_path);
+    modm.getSetupInfo();
     } else {
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();

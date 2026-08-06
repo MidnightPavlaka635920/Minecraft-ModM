@@ -106,6 +106,10 @@ Commands:
   `mcmodm listver <project_id> (loader)`
 - Show detailed info for a project:  
   `mcmodm info <project_id>`
+- List compatible loaders for specific version of the project:
+  `lscompl <version> <project_id>`
+- Print information about setup:
+  `setupinfo [path]`
 
 ## Compiling yourself
 

@@ -96,6 +96,7 @@ class McModm{
         //info.cpp
         // Get detailed info for a project (static)
         static std::vector<ModInfo> mod_info(const std::string& query);
+        void getSetupInfo();
 };
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);
 
