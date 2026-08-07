@@ -71,7 +71,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
         bool ver_comp = false, loa_comp = false;
         std::string loader_to_use = "";
         if (useVersionNumber){
-            if(versionString==release["version_string"].get<std::string>()){
+            if(versionString==release["version_number"].get<std::string>()){
                 loa_comp = true,ver_comp = true;
                 loader_to_use = release["loaders"][0].get<std::string>();
             }
