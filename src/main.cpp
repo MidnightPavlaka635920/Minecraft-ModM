@@ -600,9 +600,9 @@ int main(int argc, char* argv[]) {
             game_version = argv[3];
         }
         std::vector<version_names_info> version_numbers = pb::McModm::McModm::list_version_nums(project_id, game_version);
-        std::cout<< yellow<<"Version Number" << cyan<<" -"<<yellow<<"Game Versions"<<reset_color<<"\n";
+        std::cout<< yellow<<"Version Number" << cyan<<" - "<<yellow<<"Game Versions"<<reset_color<<"\n";
         for(const auto& version_num:version_numbers){
-            std::cout << version_num.ver_info<<cyan<<" - "<<reset_color;
+            std::cout << version_num.ver_info<<cyan<<" -"<<reset_color;
             for(auto& game_ver_cur:version_num.game_ver){
                 std::cout<< " "<<game_ver_cur;
             }
