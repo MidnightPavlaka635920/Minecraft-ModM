@@ -163,7 +163,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "Usage: mcmodm install <modname> [options] [path]\n";
             return 1;
         }
-        std::string overwrite_loader, overwrite_version = "";
+        std::string overwrite_loader, overwrite_version = "", version_number = "";
         std::vector<std::string> mods;  // project IDs
         std::string install_path;
 
@@ -175,6 +175,8 @@ int main(int argc, char* argv[]) {
             }
             else if (arg.rfind("--overwrite-version=", 0) == 0) {
                 overwrite_version = arg.substr(20);
+            } else if(arg.rfind("--vn=",0) == 0){
+                version_number = arg.substr(5);
             }
             else {
                 mods.push_back(arg); // temporarily push everything else
@@ -245,7 +247,7 @@ int main(int argc, char* argv[]) {
         for (const auto& mod:mods){
                      // mod name or slug
             std::cout << green << "["<<std::to_string(index+1)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
-            modm.install_mod(mod, req, apm,false);
+            modm.install_mod(mod, req, apm,version_number,false);
             ++index;
         }
         //std::string pn = argv[2];          // mod name or slug
@@ -589,7 +591,24 @@ int main(int argc, char* argv[]) {
         }
     pb::McModm::McModm modm(install_path);
     modm.getSetupInfo();
-    } else {
+    } else if(operation=="listvernums"){
+        if (argc <3)
+            std::cerr << "Too few arguments.\nUsage: mcmodm listvernums <project_id> [game_version]\n";
+        std::string game_version;
+        std::string project_id = argv[2];
+        if(argc>=4){
+            game_version = argv[3];
+        }
+        std::vector<version_names_info> version_numbers = pb::McModm::McModm::list_version_nums(project_id, game_version);
+        std::cout<< yellow<<"Version Number" << cyan<<" -"<<yellow<<"Game Versions"<<reset_color<<"\n";
+        for(const auto& version_num:version_numbers){
+            std::cout << version_num.ver_info<<cyan<<" - "<<reset_color;
+            for(auto& game_ver_cur:version_num.game_ver){
+                std::cout<< " "<<game_ver_cur;
+            }
+            std::cout<<"\n";
+        }
+    }else {
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();
         return 1;

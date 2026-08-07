@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <nlohmann/json.hpp>
 #include <filesystem>
@@ -31,6 +32,10 @@ struct ModInfo {
     std::string project_id;
     bool ss = false;
     bool cs = false;
+};
+struct version_names_info {
+    std::string ver_info;
+    std::unordered_set<std::string> game_ver;
 };
 namespace pb::McModm{
 
@@ -66,7 +71,7 @@ class McModm{
         static std::filesystem::path getInstallDirectory(ProjectType type);
         //install.cpp
         // Install a mod/plugin by project ID and requirements
-        void install_mod(const std::string& pn, const json& req, bool autoPathManagement,bool just_install);
+        void install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool just_install);
         //remove.cpp
         // Remove a package by project ID
         void remove_package(std::string package_id, bool just_remove, bool autoPathHandling);
@@ -93,6 +98,7 @@ class McModm{
         // List all compatible versions for a project (static)
         static std::vector<std::string> list_compatible_versions(std::string project_id, const std::string& loader = "");
         static std::vector<std::string> list_comp_loaders(std::string& version, std::string& project_id);
+        static std::vector<version_names_info> list_version_nums(const std::string& project_id, const std::string& game_version);
         //info.cpp
         // Get detailed info for a project (static)
         static std::vector<ModInfo> mod_info(const std::string& query);

@@ -4,6 +4,7 @@
 #include <vector>
 #include "nlohmann/json.hpp"
 #include "../include/curl_access.h"
+#include <unordered_set>
 // #include "../include/ck_vers.h"
 #include "../include/mcmodm.h"
 using json = nlohmann::json;
@@ -91,4 +92,27 @@ std::vector<std::string> pb::McModm::McModm::list_comp_loaders(std::string& vers
         }
     }
     return compatible_versions;
+}
+
+std::vector<version_names_info> pb::McModm::McModm::list_version_nums(const std::string& project_id, const std::string& game_version){
+    const std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
+    json releases;
+    std::cout<<url<<"\n";
+    try{
+        std::string raw_releases = pb::curl_utils::curl_to_string(url);
+        releases = json::parse(raw_releases);
+    }catch(const std::exception& e){
+        std::cerr <<"Error: "<< e.what()<<"\n";
+    }
+    std::vector<version_names_info> version_names;
+    for(const auto& release:releases){
+        std::string ver_string_current = release["version_number"].get<std::string>();
+        std::unordered_set<std::string> game_versions;
+        for(const auto& game_version_current:release["game_versions"]){
+            game_versions.insert(game_version_current.get<std::string>());
+        }
+        if(!game_version.empty()&&!game_versions.contains(game_version)){continue;}
+        version_names.push_back({ver_string_current,game_versions});
+    }
+    return version_names;
 }

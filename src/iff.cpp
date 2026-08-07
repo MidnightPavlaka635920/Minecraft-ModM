@@ -35,7 +35,7 @@ void pb::McModm::McModm::iff(const std::string& packages_path){
             std::vector<std::string> loader_mod;
             loader_mod.push_back(info["loader"].get<std::string>());
             json req_mod = json::array({{"loader", loader_mod},{"version", info["version"].get<std::string>()}});
-            install_mod(project_id, req_mod, apm,false);
+            install_mod(project_id, req_mod, apm, (const std::string)"", false);
         }
     }
     std::cout << "Installation complete, unless everything was already installed.\n";

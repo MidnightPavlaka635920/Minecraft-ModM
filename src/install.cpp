@@ -1,20 +1,19 @@
 #include <iostream>
-#include <fstream>
 #include <ostream>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <nlohmann/json.hpp>
 #include "../include/curl_access.h"
-#include <cstdio> // for FILE*, popen
 #include <curl/curl.h>
 using json = nlohmann::json;
 #include "../include/mcmodm.h"
 #include "../include/color.h"
 std::string name;
 
-void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool autoPathManagement,bool just_install) {
+void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool just_install) {
     //set_path(install_path);
+    bool useVersionNumber = !versionString.empty();
     if(!just_install){
         if (is_installed(pn)) {
             std::cout << cyan<<"[skip] Already installed: " <<yellow<< pn<<reset_color<<"\n";return;
@@ -70,17 +69,24 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
     bool ver_comp = false, loa_comp = false;
     for (auto& release : mainData) {
         bool ver_comp = false, loa_comp = false;
-        for (auto& gver : release["game_versions"])
-            if (gver == ver) { ver_comp = true; break; }
         std::string loader_to_use = "";
-        for (const auto& ldr : release["loaders"]) {
-            std::string rel_loader = ldr.get<std::string>();
-            if (std::find(loaders.begin(), loaders.end(), rel_loader) != loaders.end()) {
-                loa_comp = true;
-                loader_to_use = rel_loader;
-                break;
+        if (useVersionNumber){
+            if(versionString==release["version_string"].get<std::string>()){
+                loa_comp = true,ver_comp = true;
+                loader_to_use = release["loaders"][0].get<std::string>();
             }
-            //lmn++;
+        } else{
+            for (auto& gver : release["game_versions"])
+                if (gver == ver) { ver_comp = true; break; }
+            for (const auto& ldr : release["loaders"]) {
+                std::string rel_loader = ldr.get<std::string>();
+                if (std::find(loaders.begin(), loaders.end(), rel_loader) != loaders.end()) {
+                    loa_comp = true;
+                    loader_to_use = rel_loader;
+                    break;
+                }
+                //lmn++;
+            }
         }
     
 
@@ -123,8 +129,8 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
                             {"version", ver},
                             {"loader", loaders}
                         });
-
-                        install_mod(dep_project, dep_req, autoPathManagement,false);
+                        std::string vs = "";
+                        install_mod(dep_project, dep_req, autoPathManagement,vs,false);
                     }
                 }
             }

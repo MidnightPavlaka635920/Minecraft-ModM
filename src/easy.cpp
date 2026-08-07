@@ -73,7 +73,7 @@ void pb::McModm::McModm::easy_install(bool color){
         const bool apm = req[0].value("apm", false);
         for (const auto& project_id : to_install) {
             try {
-                install_mod(project_id, req, apm,false);
+                install_mod(project_id, req, apm,(const std::string)"",false);
             } catch (const std::exception& e) {
                 std::cerr << "Something went wrong during installation and here is what: " << e.what() << std::endl;
             }

@@ -67,7 +67,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
             json ti;
             ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
             std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
-            install_mod(mod.project_id, ti, apm, true);
+            install_mod(mod.project_id, ti, apm, (const std::string)"", true);
             index++;
         }
     }
@@ -84,7 +84,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
                 json ti;
                 ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
                 std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
-                install_mod(mod.project_id, ti, apm,true);
+                install_mod(mod.project_id, ti, apm, (const std::string)"",true);
                 //continue;
                 index++;
             }
