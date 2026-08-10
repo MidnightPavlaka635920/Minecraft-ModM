@@ -75,7 +75,7 @@ void help(){
     << "  lscompl <version> <project_id>                         - Lists compatible loaders for specific version of the project\n"
     << "  setupinfo [path]                                       - Prints information about setup at path\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
-    << "Version 1.7.1\n";
+    << "Version 1.8\n";
 }
 // ...existing code...
 int main(int argc, char* argv[]) {
