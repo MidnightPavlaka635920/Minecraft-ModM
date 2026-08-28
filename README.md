@@ -77,7 +77,9 @@ Commands:
 - Install mod/plugin(s):  
   `mcmodm install <Project ID>... [options] [Install Path]`  
   Dependencies will be installed. Multiple packages can be installed. Path is optional if default is set.
-  Example options: `--override-version=1.21.8` and `--override-loader=fabric`. They are used when you want to download **plugins** for version other than servers.
+  Options:
+    - `--override-version=1.21.8` and `--override-loader=fabric`. They are used when you want to download **plugins** for version other than configured one.
+    - `--vn=mc26.2-0.9.2-alpha.4-fabric`. It installs the specified project by version numbers, also doesn't use setup config.
 - Remove mod/plugin(s):  
   `mcmodm remove <Project ID>... [Install Path]`  
   Multiple packages can be removed. Path is optional if default is set.
@@ -110,6 +112,8 @@ Commands:
   `lscompl <version> <project_id>`
 - Print information about setup:
   `setupinfo [path]`
+- List version numbers:
+  `listvernums <project_id> [game_version]`
 
 ## Compiling yourself
 

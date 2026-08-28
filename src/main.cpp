@@ -74,6 +74,7 @@ void help(){
     << "  info <project_id>                                      - Show detailed info for a project\n"
     << "  lscompl <version> <project_id>                         - Lists compatible loaders for specific version of the project\n"
     << "  setupinfo [path]                                       - Prints information about setup at path\n"
+    << "  listvernums <project_id> [game_version]                - Lists all version numbers for <project_id> with version [game_version] if specified\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
     << "Version 1.8\n";
 }
