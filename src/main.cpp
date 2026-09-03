@@ -56,6 +56,7 @@ std::vector<std::string> get_loaders(const json& j) {
 
     return loaders;
 }
+
 void help(){
     std::cout << "Available commands:\n"
     << "  search <modname>                                       - List online mods matching <modname>\n"
@@ -85,35 +86,56 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     bool color = false;
-    std::string operation = argv[1];   // "ls" or "i"
-    std::string default_path = "";
-    #ifdef _WIN32
-        const char* appdata = std::getenv("APPDATA");
-        if (!appdata) appdata = ".";
-        std::string folder = std::string(appdata) + "\\mcmodm\\";
-        //filesystem::create_directories(folder);
-        std::string config_path = folder + "defpath.json";
+    //std::string operation = argv[1];   // "ls" or "i"
+    std::string operation;
+    std::string instance;
+    std::string path;
 
-    #else
-        const char* home = std::getenv("HOME");
-        if (!home) home = ".";
-        std::string folder = std::string(home) + "/.config/mcmodm/";
-        //std::filesystem::create_directories(folder);
-        std::string config_path = folder + "defpath.json";
-    #endif
-    if (std::filesystem::exists(config_path)) {
-        std::ifstream config_pt(config_path);
-        if (config_pt.is_open()) {
-            json config_json;
-            config_json = json::parse(config_pt);
-            if (config_json.contains("default_path")) {
-                default_path = config_json["default_path"];
-                //std::cout << "Default path loaded from config: " << default_path << "\n";
-            } else {
-                std::cerr << "Config file does not contain 'default_path'.\n";
+    bool has_instance = false;
+    bool has_path = false;
+
+    std::vector<std::string> args;
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+
+        if (arg == "-i") {
+            if (i + 1 >= argc) {
+                std::cerr << "-i requires an instance\n";
+                return 1;
             }
+            if (has_path) {
+                std::cerr << "-i and -p cannot be used together\n";
+                return 1;
+            }
+
+            instance = argv[++i];
+            has_instance = true;
+        }
+        else if (arg == "-p") {
+            if (i + 1 >= argc) {
+                std::cerr << "-p requires a path\n";
+                return 1;
+            }
+            if (has_instance) {
+                std::cerr << "-i and -p cannot be used together\n";
+                return 1;
+            }
+
+            path = argv[++i];
+            has_path = true;
+        }
+        else {
+            args.push_back(arg);
         }
     }
+
+    if (args.empty()) {
+        std::cerr << "No operation specified\n";
+        return 1;
+    }
+
+    operation = args[0];
     #ifdef _WIN32
         if (!enable_ansi()) {
             
@@ -168,8 +190,8 @@ int main(int argc, char* argv[]) {
         std::vector<std::string> mods;  // project IDs
         std::string install_path;
 
-        for (int i = 2; i < argc; i++) {
-            std::string arg = argv[i];
+        for (int i = 1; i < args.size(); i++) {
+            std::string arg = args[i];
 
             if (arg.rfind("--overwrite-loader=", 0) == 0) {
                 overwrite_loader = arg.substr(19);
@@ -188,17 +210,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "No arguments provided for install\n";
             return 1;
         }
-
-        if (default_path.empty() || mods.size() > 1) {
-            if (mods.size() < 2) {
-                std::cerr << "No install path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm install <modname> [options] <path>\n";
-                return 1;
-            }
-            install_path = mods.back();
-            mods.pop_back();
-        } else {
-            install_path = default_path;
-        }
+        install_path = pb::McModm::McModm::getPath(path, (std::string&)"");
         // for (const auto& mod : mods) {
             // std::cout << mod << "\n";
         // }
@@ -269,16 +281,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "No mods provided\n";
             return 1;
         }
-        if (default_path.empty() || mods.size() > 1) {
-            if (mods.size() < 2) {
-                std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm remove <modname> [path]\n";
-                return 1;
-            }
-            install_path = mods.back();
-            mods.pop_back();
-        } else {
-            install_path = default_path;
-        }
+        install_path = pb::McModm::McModm::getPath(path, (std::string&)"");
         pb::McModm::McModm modm(install_path + "/");
         std::ifstream sdata(install_path+"/req.json");
         json req = json::parse(sdata);
@@ -304,16 +307,11 @@ int main(int argc, char* argv[]) {
 
             if (arg == "-f" || arg == "--force") {
                 force = true;
-            } else if (install_path.empty()) {
-                install_path = arg; // first non-flag becomes path
             }
         }
 
         // fallback to default path
-        if (install_path.empty() && !default_path.empty()) {
-            install_path = default_path;
-        }
-
+        install_path = pb::McModm::McModm::getPath(path, (std::string&)"");
         // still no path? error
         if (install_path.empty()) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\n"
