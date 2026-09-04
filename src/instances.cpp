@@ -93,9 +93,20 @@ void pb::McModm::McModm::addInstance(std::string& path, std::string& name){
         std::string config_path = folder + "instances.json";
     #endif
 
-    std::ofstream insFile(config_path);
-    json insParsed = json::parse(insFile);
+    std::ifstream insFile(config_path);
+        json insParsed;
+
+    if (insFile && insFile.peek() != std::ifstream::traits_type::eof()) {
+        insParsed = json::parse(insFile);
+    } else {
+        insParsed = {
+            {"instances", json::object()}
+        };
+    }
+    insFile.close();
     insParsed["instances"][name] ={{"path",path}};
+    std::ofstream of(config_path);
+    of<<insParsed.dump(4);
 }
 void pb::McModm::McModm::removeInstance(std::string& name){
     #ifdef _WIN32
@@ -113,12 +124,20 @@ void pb::McModm::McModm::removeInstance(std::string& name){
         std::string config_path = folder + "instances.json";
     #endif
 
-    std::ifstream input(config_path);
-    if(!input.is_open()){throw std::runtime_error("could not open instance file\n");}
-    json j=json::parse(input);
-    input.close();
-    j["instances"].erase(name);
+    //if(!input.is_open()){throw std::runtime_error("could not open instance file\n");}
+    json insParsed;
+
+    std::ifstream insFile(config_path);
+    if (insFile && insFile.peek() != std::ifstream::traits_type::eof()) {
+        insParsed = json::parse(insFile);
+    } else {
+        insParsed = {
+            {"instances", json::object()}
+        };
+    }
+    insFile.close();
+    insParsed["instances"].erase(name);
     std::ofstream output(config_path);
-    output<<j.dump(4);
+    output<<insParsed.dump(4);
     output.close();
 }
