@@ -104,7 +104,10 @@ class McModm{
         static std::vector<ModInfo> mod_info(const std::string& query);
         void getSetupInfo();
         //instances.cpp
-        static std::string getPath(std::string& pathString, std::string& instanceString); 
+        static std::string getPath(std::string& pathString, std::string& instanceString);
+        static std::unordered_map<std::string, std::string> getInstances();
+        static void addInstance(std::string& path, std::string& name);
+        static void removeInstance(std::string& name);
 };
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);
 
