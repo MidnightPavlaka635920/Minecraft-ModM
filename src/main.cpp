@@ -90,7 +90,7 @@ void help(){
     << "  mcmodm instance add prod /srv/minecraft/plugins\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
     << "Also, in most commands, you can specify path with -p <path> or -i <instance_name>\n"
-    << "Version 1.8\n";
+    << "Version 2.0\n";
 }
 // ...existing code...
 int main(int argc, char* argv[]) {
