@@ -610,6 +610,7 @@ int main(int argc, char* argv[]) {
             if(args.size()<4){
                 std::cout<<"Too few arguments. Usage:\n\tmcmodm instance add <instance_name> <instance_path>\n";return 1;}
             pb::McModm::McModm::addInstance(args[3],args[2]);
+            std::cout<<"Instance added successfully!\n";
         } else if(args[1]=="rm"){
             if(args.size()<3){
                 std::cout<<"Too few arguments. Usage:\n\tmcomdm instance rm <instance name>\n";
