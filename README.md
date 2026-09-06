@@ -64,13 +64,50 @@ yay -S mcmodm
    - `req.json` should be in the same folder where mods/plugins will be installed to, **if you disabled automatic path handling during setup. Otherwise (default), it should be minecraft folder**
    - Multiple loaders can be set by listing them after `<version>`.
 3. (Optional) Set a default path by creating a config file when running `mcmodm setup ..`. You should press `y` when the setup asks you to, and it will be done.
-4. (**For clients ONLY**) When prompted for automatic path management, select yes. If it is an server, select **no**!
+4. (**For clients ONLY**) When prompted for automatic path management, say **y**(yes). If it is an server, say **n**(no)!
 5. You are ready
+
+## Managing instances
+Instances are added in v2.0
+You can save named installation targets and reuse them across commands.
+For example, adding, listing, and removing instances:
+```bash
+mcmodm instance add prod /srv/minecraft/plugins
+mcmodm instance add client ~/.minecraft/mods
+mcmodm instance ls
+mcmodm instance rm prod
+```
+
+Once an instance exists, you can reference it with `-i` instead of typing the path manually:
+
+```bash
+mcmodm list -i prod
+mcmodm install sodium -i prod
+mcmodm remove sodium -i prod
+```
+
+You can also bypass the default path or instance completely by passing `-p <path>`:
+
+```bash
+mcmodm list -p /srv/minecraft/plugins
+mcmodm install sodium -p /srv/minecraft/plugins
+```
+
+`-p` and `-i` are supported by most commands and cannot be combined together.
 
 ## Usage
 
 Commands:  
 **When you have multiple words in some text, put that text in quotes.**
+
+### Global selectors
+
+- `-p <path>`: Use a specific install directory for this command.
+- `-i <instance_name>`: Use a saved instance for this command.
+- You can use either option in most commands; they are mutually exclusive.
+- If neither is provided, the tool will use the configured default path or instance if available.
+
+### Commands
 
 - Search for mod/plugins:  
   `mcmodm search <mod/plugin name>`
@@ -114,16 +151,20 @@ Commands:
   `setupinfo [path]`
 - List version numbers:
   `listvernums <project_id> [game_version]`
-
+- Manage saved instances:
+  `mcmodm instance add <instance_name> <instance_path>`
+  `mcmodm instance rm <instance_name>`
+  `mcmodm instance ls`
+**IMPORTANT** By `[path]`, I also mean -i/-p. Those two override default path. Also, -i/-p isn't supported for `setup` and all `instance` commands
 ## Compiling yourself
 
 ### App
-There is a Makefile. Use `make` to compile on Linux/macOS, `sudo make install` to install system-wide. Source files are in src/ and header files are in include/.  
-On Windows, steps are similar after installing dependencies, using a MINGW64 shell. You should run `make win` in order to make a binary that is somewhat portable. Also, you should run `copyreq.sh` from a subfolder of `Minecraft-ModM` in order to make that binary work outside of MinGW, and also download `cacert.pem` and place it next to the binary.
+There is a Makefile. Use `make -j$(nproc)` to compile on Linux/macOS, `sudo make install` to install system-wide. Source files are in `src/` and header files are in `include/`.  
+On Windows, steps are similar after installing dependencies, using a MINGW64 shell. You should run `make win -j$(nproc)` in order to make a binary that is somewhat portable. Also, you should run `copyreq.sh` from a subfolder of `Minecraft-ModM` in order to make that binary work outside of MinGW, and also download `cacert.pem` and place it next to the binary.
 
 ### Shared library
 **NOTE:** The shared library can be built only on Linux so far.
-You should run `make shared` to make tha shared object file, and then `sudo make install-shared` to install that shared object and headers to system PATH.
+You should run `make shared` to make the shared object file, and then `sudo make install-shared` to install that shared object and headers to system PATH.
 
 
 ## Notes

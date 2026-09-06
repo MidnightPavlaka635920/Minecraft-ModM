@@ -67,8 +67,8 @@ std::unordered_map<std::string, std::string> pb::McModm::McModm::getInstances(){
             json config_json;
             config_json = json::parse(config_pt);
             if (config_json.contains("instances")) {
-                for(const auto& curInstance:config_json["instances"]){
-                    allInstances[curInstance["name"]] = curInstance["path"];
+                for(const auto& [name, info]:config_json["instances"].items()){
+                    allInstances[name] = info["path"];
                 }
             } else {
                 std::cerr << "Config file does not contain 'default_path'.\n";
@@ -136,8 +136,12 @@ void pb::McModm::McModm::removeInstance(std::string& name){
         };
     }
     insFile.close();
+    try{
     insParsed["instances"].erase(name);
     std::ofstream output(config_path);
     output<<insParsed.dump(4);
     output.close();
+    } catch(std::exception& e){
+        std::cerr<<"Something failed. Error: "<<e.what()<<"\n";
+    }
 }

@@ -77,7 +77,19 @@ void help(){
     << "  lscompl <version> <project_id>                         - Lists compatible loaders for specific version of the project\n"
     << "  setupinfo [path]                                       - Prints information about setup at path\n"
     << "  listvernums <project_id> [game_version]                - Lists all version numbers for <project_id> with version [game_version] if specified\n"
+    << "  instance <add|rm|ls>                                   - Adds, removes, or lists instances. -p/-i doesn't work\n"
+    << "\tinstance add <instance_name> <instance_path>\n"
+    << "\tinstance rm <instance_name>\n"
+    << "\tinstance ls\n"
+    << "\nGlobal path/instance selectors (available on most commands):\n"
+    << "  -p <path>                                              - Use this path instead of the default one\n"
+    << "  -i <instance_name>                                     - Use a saved instance instead of the default path\n"
+    << "\nExamples:\n"
+    << "  mcmodm install sodium -p /srv/minecraft/plugins\n"
+    << "  mcmodm list -i my_server\n"
+    << "  mcmodm instance add prod /srv/minecraft/plugins\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
+    << "Also, in most commands, you can specify path with -p <path> or -i <instance_name>\n"
     << "Version 1.8\n";
 }
 // ...existing code...
@@ -590,7 +602,7 @@ int main(int argc, char* argv[]) {
             std::cout<<"\n";
         }
     }else if(operation=="instance"){
-        std::cout<<yellow<<"WARNING: -p/-i will be ignored here!";
+        std::cout<<"WARNING: -p/-i will be ignored here!"<<"\n";
         if(args.size()<2){
             std::cout<<"Not enough arguments. Needs at least one more. Available options: \n\tmcmodm instance add <instance_name> <instance_path> - adds an instance\n\tmcmodm instance rm <instance_name> - removes specified instance\n\tmcmodm instance ls - lists instances\n";return 1;
         }
@@ -604,18 +616,20 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
             pb::McModm::McModm::removeInstance(args[2]);
+            std::cout<<green<<"Instance successfully removed!\n"<<reset_color;
         } else if(args[1]=="ls"){
             const auto& instances = pb::McModm::McModm::getInstances();
-            std::cout<<yellow<<"name"<<cyan<<" - "<<yellow<<"path"<<reset_color<<"\n";
+            std::cout<<green<<"name"<<cyan<<" - "<<green<<"path"<<reset_color<<"\n";
             for(auto&[name,insPath]:instances){
-                std::cout<<yellow<<name<<cyan<<" - "<<yellow<<path<<reset_color<<"\n"; 
+                std::cout<<yellow<<name<<cyan<<" - "<<yellow<<insPath<<reset_color<<"\n"; 
             }
         } else {
             std::cout<<"Unknown operation!\n";
             help();
             return 1;
         }
-    }else {
+    }else if(operation=="test"){throw std::runtime_error("test");
+    }else{
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();
         return 1;
