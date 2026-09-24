@@ -355,7 +355,7 @@ int main(int argc, char* argv[]) {
         }
         modm.update_all_packages(version, loaders, req, force);
     } else if (operation == "list") {
-        if (args.size() < 2) {
+        if (args.size() < 1) {
             std::cerr << "Usage: mcmodm list [ -p path]\n";
             return 1;
         }
