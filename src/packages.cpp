@@ -114,9 +114,10 @@ std::filesystem::path pb::McModm::McModm::McModm::getInstallDirectory(ProjectTyp
             throw std::runtime_error("Unsupported project type");
     }
 }
-bool pb::McModm::McModm::verify_mod(std::string project_id, bool apm){
-    const json& packages = pb::McModm::McModm::load_packages();
+bool pb::McModm::McModm::verify_mod(std::string project_id, json& packages,bool apm){
     std::string pType = packages["installed"][project_id]["type"];
-    std::string mod_path = install_path + pb::McModm::McModm::getInstallDirectory(pb::McModm::McModm::getProjectType(pType)).string();
+    std::string mod_path = install_path +"/"+pb::McModm::McModm::getInstallDirectory(pb::McModm::McModm::getProjectType(pType)).string()+"/";
     mod_path+=packages["installed"][project_id]["file"];
+    std::filesystem::path p(mod_path);
+    return std::filesystem::exists(mod_path);
 }

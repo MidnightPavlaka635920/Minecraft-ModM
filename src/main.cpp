@@ -633,7 +633,32 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }else if(operation=="test"){throw std::runtime_error("test");
-    }else{
+    }else if(operation=="verify-installed"){
+        std::string install_path=pb::McModm::McModm::getPath(path, instance);
+            std::string req_path =  install_path;
+        if (!req_path.empty() && req_path.back() != '/'){
+            req_path += '/';
+        }
+        req_path += "req.json";
+        pb::McModm::McModm modm(install_path + "/");
+        std::ifstream sdata(req_path);
+
+        //std::ifstream sdat(reqjsonPath);
+        if (!sdata.is_open()) {
+            std::cerr << "Cannot open req.json\n"<< "Run mcmodm setup <path> to create valid req.json if you didn't\n";
+            //return 1;
+            throw std::runtime_error("Cannot open req.json");
+        }
+        json req = json::parse (sdata);
+        if (!req[0].contains("version") || !req[0].contains("loader")) {
+            std::cerr << "req.json must contain 'version' and 'loader' fields.\n" << "Run mcmodm setup <path> to create valid req.json!\n";
+            return 1;
+        }
+        bool apm = req[0].value("apm", false);
+
+        modm.verify_all_mods(apm);
+    }
+    else{
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
         help();
         return 1;

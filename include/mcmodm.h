@@ -69,7 +69,7 @@ class McModm{
         );
         static ProjectType getProjectType(const std::string& type);
         static std::filesystem::path getInstallDirectory(ProjectType type);
-        bool verify_mod(std::string project_id, bool apm);
+        bool verify_mod(std::string project_id, json& packages,bool apm);
         //install.cpp
         // Install a mod/plugin by project ID and requirements
         void install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool just_install);
@@ -109,6 +109,8 @@ class McModm{
         static std::unordered_map<std::string, std::string> getInstances();
         static void addInstance(std::string& path, std::string& name);
         static void removeInstance(std::string& name);
+        //verify_installed.cpp
+        void verify_all_mods(bool apm);
 };
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);
 
