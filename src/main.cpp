@@ -76,6 +76,7 @@ void help(){
     << "  info <project_id>                                      - Show detailed info for a project\n"
     << "  lscompl <version> <project_id>                         - Lists compatible loaders for specific version of the project\n"
     << "  setupinfo [path]                                       - Prints information about setup at path\n"
+    << "  verify_installed [path]                                - Verify installed mods still exist on disk; optionally reinstall/remove missing ones\n"
     << "  listvernums <project_id> [game_version]                - Lists all version numbers for <project_id> with version [game_version] if specified\n"
     << "  instance <add|rm|ls>                                   - Adds, removes, or lists instances. -p/-i doesn't work\n"
     << "\tinstance add <instance_name> <instance_path>\n"
@@ -87,12 +88,12 @@ void help(){
     << "\nExamples:\n"
     << "  mcmodm install sodium -p /srv/minecraft/plugins\n"
     << "  mcmodm list -i my_server\n"
+    << "  mcmodm verify_installed -i my_server\n"
     << "  mcmodm instance add prod /srv/minecraft/plugins\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
     << "Also, in most commands, you can specify path with -p <path> or -i <instance_name>\n"
     << "Version 2.1\n";
 }
-// ...existing code...
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage: mcmodm <operation>\n";
@@ -633,9 +634,13 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }else if(operation=="test"){throw std::runtime_error("test");
-    }else if(operation=="verify-installed"){
+    }else if(operation=="verify_installed" || operation=="verify-installed"){
         std::string install_path=pb::McModm::McModm::getPath(path, instance);
-            std::string req_path =  install_path;
+        if(install_path.empty()) {
+            std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm verify_installed [path]\n";
+            return 1;
+        }
+        std::string req_path =  install_path;
         if (!req_path.empty() && req_path.back() != '/'){
             req_path += '/';
         }

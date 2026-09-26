@@ -43,6 +43,7 @@ class McModm{
     private:
         std::string install_path;
     public:
+        // Construct a manager bound to a specific installation path
         McModm(std::string path): install_path(path){};
 
         //search.h
@@ -67,8 +68,11 @@ class McModm{
             const std::string& name,
             const std::string& type
         );
+        // Resolve the package project type from its string identifier
         static ProjectType getProjectType(const std::string& type);
+        // Get the installation directory for a project type
         static std::filesystem::path getInstallDirectory(ProjectType type);
+        // Check whether a specific installed mod still exists on disk and matches the expected package metadata
         bool verify_mod(std::string project_id, json& packages,bool apm);
         //install.cpp
         // Install a mod/plugin by project ID and requirements
@@ -98,20 +102,29 @@ class McModm{
         //ck_vers.cpp
         // List all compatible versions for a project (static)
         static std::vector<std::string> list_compatible_versions(std::string project_id, const std::string& loader = "");
+        // List loaders compatible with a specific project version
         static std::vector<std::string> list_comp_loaders(std::string& version, std::string& project_id);
+        // List all known version numbers for a project, optionally filtered by game version
         static std::vector<version_names_info> list_version_nums(const std::string& project_id, const std::string& game_version);
         //info.cpp
         // Get detailed info for a project (static)
         static std::vector<ModInfo> mod_info(const std::string& query);
+        // Print the current setup information for the configured installation path
         void getSetupInfo();
         //instances.cpp
+        // Resolve a path or instance to an actual installation directory
         static std::string getPath(std::string& pathString, std::string& instanceString);
+        // Get all saved named instances and their target directories
         static std::unordered_map<std::string, std::string> getInstances();
+        // Save a named instance pointing to a target directory
         static void addInstance(std::string& path, std::string& name);
+        // Remove a named instance by its identifier
         static void removeInstance(std::string& name);
         //verify_installed.cpp
+        // Verify that all installed mods still exist on disk and prompt for missing-file recovery actions
         void verify_all_mods(bool apm,json&req);
 };
+// Setup a managed installation directory with the given version and loader list
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);
 
 }
