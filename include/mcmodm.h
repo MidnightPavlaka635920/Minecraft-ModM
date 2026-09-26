@@ -69,6 +69,7 @@ class McModm{
         );
         static ProjectType getProjectType(const std::string& type);
         static std::filesystem::path getInstallDirectory(ProjectType type);
+        bool verify_mod(std::string project_id, bool apm);
         //install.cpp
         // Install a mod/plugin by project ID and requirements
         void install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool just_install);

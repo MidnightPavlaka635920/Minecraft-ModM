@@ -147,6 +147,9 @@ int main(int argc, char* argv[]) {
         std::cerr << "No operation specified\n";
         return 1;
     }
+    if(!pb::McModm::McModm::getPath(path, instance).empty()){
+        std::cout<<cyan<<"INFO: secifying path in the old way won't change anything. Use -p/-i if needed.\n"<<reset_color;
+    }
 
     operation = args[0];
     #ifdef _WIN32
