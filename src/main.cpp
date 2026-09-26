@@ -90,7 +90,7 @@ void help(){
     << "  mcmodm instance add prod /srv/minecraft/plugins\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
     << "Also, in most commands, you can specify path with -p <path> or -i <instance_name>\n"
-    << "Version 2.0\n";
+    << "Version 2.1\n";
 }
 // ...existing code...
 int main(int argc, char* argv[]) {
@@ -656,7 +656,7 @@ int main(int argc, char* argv[]) {
         }
         bool apm = req[0].value("apm", false);
 
-        modm.verify_all_mods(apm);
+        modm.verify_all_mods(apm,req);
     }
     else{
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";

@@ -110,7 +110,7 @@ class McModm{
         static void addInstance(std::string& path, std::string& name);
         static void removeInstance(std::string& name);
         //verify_installed.cpp
-        void verify_all_mods(bool apm);
+        void verify_all_mods(bool apm,json&req);
 };
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);
 
