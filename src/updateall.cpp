@@ -4,6 +4,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include <cstdio> // for FILE*, popen
+#include <algorithm>
 //#include <curl/curl.h>
 #include "../include/mcmodm.h"
 #include "../include/color.h"
@@ -19,7 +20,14 @@ struct upgradeableModInfo{
     json info;
 };
 #include <unordered_set>
-void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req, bool force) {
+void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req, std::vector<std::string> args) {
+    bool force=false;
+    bool checkHash=true;
+    if (std::find(args.begin(), args.end(),"-f")!=args.end()||std::find(args.begin(),args.end(),"--force")!=args.end()){
+        force=true;
+    } else if(std::find(args.begin(),args.end(),"--noverify")!=args.end()){
+        checkHash=false;
+    }
     if (req[0]["version"] == version&&!force) {
         std::cout << "No version change detected (" << version << "). Skipping update.\n";
         return;
@@ -67,7 +75,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
             json ti;
             ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
             std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
-            install_mod(mod.project_id, ti, apm, (const std::string)"", true);
+            install_mod(mod.project_id, ti, apm, (const std::string)"",checkHash, true);
             index++;
         }
     }
@@ -84,7 +92,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
                 json ti;
                 ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
                 std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
-                install_mod(mod.project_id, ti, apm, (const std::string)"",true);
+                install_mod(mod.project_id, ti, apm, (const std::string)"",checkHash,true);
                 //continue;
                 index++;
             }

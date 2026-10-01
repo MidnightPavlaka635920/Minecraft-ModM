@@ -11,7 +11,7 @@ using json = nlohmann::json;
 #include "../include/color.h"
 std::string name;
 
-void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool just_install) {
+void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool checkHash,bool just_install) {
     //set_path(install_path);
     bool useVersionNumber = !versionString.empty();
     if(!just_install){
@@ -50,6 +50,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
     name = projectData["title"];
     const std::string p_type = projectData["project_type"];
     try {
+
         aboutVersionData= curl_utils::curl_to_string(url);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
@@ -95,6 +96,8 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
             std::string dl_url = release["files"][0]["url"];
             std::string filename = release["files"][0]["filename"];
             std::string out_file;
+            std::string expected_hash,file_hash;
+            expected_hash = release["files"][0]["hashes"]["sha512"];
             if (autoPathManagement){
                 ProjectType ty = getProjectType(p_type);
                 auto subfolder = getInstallDirectory(ty);
@@ -108,10 +111,18 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
             std::cout << "Downloading to: " << out_file << "\n";
 
             try {
-                curl_utils::curl_download_file(dl_url, out_file);
+                curl_utils::curl_download_file(dl_url, out_file, file_hash);
                 std::cout << "\nDownload complete.\n";
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
+            }
+            if(checkHash){
+                if(file_hash!=expected_hash){
+                    std::cout<<red<<"Hashes are not matching!\nAboritng!"<<reset_color;
+                    std::cout<<"Expected hash: "<<expected_hash<<"\n";
+                    std::cout<<"File Hash:     "<<file_hash<<"\n";
+                    return;
+                }
             }
             if (just_install){mark_installed(pn, ver, loader_to_use, filename, name,p_type);break;} else{mark_installed(pn, ver, loader_to_use, filename, name, p_type);
 
@@ -130,7 +141,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
                             {"loader", loaders}
                         });
                         std::string vs = "";
-                        install_mod(dep_project, dep_req, autoPathManagement,vs,false);
+                        install_mod(dep_project, dep_req, autoPathManagement,vs,checkHash,false);
                     }
                 }
             }

@@ -76,13 +76,13 @@ class McModm{
         bool verify_mod(std::string project_id, json& packages,bool apm);
         //install.cpp
         // Install a mod/plugin by project ID and requirements
-        void install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool just_install);
+        void install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool checkHash,bool just_install);
         //remove.cpp
         // Remove a package by project ID
         void remove_package(std::string package_id, bool just_remove, bool autoPathHandling);
         //updateall.cpp
         // Update all installed packages to a new game version and loaders
-        void update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req, bool force = false);
+        void update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req, std::vector<std::string> args);
         // Check if all packages are upgradeable to a specific version and loader
         std::vector<areUpdatable> check_all_upgradeable(std::string& version, std::string& loader);
         //list.cpp
@@ -95,7 +95,7 @@ class McModm{
         void easy_remove(bool color);
         //iff.cpp
         // Install all packages from a packages.json file
-        void iff(const std::string& packages_path);
+        void iff(const std::string& packages_path,bool checkHash);
         //il.cpp
         // Install a local file as a mod/plugin
         void install_local(std::string& path_tif, std::string& name, std::string& version ,std::string& loader, std::string& type);

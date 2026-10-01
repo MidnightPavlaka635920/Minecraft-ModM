@@ -28,7 +28,7 @@ void pb::McModm::McModm::verify_all_mods(bool apm,json&req){
         std::cout<<"Reinstalling mods...\n";
         for(const auto&mod:missing){
             std::cout<<yellow<<"Installing "<<mod<<reset_color<<"\n";
-            install_mod(mod, req,apm,"",true);
+            install_mod(mod, req,apm,"",true,true);
         }
         std::cout<<green<<"All done!\n"<<reset_color;
     } else if(wtd=="U"||wtd=="u"){

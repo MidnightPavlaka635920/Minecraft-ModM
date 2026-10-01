@@ -206,7 +206,7 @@ int main(int argc, char* argv[]) {
         std::string overwrite_loader, overwrite_version = "", version_number = "";
         std::vector<std::string> mods;  // project IDs
         std::string install_path;
-
+        bool checkHash=true;
         for (size_t i = 1; i < args.size(); i++) {
             std::string arg = args[i];
 
@@ -217,8 +217,9 @@ int main(int argc, char* argv[]) {
                 overwrite_version = arg.substr(20);
             } else if(arg.rfind("--vn=",0) == 0){
                 version_number = arg.substr(5);
-            }
-            else {
+            } else if(arg=="--noverify"){
+                checkHash = false;
+            }else {
                 mods.push_back(arg); // temporarily push everything else
             }
         }
@@ -278,7 +279,7 @@ int main(int argc, char* argv[]) {
         for (const auto& mod:mods){
                      // mod name or slug
             std::cout << green << "["<<std::to_string(index+1)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
-            modm.install_mod(mod, req, apm,version_number,false);
+            modm.install_mod(mod, req, apm,version_number,checkHash,false);
             ++index;
         }
         //std::string pn = argv[2];          // mod name or slug
@@ -357,7 +358,7 @@ int main(int argc, char* argv[]) {
         for (const auto& l : req[0]["loader"]){
             loaders.push_back(l.get<std::string>());
         }
-        modm.update_all_packages(version, loaders, req, force);
+        modm.update_all_packages(version, loaders, req, args);
     } else if (operation == "list") {
         if (args.size() < 1) {
             std::cerr << "Usage: mcmodm list [ -p path]\n";
@@ -444,8 +445,11 @@ int main(int argc, char* argv[]) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_remove [path]\n";
             return 1;
         }
+        bool checkHash = true;
+        if(std::find(args.begin(), args.end(),"--noverify")!=args.end())
+            checkHash = false;
         pb::McModm::McModm modm(install_path + "/");
-        modm.iff(packages_path);
+        modm.iff(packages_path,checkHash);
 
     }else if(operation == "ck_upd"){
         if (args.size() < 2) {

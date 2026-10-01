@@ -1,9 +1,14 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <openssl/evp.h>
+struct DownloadData {
+    FILE* file;
+    EVP_MD_CTX* hash;
+};
 namespace pb::curl_utils{
     std::string curl_to_string(const std::string& url, bool doProgressAnimation = false);
-    void curl_download_file(const std::string& url, const std::string& out_path, bool doProgressAnimation = true);
+    void curl_download_file(const std::string& url, const std::string& out_path, std::string& hash_string, bool doProgressAnimation = true);
     std::string url_encode(const std::string& value);
     std::string curl_to_string_with_http_header(std::string url, std::vector<std::string> headersVec, bool doProgressAnimation);
 }

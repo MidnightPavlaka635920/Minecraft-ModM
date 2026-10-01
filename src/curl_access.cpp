@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <openssl/evp.h>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -101,10 +102,15 @@ std::string pb::curl_utils::url_encode(const std::string &value) {
     return escaped.str();
 }
 static size_t write_file(void* ptr, size_t size, size_t nmemb, void* stream) {
-    return fwrite(ptr, size, nmemb, (FILE*)stream);
+    auto* ctx= static_cast<DownloadData*>(stream);
+    size_t total = size*nmemb;
+    if (fwrite(ptr, 1, total, ctx->file) != total)
+        return 0;
+    EVP_DigestUpdate(ctx->hash,ptr,total);
+    return total;
 }
 
-void pb::curl_utils::curl_download_file(const std::string& url, const std::string& output_path, bool doProgressAnimation) {
+void pb::curl_utils::curl_download_file(const std::string& url, const std::string& output_path, std::string& hash_string, bool doProgressAnimation) {
     CURL* curl = curl_easy_init();
     if (!curl)
         throw std::runtime_error("curl init failed");
@@ -112,10 +118,16 @@ void pb::curl_utils::curl_download_file(const std::string& url, const std::strin
     FILE* fp = fopen(output_path.c_str(), "wb");
     if (!fp)
         throw std::runtime_error("cannot open output file");
+    EVP_MD_CTX* hash = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(hash, EVP_sha512(), nullptr);
 
+    DownloadData ctx{
+        .file = fp,
+        .hash = hash
+    };
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ctx);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     if (doProgressAnimation){
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_print);
@@ -123,12 +135,26 @@ void pb::curl_utils::curl_download_file(const std::string& url, const std::strin
     }
 
     CURLcode res = curl_easy_perform(curl);
-
-    fclose(fp);
-    curl_easy_cleanup(curl);
-
     if (res != CURLE_OK)
         throw std::runtime_error("download failed");
+
+    unsigned char digest[EVP_MAX_MD_SIZE];
+    unsigned int digest_len;
+
+    EVP_DigestFinal_ex(hash, digest, &digest_len);
+    fclose(fp);
+    curl_easy_cleanup(curl);
+    std::ostringstream ss;
+
+    for (unsigned int i = 0; i < digest_len; ++i) {
+        ss << std::hex
+           << std::setw(2)
+           << std::setfill('0')
+           << static_cast<unsigned int>(digest[i]);
+    }
+
+    hash_string = ss.str();
+
 }
 std::string pb::curl_utils::curl_to_string_with_http_header(std::string url, std::vector<std::string> headersVec, bool doProgressAnimation){
     CURL* curl = curl_easy_init();
