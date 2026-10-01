@@ -63,7 +63,7 @@ void pb::McModm::McModm::easy_install(bool color){
 
 //        std::string project_id = hits[choice]["project_id"];
         std::filesystem::path req_path(install_path + "/req.json");
-        std::cout << req_path<<std::endl;
+        //std::cout << req_path<<std::endl;
         std::ifstream f(req_path);
         if (!f.is_open()) {
             std::cerr << "req.json not found in path.\n";

@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     if(!pb::McModm::McModm::getPath(path, instance).empty()){
-        std::cout<<cyan<<"INFO: secifying path in the old way won't change anything. Use -p/-i if needed.\n"<<reset_color;
+        std::cout<<cyan<<"INFO: specifying path in the old way won't change anything. Use -p/-i if needed.\n"<<reset_color;
     }
 
     operation = args[0];
@@ -413,7 +413,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "No path provided. Either provide it in the command, or set up a default path.\nUsage: mcmodm easy_install [path]\n";
             return 1;
         }
-        std::cout << install_path<<std::endl;
+        //std::cout << install_path<<std::endl;
         pb::McModm::McModm modm(install_path);
         //install_path = argv[2]; // installation path
         modm.easy_install(color);
