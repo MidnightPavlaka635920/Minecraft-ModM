@@ -114,9 +114,10 @@ Commands:
 - Install mod/plugin(s):  
   `mcmodm install <Project ID>... [options] [Install Path]`  
   Dependencies will be installed. Multiple packages can be installed. Path is optional if default is set.
-  Options:
+  #### Options:
     - `--override-version=1.21.8` and `--override-loader=fabric`. They are used when you want to download **plugins** for version other than configured one.
-    - `--vn=mc26.2-0.9.2-alpha.4-fabric`. It installs the specified project by version numbers, also doesn't use setup config.
+    - `--vn=mc26.2-0.9.2-alpha.4-fabric`. It installs the specified project by version numbers, also doesn't use setup config. In all of those options the value is typed after `=`.
+    - `--noverify` Disables integrity check.
 - Remove mod/plugin(s):  
   `mcmodm remove <Project ID>... [Install Path]`  
   Multiple packages can be removed. Path is optional if default is set.
@@ -126,6 +127,9 @@ Commands:
 - Update all packages:  
   `mcmodm updateall <new Game version> [Install path]`  
   Path is optional if default is set.
+  #### Options:
+    - `-f` of `--force`. Skips un-upgradeable packages
+    - `--noverify`. Skips integrity check.
 - Install packages easily (follow instructions that appear):  
   `mcmodm easy_install [path]`  
   Path is optional if default is set.
@@ -135,6 +139,8 @@ Commands:
 - Install all packages from a file:  
   `mcmodm iff <path_to/packages.json> <install-path>`  
   There, `path_to/packages.json` should point to a file.
+  #### Options:
+    - `--noverify`. Skips integrity check.
 - Check if all installed packages are available for updating to a specific version and loader:  
   `mcmodm ck_upd <update_version> <loader> [installation_folder]`  
   Path is optional if default is set.

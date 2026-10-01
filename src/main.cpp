@@ -62,7 +62,7 @@ void help(){
     std::cout << "Available commands:\n"
     << "  search <modname>                                       - List online mods matching <modname>\n"
     << "  install <modname>... [options] [path]                  - Install one or more mods to [path] (uses default if not specified)\n"
-    << "     --overwrite-loader=<loader> --overwrite-version=<version>\n"
+    << "     --overwrite-loader=<loader> --overwrite-version=<version> --vn=<version-number>\n"
     << "  remove <modname>... [path]                             - Remove one or more mods from [path] (uses default if not specified)\n"
     << "  updateall <version> [path] -f                          - Update all mods in [path] for game version <version> (uses default if not specified), -f is force\n"
     << "  list [path]                                            - List installed mods in [path] (uses default if not specified)\n"
