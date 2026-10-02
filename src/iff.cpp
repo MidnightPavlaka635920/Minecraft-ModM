@@ -6,7 +6,8 @@
 // #include "../include/install.h"
 #include "../include/mcmodm.h"
 using json = nlohmann::json;
-void pb::McModm::McModm::iff(const std::string& packages_path,bool checkHash){    
+void pb::McModm::McModm::iff(const std::string& packages_path,InstallFlag& installFlag){
+    bool checkHash = (installFlag&InstallFlag::VerifyHash)!=InstallFlag::None;
     std::ifstream sdata(packages_path);
     if (!sdata.is_open()) {
         std::cerr << "Cannot open " << packages_path << "\n";
@@ -28,6 +29,9 @@ void pb::McModm::McModm::iff(const std::string& packages_path,bool checkHash){
     std::ifstream sdata2(install_path+"/req.json");
     json req = json::parse(sdata2);
     const bool apm = req[0].value("apm",false);
+    InstallFlag useIF=InstallFlag::None;
+    useIF = useIF | (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
+    useIF = useIF | (checkHash?InstallFlag::VerifyHash:InstallFlag::None);
     for (auto& [project_id, info] : packages["installed"].items()){
         if (project_id.starts_with("local:")){
             std::cout << yellow<<"Warning: "<<reset_color<<"Local package " << project_id << " is skipped.\n Use 'mcmodm il' to install it mmanually afterwards.\n" << cyan <<"File to install: " << reset_color << info["file"].get<std::string>() << "\n";
@@ -35,7 +39,7 @@ void pb::McModm::McModm::iff(const std::string& packages_path,bool checkHash){
             std::vector<std::string> loader_mod;
             loader_mod.push_back(info["loader"].get<std::string>());
             json req_mod = json::array({{"loader", loader_mod},{"version", info["version"].get<std::string>()}});
-            install_mod(project_id, req_mod, apm, (const std::string)"",checkHash, false);
+            install_mod(project_id, req_mod, (const std::string)"",useIF);
         }
     }
     std::cout << "Installation complete, unless everything was already installed.\n";

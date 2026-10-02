@@ -69,7 +69,7 @@ void help(){
     << "  setup <path> <version> <loader> (loader)               - Setup req.json in <path> with specified version and one or more loaders\n"
     << "  easy_install [path]                                    - Easy install mods from a list in [path] (uses default if not specified)\n"
     << "  easy_remove [path]                                     - Easy remove mods from a list in [path] (uses default if not specified)\n"
-    << "  iff <path-to-packages.json> <install_path>             - Install from a list of packages\n"
+    << "  iff <path-to-packages.json> <install_path>             - Install from a list of packages\n" //72
     << "  ck_upd <version> path-to-req.json]                     - Check if all packages can be upgraded (uses default if not specified)\n"
     << "  il <file_to_install> <name> <loader> [path_to_install] - Install a local file to the destination (uses default if not specified)\n"
     << "  listver <project_id> [loader]                          - List compatible versions for a project with a specifiable loader\n"
@@ -279,7 +279,10 @@ int main(int argc, char* argv[]) {
         for (const auto& mod:mods){
                      // mod name or slug
             std::cout << green << "["<<std::to_string(index+1)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
-            modm.install_mod(mod, req, apm,version_number,checkHash,false);
+            InstallFlag tempIF = InstallFlag::None;
+            tempIF = tempIF | (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
+            tempIF = tempIF | (checkHash?InstallFlag::VerifyHash:InstallFlag::None);
+            modm.install_mod(mod, req,version_number,tempIF);
             ++index;
         }
         //std::string pn = argv[2];          // mod name or slug
@@ -449,7 +452,8 @@ int main(int argc, char* argv[]) {
         if(std::find(args.begin(), args.end(),"--noverify")!=args.end())
             checkHash = false;
         pb::McModm::McModm modm(install_path + "/");
-        modm.iff(packages_path,checkHash);
+        InstallFlag cIF=(checkHash?InstallFlag::VerifyHash:InstallFlag::None);
+        modm.iff(packages_path,cIF);
 
     }else if(operation == "ck_upd"){
         if (args.size() < 2) {
@@ -664,8 +668,8 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         bool apm = req[0].value("apm", false);
-
-        modm.verify_all_mods(apm,req);
+        InstallFlag cif = (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
+        modm.verify_all_mods(req,cif);
     }
     else{
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";

@@ -11,7 +11,11 @@ using json = nlohmann::json;
 #include "../include/color.h"
 std::string name;
 
-void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool checkHash,bool just_install) {
+void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag) {
+    bool just_install=(installFlag&InstallFlag::JustInstall)!=InstallFlag::None;
+    //std::cout<<just_install<<"\n";
+    bool autoPathManagement=(installFlag&InstallFlag::AutoPathManagement)!=InstallFlag::None;
+    bool checkHash=(installFlag&InstallFlag::VerifyHash)!=InstallFlag::None;
     //set_path(install_path);
     bool useVersionNumber = !versionString.empty();
     if(!just_install){
@@ -141,7 +145,10 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, boo
                             {"loader", loaders}
                         });
                         std::string vs = "";
-                        install_mod(dep_project, dep_req, autoPathManagement,vs,checkHash,false);
+                        InstallFlag tempIF = InstallFlag::None;
+                        tempIF = tempIF| (checkHash?InstallFlag::VerifyHash: InstallFlag::None);
+                        tempIF = tempIF| (autoPathManagement?InstallFlag::AutoPathManagement:InstallFlag::None);
+                        install_mod(dep_project, dep_req, vs,tempIF);
                     }
                 }
             }

@@ -37,6 +37,29 @@ struct version_names_info {
     std::string ver_info;
     std::unordered_set<std::string> game_ver;
 };
+enum class InstallFlag : uint32_t {
+    None        = 0,
+    VerifyHash  = 1u << 0,
+    AutoPathManagement = 1u << 1,
+    JustInstall = 1u << 2
+};
+
+constexpr InstallFlag operator|(InstallFlag a, InstallFlag b)
+{
+    return static_cast<InstallFlag>(
+        static_cast<uint32_t>(a) |
+        static_cast<uint32_t>(b)
+    );
+}
+
+constexpr InstallFlag operator&(InstallFlag a, InstallFlag b)
+{
+    return static_cast<InstallFlag>(
+        static_cast<uint32_t>(a) &
+        static_cast<uint32_t>(b)
+    );
+}
+
 namespace pb::McModm{
 
 class McModm{
@@ -76,7 +99,7 @@ class McModm{
         bool verify_mod(std::string project_id, json& packages,bool apm);
         //install.cpp
         // Install a mod/plugin by project ID and requirements
-        void install_mod(const std::string& pn, const json& req, bool autoPathManagement, const std::string& versionString,bool checkHash,bool just_install);
+        void install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag);
         //remove.cpp
         // Remove a package by project ID
         void remove_package(std::string package_id, bool just_remove, bool autoPathHandling);
@@ -95,7 +118,7 @@ class McModm{
         void easy_remove(bool color);
         //iff.cpp
         // Install all packages from a packages.json file
-        void iff(const std::string& packages_path,bool checkHash);
+        void  iff(const std::string& packages_path,InstallFlag& installFlag);
         //il.cpp
         // Install a local file as a mod/plugin
         void install_local(std::string& path_tif, std::string& name, std::string& version ,std::string& loader, std::string& type);
@@ -122,7 +145,7 @@ class McModm{
         static void removeInstance(std::string& name);
         //verify_installed.cpp
         // Verify that all installed mods still exist on disk and prompt for missing-file recovery actions
-        void verify_all_mods(bool apm,json&req);
+        void verify_all_mods(json&req,InstallFlag&installFlag);
 };
 // Setup a managed installation directory with the given version and loader list
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);

@@ -16,7 +16,7 @@ void pb::McModm::setup(std::string& path, std::string& version, std::vector<std:
     std::getline(std::cin, apm_choice);
     if(apm_choice == "Y" || apm_choice == "y" or apm_choice==""){
         useAPM = true;
-        std::cout << "Y";
+        //std::cout << "Y";
     }
     req_s.push_back({{"version", version}, {"loader",loaders},{"apm",useAPM}});
     std::ofstream ofs(req_path);

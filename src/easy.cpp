@@ -71,9 +71,12 @@ void pb::McModm::McModm::easy_install(bool color){
         }
         json req = json::parse(f);
         const bool apm = req[0].value("apm", false);
+        InstallFlag tempIF = InstallFlag::None;
+        tempIF = tempIF| (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
+        tempIF = tempIF| InstallFlag::VerifyHash;
         for (const auto& project_id : to_install) {
             try {
-                install_mod(project_id, req, apm,(const std::string)"",true,false);
+                install_mod(project_id, req,(const std::string)"",tempIF);
             } catch (const std::exception& e) {
                 std::cerr << "Something went wrong during installation and here is what: " << e.what() << std::endl;
             }

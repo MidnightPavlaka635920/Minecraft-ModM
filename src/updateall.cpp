@@ -60,6 +60,9 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
             std::cout << "Is " << info["name"].get<std::string>() <<" (" <<project_id<< ") upgradable to version " << version << ": "<<(upgradable ? "\033[32mYes\033[0m" : "\033[31mNo\033[0m") << ".\n";
         
     }
+    InstallFlag useIF = InstallFlag::JustInstall;
+    useIF = useIF| (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
+    useIF = useIF| (checkHash?InstallFlag::VerifyHash:InstallFlag::None);
     if (!all_updatable) {
         if (!force){
             std::cout << "Not all packages can be upgraded. Wait for all the packages to become upgradable to the specified version " << version << ", or, run 'mcmodm ck_upd <version to update> <loader> <path to req.json>' to check that.\n";
@@ -75,7 +78,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
             json ti;
             ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
             std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
-            install_mod(mod.project_id, ti, apm, (const std::string)"",checkHash, true);
+            install_mod(mod.project_id, ti, (const std::string)"",useIF);
             index++;
         }
     }
@@ -91,8 +94,8 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
                 remove_package(mod.project_id, true,apm);
                 json ti;
                 ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
-                std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
-                install_mod(mod.project_id, ti, apm, (const std::string)"",checkHash,true);
+                std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n"<<reset_color;
+                install_mod(mod.project_id, ti, (const std::string)"",useIF);
                 //continue;
                 index++;
             }
