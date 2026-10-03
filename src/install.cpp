@@ -119,6 +119,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                 std::cout << "\nDownload complete.\n";
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
+                return;
             }
             if(checkHash){
                 if(file_hash!=expected_hash){

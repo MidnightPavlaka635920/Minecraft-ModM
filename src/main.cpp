@@ -23,6 +23,7 @@ bool enable_ansi() {
 #include <nlohmann/json.hpp>
 #include <cstdio> // for FILE*, popen
 #include <curl/curl.h>
+#include "../include/linenoise.hpp"
 // #include "../include/install.h"
 // #include "../include/remove.h"
 // #include "../include/updateall.h"
@@ -94,11 +95,11 @@ void help(){
     << "Also, in most commands, you can specify path with -p <path> or -i <instance_name>\n"
     << "Version 2.1\n";
 }
-int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Usage: mcmodm <operation>\n";
-        return 1;
-    }
+int runMcmodm(const std::vector<std::string>& arguments) {
+    //if (arguments.size() < 2) {
+    //    std::cerr << "Usage: mcmodm <operation>\n";
+    //    return 1;
+   // }
     bool color = false;
     //std::string operation = argv[1];   // "ls" or "i"
     std::string operation;
@@ -110,11 +111,11 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::string> args;
 
-    for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
+    for (size_t i = 0; i < arguments.size(); ++i) {
+        std::string arg = arguments[i];
 
         if (arg == "-i") {
-            if (i + 1 >= argc) {
+            if (i + 1 >= arguments.size()) {
                 std::cerr << "-i requires an instance\n";
                 return 1;
             }
@@ -123,11 +124,11 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
 
-            instance = argv[++i];
+            instance = arguments[++i];
             has_instance = true;
         }
         else if (arg == "-p") {
-            if (i + 1 >= argc) {
+            if (i + 1 >= arguments.size()) {
                 std::cerr << "-p requires a path\n";
                 return 1;
             }
@@ -136,7 +137,7 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
 
-            path = argv[++i];
+            path = arguments[++i];
             has_path = true;
         }
         else {
@@ -310,7 +311,7 @@ int main(int argc, char* argv[]) {
         bool apm = req[0].value("apm", false);
         for (size_t i = 0; i < mods.size(); i++){
             std::string pn = mods[i];          // mod name or slug
-            std::cout << green << "["<<std::to_string(i)<<"/"<<std::to_string(mods.size())<<"] "<<"Remving " << pn << "...\n";
+            std::cout << green << "["<<std::to_string(i)<<"/"<<std::to_string(mods.size())<<"] "<<"Removing " << pn << "...\n"<<reset_color;
             modm.remove_package(pn, false,apm);
         }
         //std::string pn = argv[2];
@@ -321,16 +322,16 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         std::string version = args[1]; // game version
-        bool force = false;
+        //bool force = false;
         std::string install_path;
 
-        for (size_t i = 3; i < args.size(); i++) {
+        /*for (size_t i = 3; i < args.size(); i++) {
             std::string arg = args[i];
 
             if (arg == "-f" || arg == "--force") {
                 force = true;
             }
-        }
+        }*/
 
         // fallback to default path
         install_path = pb::McModm::McModm::getPath(path, instance);
@@ -389,16 +390,16 @@ int main(int argc, char* argv[]) {
         }
     } else if (operation == "setup"){
         std::cout<<yellow<<"WARNING: Using -i/-p here will be ignored!"<<reset_color<<"\n";
-        if (argc < 5){
+        if (arguments.size() < 4){
             std::cerr << "Usage: mcmodm setup <path> <version> <loader> (loader)\nNote that -p/-i isn't available here. You must specify the path.";
             return 1;
         }
         std::vector <std::string> loaders;
-        std::string path = argv[2];
-        std::string version = argv[3];
+        std::string path = arguments[1];
+        std::string version = arguments[2];
         //std::string loader = argv[4];
-        for (int i = 4; i < argc; i++) {
-            loaders.push_back(argv[i]);
+        for (size_t i = 3; i < arguments.size(); i++) {
+            loaders.push_back(arguments[i]);
         }
         pb::McModm::setup(path, version, loaders);
     } else if (operation == "help"){
@@ -672,8 +673,8 @@ int main(int argc, char* argv[]) {
         modm.verify_all_mods(req,cif);
     }
     else{
-        std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\n Here goes little help:\n";
-        help();
+        std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\nRun help for available commands.\n";
+        //help();
         return 1;
     }
     } catch (const std::exception& ex) {
@@ -684,4 +685,99 @@ int main(int argc, char* argv[]) {
     return 0;
     curl_global_cleanup();
 
+}
+
+std::vector<std::string> tokenize(const std::string& input)
+{
+    std::vector<std::string> tokens;
+    std::string current;
+
+    bool in_single_quote = false;
+    bool in_double_quote = false;
+    bool escaped = false;
+    bool token_started = false;
+
+    for (char c : input)
+    {
+        if (escaped)
+        {
+            current += c;
+            escaped = false;
+            token_started = true;
+            continue;
+        }
+
+        if (c == '\\' && !in_single_quote)
+        {
+            escaped = true;
+            token_started = true;
+            continue;
+        }
+
+        if (c == '"' && !in_single_quote)
+        {
+            in_double_quote = !in_double_quote;
+            token_started = true;
+            continue;
+        }
+
+        if (c == '\'' && !in_double_quote)
+        {
+            in_single_quote = !in_single_quote;
+            token_started = true;
+            continue;
+        }
+
+        if (std::isspace(static_cast<unsigned char>(c))
+            && !in_single_quote
+            && !in_double_quote)
+        {
+            if (token_started)
+            {
+                tokens.push_back(current);
+                current.clear();
+                token_started = false;
+            }
+
+            continue;
+        }
+
+        current += c;
+        token_started = true;
+    }
+
+    if (escaped)
+        throw std::runtime_error("Trailing escape character");
+
+    if (in_single_quote || in_double_quote)
+        throw std::runtime_error("Unterminated quote");
+
+    if (token_started)
+        tokens.push_back(current);
+
+    return tokens;
+}
+
+int runShell(){
+    std::cout<< "\t\tThis is a McModm shell.\n\t\tFor help type help and press enter.\n";
+    while(1){
+        std::string input;
+        if(linenoise::Readline("mcmodm> ",input)){std::cout<<"exit\n";break;}
+        if(input.empty())
+            continue;
+        linenoise::AddHistory(input.c_str());
+        auto args = tokenize(input);
+        if(args[0]=="exit")
+            break;
+        int ret = runMcmodm(args);
+        std::cout<<"\n"<<ret<<"\n";
+    }
+    return 0;
+}
+
+int main(int argc, char* argv[]){
+    if(argc<2)
+        return runShell();
+    std::vector<std::string> args(argv + 1, argv + argc);
+    return runMcmodm(args);
 }
