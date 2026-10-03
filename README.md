@@ -95,6 +95,40 @@ mcmodm install sodium -p /srv/minecraft/plugins
 
 `-p` and `-i` are supported by most commands and cannot be combined together.
 
+## Shell usage
+
+You can use `mcmodm` either as a normal CLI program or as an interactive shell.
+
+### Interactive shell
+
+Run the program with no arguments to start the built-in shell:
+
+```bash
+mcmodm
+mcmodm> help
+mcmodm> list -i prod
+mcmodm> install sodium -p /srv/minecraft/plugins
+mcmodm> exit
+```
+
+Inside the shell, you type commands without the `mcmodm` prefix. The shell accepts the same commands as the normal CLI, and it supports:
+
+- `help` to print the command list
+- `exit` to quit
+
+### Direct shell usage
+
+You can also run the tool directly from your shell in the usual way:
+
+```bash
+mcmodm list -i prod
+mcmodm install sodium -p /srv/minecraft/plugins
+mcmodm verify_installed -i my_server
+mcmodm instance add prod /srv/minecraft/plugins
+```
+
+This works in bash, zsh, and other Unix-like shells, and also in Windows shells when the binary is on your `PATH`.
+
 ## Usage
 
 Commands:  

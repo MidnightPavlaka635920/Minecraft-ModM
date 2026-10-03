@@ -42,6 +42,7 @@ std::string yellow;
 std::string cyan;
 std::string red;
 std::string green;
+bool color;
 using json = nlohmann::json;
 std::vector<std::string> get_loaders(const json& j) {
     std::vector<std::string> loaders;
@@ -61,6 +62,14 @@ std::vector<std::string> get_loaders(const json& j) {
 
 void help(){
     std::cout << "Available commands:\n"
+    << "  mcmodm                                            - Start the interactive shell\n"
+    << "  mcmodm <command> [args]                            - Run a command directly from the shell\n"
+    << "\nInteractive shell:\n"
+    << "  help                                              - Show this help\n"
+    << "  exit                                              - Leave the shell\n"
+    << "  Commands are entered without the 'mcmodm' prefix in the shell\n"
+    << "  Example: mcmodm> list -i prod\n"
+    << "\nAvailable commands:\n"
     << "  search <modname>                                       - List online mods matching <modname>\n"
     << "  install <modname>... [options] [path]                  - Install one or more mods to [path] (uses default if not specified)\n"
     << "     --overwrite-loader=<loader> --overwrite-version=<version> --vn=<version-number>\n"
@@ -87,8 +96,10 @@ void help(){
     << "  -p <path>                                              - Use this path instead of the default one\n"
     << "  -i <instance_name>                                     - Use a saved instance instead of the default path\n"
     << "\nExamples:\n"
+    << "  mcmodm\n"
+    << "  mcmodm> help\n"
+    << "  mcmodm> list -i my_server\n"
     << "  mcmodm install sodium -p /srv/minecraft/plugins\n"
-    << "  mcmodm list -i my_server\n"
     << "  mcmodm verify_installed -i my_server\n"
     << "  mcmodm instance add prod /srv/minecraft/plugins\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
@@ -100,7 +111,6 @@ int runMcmodm(const std::vector<std::string>& arguments) {
     //    std::cerr << "Usage: mcmodm <operation>\n";
     //    return 1;
    // }
-    bool color = false;
     //std::string operation = argv[1];   // "ls" or "i"
     std::string operation;
     std::string instance;
@@ -154,33 +164,7 @@ int runMcmodm(const std::vector<std::string>& arguments) {
     }
 
     operation = args[0];
-    #ifdef _WIN32
-        if (!enable_ansi()) {
-            
-            std::cerr << "Warning: Failed to enable ANSI escape codes. Output may not be colored.\n";
-            color = false;
-            reset_color = "";
-            yellow = "";
-            cyan = "";
-            red = "";
-            green = "";
-        } else {
-            color = true;
-        reset_color = "\033[0m";
-        yellow = "\033[33m";
-        cyan = "\033[36m";
-        red = "\033[31m";
-        green = "\033[32m";
-        }
 
-    #else
-        color = true;
-        reset_color = "\033[0m";
-        yellow = "\033[33m";
-        cyan = "\033[36m";
-        red = "\033[31m";
-        green = "\033[32m";
-    #endif
     try{
     if (operation == "search") {
         if(args.size() < 2){
@@ -762,7 +746,8 @@ int runShell(){
     std::cout<< "\t\tThis is a McModm shell.\n\t\tFor help type help and press enter.\n";
     while(1){
         std::string input;
-        if(linenoise::Readline("mcmodm> ",input)){std::cout<<"exit\n";break;}
+        std::string prompt = green+"mcmodm> "+reset_color;
+        if(linenoise::Readline(prompt.c_str(),input)){std::cout<<"exit\n";break;}
         if(input.empty())
             continue;
         linenoise::AddHistory(input.c_str());
@@ -770,12 +755,42 @@ int runShell(){
         if(args[0]=="exit")
             break;
         int ret = runMcmodm(args);
-        std::cout<<"\n"<<ret<<"\n";
+        if(ret!=0)
+            std::cout<<red<<"\n[exit status "<<ret<<"]\n"<<reset_color;
     }
     return 0;
 }
 
 int main(int argc, char* argv[]){
+        #ifdef _WIN32
+        if (!enable_ansi()) {
+            
+            std::cerr << "Warning: Failed to enable ANSI escape codes. Output may not be colored.\n";
+            color = false;
+            reset_color = "";
+            yellow = "";
+            cyan = "";
+            red = "";
+            green = "";
+            color = false;
+        } else {
+            color = true;
+        reset_color = "\033[0m";
+        yellow = "\033[33m";
+        cyan = "\033[36m";
+        red = "\033[31m";
+        green = "\033[32m";
+        }
+
+    #else
+        color = true;
+        reset_color = "\033[0m";
+        yellow = "\033[33m";
+        cyan = "\033[36m";
+        red = "\033[31m";
+        green = "\033[32m";
+    #endif
+
     if(argc<2)
         return runShell();
     std::vector<std::string> args(argv + 1, argv + argc);
