@@ -45,7 +45,7 @@ installwin:
 uninstallwin:
 	rm -f /mingw64/bin/$(notdir $(TARGET))
 win:
-	$(MAKE) TARGET=$(TARGET).exe LDFLAGS="-lcurl -static-libgcc -static-libstdc++"
+	$(MAKE) TARGET=$(TARGET).exe LDFLAGS="-lcurl -lcrypto -static-libgcc -static-libstdc++"
 shared: CXXFLAGS += -fPIC
 shared: $(LIB)
 

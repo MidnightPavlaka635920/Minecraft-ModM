@@ -71,10 +71,10 @@ std::string pb::curl_utils::curl_to_string(const std::string& url, bool doProgre
     }
 
     CURLcode res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
     if (res != CURLE_OK){
     long response_code;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+    curl_easy_cleanup(curl);
 
     std::cerr << "HTTP " << response_code << "\n"<<"URL: "<<url<<"\n";
         throw std::runtime_error(curl_easy_strerror(res));
@@ -125,6 +125,14 @@ void pb::curl_utils::curl_download_file(const std::string& url, const std::strin
         .file = fp,
         .hash = hash
     };
+    #ifdef _WIN32
+        char exe_path[MAX_PATH];
+        GetModuleFileNameA(NULL, exe_path, MAX_PATH);
+        std::string exe_dir = std::string(exe_path);
+        exe_dir = exe_dir.substr(0, exe_dir.find_last_of("\\/"));
+        std::string ca_path = exe_dir + "\\cacert.pem";
+        curl_easy_setopt(curl, CURLOPT_CAINFO, ca_path.c_str());
+    #endif
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ctx);
@@ -135,9 +143,13 @@ void pb::curl_utils::curl_download_file(const std::string& url, const std::strin
     }
 
     CURLcode res = curl_easy_perform(curl);
-    if (res != CURLE_OK)
-        throw std::runtime_error("download failed");
-
+    if (res != CURLE_OK){
+        std::string error = curl_easy_strerror(res);
+        curl_easy_cleanup(curl);
+        fclose(fp);
+        EVP_MD_CTX_free(hash);
+        throw std::runtime_error("download failed: "+ error);
+    }
     unsigned char digest[EVP_MAX_MD_SIZE];
     unsigned int digest_len;
 

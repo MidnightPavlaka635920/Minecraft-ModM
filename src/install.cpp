@@ -12,6 +12,7 @@ using json = nlohmann::json;
 std::string name;
 
 void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag) {
+    std::cout<<install_path<<"\n";
     bool just_install=(installFlag&InstallFlag::JustInstall)!=InstallFlag::None;
     //std::cout<<just_install<<"\n";
     bool autoPathManagement=(installFlag&InstallFlag::AutoPathManagement)!=InstallFlag::None;
@@ -119,7 +120,6 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                 std::cout << "\nDownload complete.\n";
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
-                return;
             }
             if(checkHash){
                 if(file_hash!=expected_hash){
