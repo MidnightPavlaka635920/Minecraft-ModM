@@ -104,7 +104,7 @@ void help(){
     << "  mcmodm instance add prod /srv/minecraft/plugins\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
     << "Also, in most commands, you can specify path with -p <path> or -i <instance_name>\n"
-    << "Version 2.1\n";
+    << "Version 2.2\n";
 }
 int runMcmodm(const std::vector<std::string>& arguments) {
     //if (arguments.size() < 2) {
