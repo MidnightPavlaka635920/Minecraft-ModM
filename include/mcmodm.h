@@ -41,7 +41,8 @@ enum class InstallFlag : uint32_t {
     None        = 0,
     VerifyHash  = 1u << 0,
     AutoPathManagement = 1u << 1,
-    JustInstall = 1u << 2
+    JustInstall = 1u << 2,
+    NoHandleDeps = 1u << 3
 };
 
 constexpr InstallFlag operator|(InstallFlag a, InstallFlag b)
@@ -100,6 +101,8 @@ class McModm{
         //install.cpp
         // Install a mod/plugin by project ID and requirements
         void install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag);
+        std::vector<std::string> get_deps(const std::string&project_id,const std::string&version_number,const json&req);
+        void install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag);
         //remove.cpp
         // Remove a package by project ID
         void remove_package(std::string package_id, bool just_remove, bool autoPathHandling);

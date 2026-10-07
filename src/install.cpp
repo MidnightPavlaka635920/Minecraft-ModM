@@ -12,7 +12,7 @@ using json = nlohmann::json;
 std::string name;
 
 void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag) {
-    std::cout<<install_path<<"\n";
+    //std::cout<<install_path<<"\n";
     bool just_install=(installFlag&InstallFlag::JustInstall)!=InstallFlag::None;
     //std::cout<<just_install<<"\n";
     bool autoPathManagement=(installFlag&InstallFlag::AutoPathManagement)!=InstallFlag::None;
@@ -129,7 +129,8 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                     return;
                 }
             }
-            if (just_install){mark_installed(pn, ver, loader_to_use, filename, name,p_type);break;} else{mark_installed(pn, ver, loader_to_use, filename, name, p_type);
+            mark_installed(pn, ver, loader_to_use, filename, name,p_type);
+            if (just_install||((installFlag&InstallFlag::NoHandleDeps)!=InstallFlag::None)){break;} else{
 
             // ---- Install required dependencies ----
                 if (release.contains("dependencies")) {
@@ -165,8 +166,132 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
             std::cout<<cyan<<"Version is compatible with yours"<<reset_color<<"\n";
         }else if (loa_comp){
             std::cout<<cyan<<"Loader is compatible with one of yours"<<reset_color<<"\n";
-        } else{std::cout<<"Nor loader nor version are compatible!"<<reset_color<<"'n";}
+        } else{std::cout<<"Nor loader nor version are compatible!"<<reset_color<<"\n";}
     }
 }
 
 
+
+
+
+
+std::vector<std::string> pb::McModm::McModm::get_deps(const std::string&project_id,const std::string&version_number,const json&req){
+    std::vector<std::string> deps;
+    bool useVersionNumber = !version_number.empty();
+    std::string game_ver = req[0]["version"].get<std::string>();
+    std::vector<std::string> loaders;
+    for (const auto& loader : req[0]["loader"]) {
+        loaders.push_back(loader.get<std::string>());
+    }
+    if (loaders.empty()) {
+        throw std::runtime_error("No loaders specified in requirements.");
+
+    }
+    std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
+    std::string aboutVersionData;
+    std::string projectUrl = "https://api.modrinth.com/v2/project/" + project_id;
+    std::string projectDataRaw;
+    //std::cout << "Fetching versions...\n";
+    try {
+        projectDataRaw = pb::curl_utils::curl_to_string(projectUrl);
+    } catch (const std::exception& e) {
+        std::cerr << "Error fetching main page: " << e.what() << "\n";
+        throw std::runtime_error("Error fetching versions.");
+    }
+    json projectData = json::parse(projectDataRaw);
+    name = projectData["title"];
+    const std::string p_type = projectData["project_type"];
+    try {
+
+        aboutVersionData= pb::curl_utils::curl_to_string(url);
+    } catch (const std::exception& e) {
+        std::cerr << "Error fetching versions: " << e.what() << "\n";
+        throw std::runtime_error("Error fetching versions.");
+    }
+    //json mainData = json::parse(aboutVersionData);
+    json mainData;
+    try {
+        mainData = json::parse(aboutVersionData);
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to parse JSON: [" << aboutVersionData << "]\n";
+        std::cerr << "Error: " << e.what() << "\n";
+        throw std::runtime_error("JSON parsing failed.");
+    }
+    bool found = false;
+    bool ver_comp = false, loa_comp = false;
+    for (auto& release : mainData) {
+        bool ver_comp = false, loa_comp = false;
+        std::string loader_to_use = "";
+        if (useVersionNumber){
+            if(version_number==release["version_number"].get<std::string>()){
+                loa_comp = true,ver_comp = true;
+                loader_to_use = release["loaders"][0].get<std::string>();
+            }
+        } else{
+            for (auto& gver : release["game_versions"])
+                if (gver == game_ver) {ver_comp = true; break; }
+            for (const auto& ldr : release["loaders"]) {
+                std::string rel_loader = ldr.get<std::string>();
+                if (std::find(loaders.begin(), loaders.end(), rel_loader) != loaders.end()) {
+                    loa_comp = true;
+                    loader_to_use = rel_loader;
+                    break;
+                }
+                //lmn++;
+            }
+        }
+    
+
+        if (ver_comp && loa_comp) {
+            found = true;
+            //std::cout << "Found matching version for " << name << release["name"].get<std::string>() << " (" << project_id << ")"<< std::endl;
+            //deps.push_back(project_id);        
+                if (release.contains("dependencies")) {
+                    for (auto& dep : release["dependencies"]) {
+                        std::string dep_type = dep["dependency_type"];
+                        if (dep_type != "required") continue; // skip optional
+
+                        std::string dep_project = dep["project_id"].get<std::string>();
+                        deps.push_back(dep_project);
+                        auto subdeps =get_deps(dep_project,"",req);
+                        deps.insert(deps.end(),subdeps.begin(),subdeps.end());
+                    }
+                }
+                break; // stop after first matching release
+            }
+    }
+    if(!found) {
+        std::cout << red<<("No matching version found for " + cyan+name+red + " (" + cyan+project_id+red + ")")<<reset_color<<"\n";
+        if(ver_comp){
+            std::cout<<cyan<<"Version is compatible with yours"<<reset_color<<"\n";
+        }else if (loa_comp){
+            std::cout<<cyan<<"Loader is compatible with one of yours"<<reset_color<<"\n";
+        } else{std::cout<<"Nor loader nor version are compatible!"<<reset_color<<"\n";}
+        throw std::runtime_error("No matching version found.");
+    }
+    return deps;
+}
+
+void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag){
+    std::vector<std::string>plan;
+    for(const auto& mod:og_plan){
+        plan.push_back(mod);
+        auto deps = get_deps(mod,"",req);
+        plan.insert(plan.end(),deps.begin(),deps.end());
+    }
+    std::cout<<yellow<<"Will be installed: "<<reset_color<<"\n";
+    for(const auto&mod:plan){
+        std::cout<<cyan<<mod<<" ";
+    }
+    std::cout<<reset_color<<"\n";
+    std::string prompt;
+    std::cout << "Install these?(Y/n): ";
+    std::getline(std::cin,prompt);
+    if(prompt!="Y"&&prompt!="y"&&!prompt.empty()){std::cout<<"abort\n";return;}
+    size_t index = 1;
+    InstallFlag newFlags = installFlag|InstallFlag::NoHandleDeps;
+    for(const auto&mod:plan){
+        std::cout<<green<<"["<<index<<"/"<<plan.size()<<"] Installing " <<mod<<reset_color<<"\n";
+        install_mod(mod,req,versionString,newFlags);
+    }
+}

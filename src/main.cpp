@@ -655,8 +655,16 @@ int runMcmodm(const std::vector<std::string>& arguments) {
         bool apm = req[0].value("apm", false);
         InstallFlag cif = (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
         modm.verify_all_mods(req,cif);
-    }
-    else{
+    }else if(operation=="get-deps"){
+        if(args.size()<2){std::cout<<"Not enough arguments. Usage:\n\tmcmodm get-deps <project_id> [-p <path>/-i <instance>]\n";return 1;}
+        auto install_path = pb::McModm::McModm::getPath(path,instance);
+        pb::McModm::McModm modm("/home/pavleb/.minecraft/");
+        auto deps = modm.get_deps(args[1],"");
+        std::cout<<yellow<<"Deps for this project:\n"<<reset_color;
+        for(const auto& id:deps){
+            std::cout<<id<<"\n";
+        }
+    }else{
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\nRun help for available commands.\n";
         //help();
         return 1;
