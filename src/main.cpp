@@ -665,7 +665,7 @@ int runMcmodm(const std::vector<std::string>& arguments) {
         auto deps = modm.get_deps(args[1],"",req);
         std::cout<<yellow<<"Deps for this project:\n"<<reset_color;
         for(const auto& id:deps){
-            std::cout<<id<<"\n";
+            std::cout<<id.project_id<<" - " <<id.name<<"\n";
         }
     }else{
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\nRun help for available commands.\n";

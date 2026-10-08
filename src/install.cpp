@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ostream>
 #include <string>
+#include <strings.h>
 #include <vector>
 #include <algorithm>
 #include <nlohmann/json.hpp>
@@ -175,8 +176,8 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
 
 
 
-std::vector<std::string> pb::McModm::McModm::get_deps(const std::string&project_id,const std::string&version_number,const json&req){
-    std::vector<std::string> deps;
+std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag){
+    std::vector<areUpdatable> deps;
     bool useVersionNumber = !version_number.empty();
     std::string game_ver = req[0]["version"].get<std::string>();
     std::vector<std::string> loaders;
@@ -200,6 +201,9 @@ std::vector<std::string> pb::McModm::McModm::get_deps(const std::string&project_
     }
     json projectData = json::parse(projectDataRaw);
     name = projectData["title"];
+    if((installFlag&InstallFlag::PushOGProject)!=InstallFlag::None){
+        deps.push_back({name,project_id,true});
+    }
     const std::string p_type = projectData["project_type"];
     try {
 
@@ -252,7 +256,15 @@ std::vector<std::string> pb::McModm::McModm::get_deps(const std::string&project_
                         if (dep_type != "required") continue; // skip optional
 
                         std::string dep_project = dep["project_id"].get<std::string>();
-                        deps.push_back(dep_project);
+                        json dep_data;
+                        try{
+                            std::string dep_name = pb::curl_utils::curl_to_string("https://api.modrinth.com/v2/project/" + dep_project);
+                            dep_data = json::parse(dep_name);
+                        } catch (const std::exception& e) {
+                            std::cerr << "Error fetching dependency project name: " << e.what() << "\n";
+                            throw std::runtime_error("Error fetching dependency project name.");
+                        }
+                        deps.push_back({dep_data["title"].get<std::string>(),dep_project, true});
                         auto subdeps =get_deps(dep_project,"",req);
                         deps.insert(deps.end(),subdeps.begin(),subdeps.end());
                     }
@@ -273,7 +285,7 @@ std::vector<std::string> pb::McModm::McModm::get_deps(const std::string&project_
 }
 
 void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag,const InstallWrapper& installWrapper) {
-    std::vector<std::string>plan;
+    std::vector<areUpdatable>plan;
     //std::ifstream packgs(install_path+"/packages.json");
     //if(!packgs.is_open()){
     //    std::cerr<<red<<"Could not open packages.json in folder: "<<install_path<<"\n"<<reset_color; 
@@ -286,16 +298,16 @@ void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, 
         use_colors=true;
     }
     for(const auto& mod:og_plan){
-        plan.push_back(mod);
-        auto deps = get_deps(mod,"",req);
+        //plan.push_back(mod);
+        auto deps = get_deps(mod,"",req,InstallFlag::PushOGProject);
         plan.insert(plan.end(),deps.begin(),deps.end());
     }
     std::cout<<yellow<<"Will be installed: "<<reset_color<<"\n";
     for(const auto&mod:plan){
         if(use_colors){
-            std::cout<<(is_installed(mod)?green:yellow)<<mod<<" ";
+            std::cout<<(is_installed(mod.project_id)?green:yellow)<<mod.project_id<<cyan<<" ("<<mod.name<<") ";
         } else{
-            std::cout<<cyan<<mod<<" ";
+            std::cout<<cyan<<mod.project_id<<" ";
         }
     }
     std::cout<<reset_color<<"\n";
@@ -306,7 +318,8 @@ void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, 
     size_t index = 1;
     InstallFlag newFlags = installFlag|InstallFlag::NoHandleDeps;
     for(const auto&mod:plan){
-        std::cout<<green<<"["<<index<<"/"<<plan.size()<<"] Installing " <<mod<<reset_color<<"\n";
-        install_mod(mod,req,versionString,newFlags);
+        std::cout<<green<<"["<<index<<"/"<<plan.size()<<"] Installing " <<mod.project_id<<" ("<<mod.name<<")"<<reset_color<<"\n";
+        install_mod(mod.project_id,req,versionString,newFlags);
+        ++index;
     }
 }

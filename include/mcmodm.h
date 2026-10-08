@@ -42,7 +42,8 @@ enum class InstallFlag : uint32_t {
     VerifyHash  = 1u << 0,
     AutoPathManagement = 1u << 1,
     JustInstall = 1u << 2,
-    NoHandleDeps = 1u << 3
+    NoHandleDeps = 1u << 3,
+    PushOGProject = 1u << 4
 };
 enum class InstallWrapper : uint32_t {
     None        = 0,
@@ -118,7 +119,7 @@ class McModm{
         //install.cpp
         // Install a mod/plugin by project ID and requirements
         void install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag);
-        std::vector<std::string> get_deps(const std::string&project_id,const std::string&version_number,const json&req);
+        std::vector<areUpdatable> get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag =InstallFlag::None);
         void install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag,const InstallWrapper& installWrapper = InstallWrapper::None);
         //remove.cpp
         // Remove a package by project ID
