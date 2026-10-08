@@ -259,17 +259,17 @@ int runMcmodm(const std::vector<std::string>& arguments) {
         //req = json::array({{{"version", version}, {"loader", loaders}}});
         req[0]["version"] = version;
         req[0]["loaders"] = loaders;
-        size_t modsamm = mods.size();
-        int index = 0;
-        for (const auto& mod:mods){
-                     // mod name or slug
-            std::cout << green << "["<<std::to_string(index+1)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
+        //size_t modsamm = mods.size();
+        //int index = 0;
+        //for (const auto& mod:mods){
+        //             // mod name or slug
+        //    std::cout << green << "["<<std::to_string(index+1)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
             InstallFlag tempIF = InstallFlag::None;
             tempIF = tempIF | (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
             tempIF = tempIF | (checkHash?InstallFlag::VerifyHash:InstallFlag::None);
-            modm.install_mod(mod, req,version_number,tempIF);
-            ++index;
-        }
+            modm.install_wrapper(mods, req,version_number,tempIF);
+        //    ++index;
+        //}
         //std::string pn = argv[2];          // mod name or slug
         //install_mod(pn, install_path, req, false);
 
@@ -658,8 +658,10 @@ int runMcmodm(const std::vector<std::string>& arguments) {
     }else if(operation=="get-deps"){
         if(args.size()<2){std::cout<<"Not enough arguments. Usage:\n\tmcmodm get-deps <project_id> [-p <path>/-i <instance>]\n";return 1;}
         auto install_path = pb::McModm::McModm::getPath(path,instance);
-        pb::McModm::McModm modm("/home/pavleb/.minecraft/");
-        auto deps = modm.get_deps(args[1],"");
+        pb::McModm::McModm modm(install_path);
+        std::ifstream ifs(install_path+"/req.json");
+        json req = json::parse(ifs);
+        auto deps = modm.get_deps(args[1],"",req);
         std::cout<<yellow<<"Deps for this project:\n"<<reset_color;
         for(const auto& id:deps){
             std::cout<<id<<"\n";
