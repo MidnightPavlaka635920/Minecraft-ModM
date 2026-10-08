@@ -267,7 +267,7 @@ int runMcmodm(const std::vector<std::string>& arguments) {
             InstallFlag tempIF = InstallFlag::None;
             tempIF = tempIF | (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
             tempIF = tempIF | (checkHash?InstallFlag::VerifyHash:InstallFlag::None);
-            modm.install_wrapper(mods, req,version_number,tempIF);
+            modm.install_wrapper(mods, req,version_number,tempIF,InstallWrapper::NoCheckInstalled);
         //    ++index;
         //}
         //std::string pn = argv[2];          // mod name or slug
@@ -661,6 +661,7 @@ int runMcmodm(const std::vector<std::string>& arguments) {
         pb::McModm::McModm modm(install_path);
         std::ifstream ifs(install_path+"/req.json");
         json req = json::parse(ifs);
+        ifs.close();
         auto deps = modm.get_deps(args[1],"",req);
         std::cout<<yellow<<"Deps for this project:\n"<<reset_color;
         for(const auto& id:deps){

@@ -272,8 +272,19 @@ std::vector<std::string> pb::McModm::McModm::get_deps(const std::string&project_
     return deps;
 }
 
-void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag){
+void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag,const InstallWrapper& installWrapper) {
     std::vector<std::string>plan;
+    //std::ifstream packgs(install_path+"/packages.json");
+    //if(!packgs.is_open()){
+    //    std::cerr<<red<<"Could not open packages.json in folder: "<<install_path<<"\n"<<reset_color; 
+    //    throw std::runtime_error("Could not open packages.json");
+    //}
+    json packgs;//load_packages();
+    bool use_colors = false;
+    if((installWrapper&InstallWrapper::NoCheckInstalled)!=InstallWrapper::None){
+        packgs = load_packages();
+        use_colors=true;
+    }
     for(const auto& mod:og_plan){
         plan.push_back(mod);
         auto deps = get_deps(mod,"",req);
@@ -281,7 +292,11 @@ void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, 
     }
     std::cout<<yellow<<"Will be installed: "<<reset_color<<"\n";
     for(const auto&mod:plan){
-        std::cout<<cyan<<mod<<" ";
+        if(use_colors){
+            std::cout<<(is_installed(mod)?green:yellow)<<mod<<" ";
+        } else{
+            std::cout<<cyan<<mod<<" ";
+        }
     }
     std::cout<<reset_color<<"\n";
     std::string prompt;
