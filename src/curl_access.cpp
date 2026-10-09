@@ -69,16 +69,29 @@ std::string pb::curl_utils::curl_to_string(const std::string& url, bool doProgre
     } else {
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
     }
-
     CURLcode res = curl_easy_perform(curl);
-    if (res != CURLE_OK){
-    long response_code;
+
+    long response_code = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
     curl_easy_cleanup(curl);
 
-    std::cerr << "HTTP " << response_code << "\n"<<"URL: "<<url<<"\n";
-        throw std::runtime_error(curl_easy_strerror(res));
+    if (res != CURLE_OK) {
+        throw std::runtime_error(
+            std::string("curl error: ") + curl_easy_strerror(res)
+        );
     }
+
+    if (response_code == 404) {
+        throw std::runtime_error("HTTP 404: Not found");
+    }
+
+    if (response_code >= 400) {
+        throw std::runtime_error(
+            "HTTP error: " + std::to_string(response_code)
+        );
+    }
+
     return result;
 }
 
