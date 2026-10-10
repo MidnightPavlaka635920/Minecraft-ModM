@@ -91,7 +91,7 @@ class McModm{
         //search.h
         // Search for mods/plugins online by query (static)
         static std::vector<search_result> search_mods(const std::string& query);
-
+        static std::vector<search_result> search_mods_cf(std::string& query);
         //packages.h
         // Load the installed packages information from disk
         json load_packages();

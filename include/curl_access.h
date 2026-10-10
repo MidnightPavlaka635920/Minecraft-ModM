@@ -13,4 +13,4 @@ namespace pb::curl_utils{
     std::string curl_to_string_with_http_header(std::string url, std::vector<std::string> headersVec, bool doProgressAnimation);
 }
 __attribute__((used))
-const char a_thing[] = "In case you are wondering who is in 450479388_496240406415295_5860082617347840614_n.jpg, take a look at the source of my last project. It would be clear ;)";
+const char a_thing[] = "In case you are wondering who is in 450479388_496240406415295_5860082617347840614_n.jpg, take a look at the source of Ansitovideo. It would be clear ;)";

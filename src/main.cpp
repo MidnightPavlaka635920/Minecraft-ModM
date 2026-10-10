@@ -173,7 +173,18 @@ int runMcmodm(const std::vector<std::string>& arguments) {
         }
 
         std::string pn = args[1];          // mod name or slug
+        std::cout<<cyan<<"[Modrinth]\n"<<reset_color;
         auto results = pb::McModm::McModm::search_mods(pn);
+        if (results.empty()) {
+            std::cout << "No results found for query: " << pn << "\n";
+        } else {
+            std::cout << "Search results for query: " << pn << "\n";
+            for (const auto& res : results) {
+                std::cout <<yellow<< "Title: " << reset_color << res.title << yellow << ", Author: " << reset_color << res.author <<yellow<< ", Project ID: " << reset_color << res.project_id << "\n";
+            }
+        }
+        std::cout<<green<<"[CurseForge]\n"<<reset_color;
+        results = pb::McModm::McModm::search_mods_cf(pn);
         if (results.empty()) {
             std::cout << "No results found for query: " << pn << "\n";
         } else {
