@@ -45,7 +45,7 @@ std::vector<search_result> pb::McModm::McModm::search_mods_cf(std::string& query
     }
     std::string token;
     std::getline(key,token);
-    std::string url = "https://api.curseforge.com/v1/mods/search?gameId=432&searchFilter=" + pb::curl_utils::url_encode(query) + "&pageSize=10&index=0";
+    std::string url = "https://api.curseforge.com/v1/mods/search?gameId=432&searchFilter=" + pb::curl_utils::url_encode(query) + "&sortOrder=desc&pageSize=10&index=0";
     std::string res = pb::curl_utils::curl_to_string_with_http_header(url,{"Accept: application/json","x-api-key: " + token},false);
     json sr = json::parse(res);
     std::vector<search_result>results;
