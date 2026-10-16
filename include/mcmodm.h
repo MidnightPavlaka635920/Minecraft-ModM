@@ -108,10 +108,12 @@ class McModm{
             const std::string& loader,
             const std::string& file,
             const std::string& name,
-            const std::string& type
+            const std::string& type,
+            const int& cf_type=0
         );
         // Resolve the package project type from its string identifier
         static ProjectType getProjectType(const std::string& type);
+        ProjectType getProjectTypeCF(int type);
         // Get the installation directory for a project type
         static std::filesystem::path getInstallDirectory(ProjectType type);
         // Check whether a specific installed mod still exists on disk and matches the expected package metadata

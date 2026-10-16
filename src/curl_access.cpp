@@ -214,11 +214,28 @@ std::string pb::curl_utils::curl_to_string_with_http_header(std::string url, std
     }
 
     CURLcode res = curl_easy_perform(curl);
+
+       long response_code = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
     curl_easy_cleanup(curl);
+    if (res != CURLE_OK) {
+        std::cout<<response_code<<"\n";
+        throw std::runtime_error(
+            std::string("curl error: ") + curl_easy_strerror(res)+" "+std::to_string(response_code)
+        );
+    }
 
-    if (res != CURLE_OK)
-        throw std::runtime_error(curl_easy_strerror(res));
+    if (response_code == 404) {
+        throw std::runtime_error("HTTP 404: Not found");
+    }
 
+    if (response_code >= 400) {
+        throw std::runtime_error(
+            "HTTP error: " + std::to_string(response_code)
+        );
+    }
+    curl_easy_cleanup(curl);
     return result;
 
 }

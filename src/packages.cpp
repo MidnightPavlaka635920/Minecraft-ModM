@@ -44,7 +44,8 @@ void pb::McModm::McModm::mark_installed(
     const std::string& loader,
     const std::string& file,
     const std::string& name,
-    const std::string& type
+    const std::string& type,
+    const int& cf_type
 ) {
     json j = load_packages();
 
@@ -53,7 +54,8 @@ void pb::McModm::McModm::mark_installed(
         {"loader", loader},
         {"file", file},
         {"name", name},
-        {"type", type}
+        {"type", type},
+        {"cf_type", cf_type}
     };
 
     save_packages(j);
@@ -120,4 +122,16 @@ bool pb::McModm::McModm::verify_mod(std::string project_id, json& packages,bool 
     mod_path+=packages["installed"][project_id]["file"];
     std::filesystem::path p(mod_path);
     return std::filesystem::exists(mod_path);
+}
+ProjectType pb::McModm::McModm::getProjectTypeCF(int type){
+    switch(type){
+        case 5:
+            return ProjectType::Mod;
+        case 12:
+            return ProjectType::ResourcePack;
+        case 6552:
+            return ProjectType::Shader;
+        default:
+            return ProjectType::NONE;
+    }
 }
