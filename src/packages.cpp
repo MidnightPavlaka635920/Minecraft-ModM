@@ -61,32 +61,107 @@ void pb::McModm::McModm::mark_installed(
     save_packages(j);
 }
 bool pb::McModm::McModm::can_be_upgraded(const std::string& project_id, const std::string& game_version, const std::string& loader) {
-    std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
-    std::string verDataString;
-    try {
-        verDataString = curl_utils::curl_to_string(url);
-    } catch (const std::exception& e) {
-        std::cerr << "Error fetching versions: " << e.what() << "\n";
-        throw std::runtime_error("Error fetching versions."); 
+    bool cf_mod = project_id.starts_with("cf:");
+    std::string n_pid = project_id;
+    std::string url = "https://api.modrinth.com/v2/project/" + n_pid + "/version";
+    std::string projectUrl = "https://api.modrinth.com/v2/project/" + n_pid;
+    if(cf_mod){
+        n_pid = project_id.substr(3);
+        url = "https://api.curseforge.com/v1/mods/" + n_pid+"/files";
+        projectUrl = "https://api.curseforge.com/v1/mods/" + n_pid;
     }
-    json verData;
-    try{
-        verData = json::parse(verDataString);
+    std::string verDataString,projectDataRaw;
+    std::string token;
+    if(cf_mod){
+        #ifdef _WIN32
+        const char* appdata = std::getenv("APPDATA");
+        if (appdata == nullptr) {
+            throw std::runtime_error("APPDATA environment variable not found");
+        }
+        if (!appdata) appdata = ".";
+        std::string folder = std::string(appdata) + "\\mcmodm\\";
+        //filesystem::create_directories(folder);
+        std::string key_path = folder + "api_key.txt";
+
+    #else
+        const char* home = std::getenv("HOME");
+        if (home == nullptr) {
+            throw std::runtime_error("HOME environment variable not found");
+        }
+        if (!home) home = ".";
+        std::string folder = std::string(home) + "/.config/mcmodm/";
+        //std::filesystem::create_directories(folder);
+        std::string key_path = folder + "api_key.txt";
+    #endif
+    std::ifstream key(key_path);
+    if(!key.is_open()){
+        throw std::runtime_error("Could not open api_key.txt");
+    }
+    std::getline(key,token);
+
+    }
+    try {
+        if (cf_mod) {
+            projectDataRaw =
+                pb::curl_utils::curl_to_string_with_http_header(
+                    projectUrl,
+                    {"Accept: application/json", "x-api-key: " + token},
+                    false
+                );
+
+            verDataString =
+                pb::curl_utils::curl_to_string_with_http_header(
+                    url,
+                    {"Accept: application/json", "x-api-key: " + token},
+                    false
+                );
+        } else {
+            //projectDataRaw = pb::curl_utils::curl_to_string(projectUrl);
+            verDataString = pb::curl_utils::curl_to_string(url);
+        }
     } catch (const std::exception& e) {
-        std::cerr << "Failed to parse JSON: [" << verDataString << "]\n";
-        std::cerr << "Error: " << e.what() << "\n";
+        std::cerr << "Error fetching project or version data: "
+                  << e.what() << '\n';
+        throw std::runtime_error("Failed to fetch project or version data.");
+    }
+
+    json verData;
+    json projectData;
+
+    try {
+        verData = json::parse(verDataString);
+    } catch (const json::parse_error& e) {
+        std::cerr << "Failed to parse version data: "
+                  << e.what() << '\n';
         throw std::runtime_error("Failed to parse version data.");
     }
+    if(cf_mod){
+        try {
+            projectData = json::parse(projectDataRaw);
+        } catch (const json::parse_error& e) {
+            std::cerr << "Failed to parse project data: "
+                      << e.what() << '\n';
+            throw std::runtime_error("Failed to parse project data.");
+        }
+    }
     bool found = false;
-    for (auto& release : verData) {
+    for (auto& release : (cf_mod? verData["data"]:verData)) {
         bool ver_comp = false, loa_comp = false;
-
-        for (auto& gver : release["game_versions"])
+        for (auto& gver : (cf_mod? release["gameVersions"]:release["game_versions"]))
             if (gver == game_version) { ver_comp = true; break; }
-
-        for (auto& ldr : release["loaders"])
-            if (ldr == loader) { loa_comp = true; break; }
-
+        if(cf_mod){
+            if(pb::McModm::McModm::matchesLoader(projectData["data"], release,pb::McModm::McModm::toLower(loader))) loa_comp = true;
+            
+        } else{
+            for (const auto& ldr : release["loaders"]) {
+                std::string rel_loader = ldr.get<std::string>();
+                if (ldr==loader) {
+                    loa_comp = true;
+                    break;
+                }
+                //lmn++;
+            }
+        }
         if (ver_comp && loa_comp) {
             found = true;
             break;

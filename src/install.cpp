@@ -13,14 +13,14 @@ using json = nlohmann::json;
 #include "../include/color.h"
 std::string name;
 #include <cctype>
-std::string toLower(std::string str) {
+std::string pb::McModm::McModm::toLower(std::string str) {
     std::transform(str.begin(), str.end(), str.begin(),
         [](unsigned char c) {
             return static_cast<char>(std::tolower(c));
         });
     return str;
 }
-bool matchesLoader(
+bool pb::McModm::McModm::McModm::matchesLoader(
     const json& project,
     const json& file,
     const std::string& requestedLoader
@@ -43,7 +43,7 @@ bool matchesLoader(
 
     for (const auto& version : file["gameVersions"]) {
         if (version.is_string() &&
-            toLower(version.get<std::string>()) == requestedLoader) {
+            pb::McModm::McModm::toLower(version.get<std::string>()) == requestedLoader) {
             return true;
         }
     }
@@ -181,8 +181,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                 if (gver == ver) { ver_comp = true; break; }
             if(cf_mod){
                 for(const auto& local_loader:loaders){
-                    if(matchesLoader(projectData["data"], release,toLower(local_loader))) loa_comp = true;
-                    loader_to_use = local_loader;
+                    if(pb::McModm::McModm::matchesLoader(projectData["data"], release,pb::McModm::McModm::toLower(local_loader))) {loa_comp = true;loader_to_use=local_loader;break;};
                 }
             } else{
                 for (const auto& ldr : release["loaders"]) {
@@ -420,7 +419,7 @@ std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project
                 if (gver == game_ver) { ver_comp = true; break; }
             if(cf_mod){
                 for(const auto& local_loader:loaders){
-                    if(matchesLoader(projectData["data"], release,toLower(local_loader))) loa_comp = true;
+                    if(pb::McModm::McModm::matchesLoader(projectData["data"], release,pb::McModm::McModm::toLower(local_loader))) {loa_comp = true;loader_to_use = local_loader;break;}
                     loader_to_use = local_loader;
                 }
             } else{

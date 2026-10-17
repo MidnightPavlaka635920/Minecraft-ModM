@@ -123,6 +123,12 @@ class McModm{
         void install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag);
         std::vector<areUpdatable> get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag =InstallFlag::None);
         void install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag,const InstallWrapper& installWrapper = InstallWrapper::None);
+        static std::string toLower(std::string str);
+        static bool matchesLoader(
+            const json& project,
+            const json& file,
+            const std::string& requestedLoader
+        );
         //remove.cpp
         // Remove a package by project ID
         void remove_package(std::string package_id, bool just_remove, bool autoPathHandling);
