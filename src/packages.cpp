@@ -125,7 +125,7 @@ bool pb::McModm::McModm::verify_mod(std::string project_id, json& packages,bool 
 }
 ProjectType pb::McModm::McModm::getProjectTypeCF(int type){
     switch(type){
-        case 5:
+        case 6:
             return ProjectType::Mod;
         case 12:
             return ProjectType::ResourcePack;

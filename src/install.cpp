@@ -13,6 +13,13 @@ using json = nlohmann::json;
 #include "../include/color.h"
 std::string name;
 #include <cctype>
+std::string toLower(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(),
+        [](unsigned char c) {
+            return static_cast<char>(std::tolower(c));
+        });
+    return str;
+}
 bool matchesLoader(
     const json& project,
     const json& file,
@@ -20,6 +27,7 @@ bool matchesLoader(
 ) {
     // CurseForge classId identifies the project category.
     const int classId = project.value("classId", 0);
+    //std::cout<<"classid succ\n";
 
     if (requestedLoader == "paper" ||
         requestedLoader == "spigot" ||
@@ -35,7 +43,7 @@ bool matchesLoader(
 
     for (const auto& version : file["gameVersions"]) {
         if (version.is_string() &&
-            version.get<std::string>() == requestedLoader) {
+            toLower(version.get<std::string>()) == requestedLoader) {
             return true;
         }
     }
@@ -43,13 +51,6 @@ bool matchesLoader(
     return false;
 }
 
-std::string toLower(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(),
-        [](unsigned char c) {
-            return static_cast<char>(std::tolower(c));
-        });
-    return str;
-}
 void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag) {
     bool cf_mod = false;
     std::string project_id = pn;
@@ -65,7 +66,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
     //set_path(install_path);
     bool useVersionNumber = !versionString.empty();
     if(!just_install){
-        if (is_installed(project_id)) {
+        if (is_installed(pn)) {
             std::cout << cyan<<"[skip] Already installed: " <<yellow<< project_id<<reset_color<<"\n";return;
         }
 
@@ -118,13 +119,13 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
         throw std::runtime_error("Error fetching versions.");
     }
     json projectData = json::parse(projectDataRaw);
-    name = projectData[(cf_mod? "name":"title")];
+    if(cf_mod){name = projectData["data"]["name"];} else{name = projectData["title"];}
     std::string p_type;
     int p_type_cf;
-    if(cf_mod){
+    if(!cf_mod){
         p_type = projectData["project_type"];
     } else{
-        p_type_cf = projectData.value("classID",0);
+        p_type_cf = projectData["data"].value("classId",0);
     }
     try {
         if(cf_mod){
@@ -159,8 +160,21 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
         } else{
             for (auto& gver : (cf_mod? release["gameVersions"]:release["game_versions"]))
                 if (gver == ver) { ver_comp = true; break; }
-            for(const auto& local_loader:loaders){
-                if(matchesLoader(projectData, release,toLower(local_loader))) loa_comp = true;
+            if(cf_mod){
+                for(const auto& local_loader:loaders){
+                    if(matchesLoader(projectData["data"], release,toLower(local_loader))) loa_comp = true;
+                    loader_to_use = local_loader;
+                }
+            } else{
+                for (const auto& ldr : release["loaders"]) {
+                    std::string rel_loader = ldr.get<std::string>();
+                    if (std::find(loaders.begin(), loaders.end(), rel_loader) != loaders.end()) {
+                        loa_comp = true;
+                        loader_to_use = rel_loader;
+                        break;
+                    }
+                    //lmn++;
+                }
             }
         }
     
@@ -175,14 +189,45 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                 dl_url = release["files"][0]["url"];
                 filename = release["files"][0]["filename"];
             } else{
-                dl_url = release["downloadUrl"];
-                filename = release["fileName"];
+                filename = release.at("fileName").get<std::string>();
+                if (release.contains("downloadUrl") &&
+                release["downloadUrl"].is_string()) {
+                dl_url = release["downloadUrl"].get<std::string>();
+            } else {
+                // Fetch the download URL using CurseForge's dedicated endpoint.
+                const std::string downloadUrlEndpoint =
+                    "https://api.curseforge.com/v1/mods/" +
+                    project_id + "/files/" +
+                    release.at("id").get<std::string>() +
+                    "/download-url";
+
+                const std::string response =
+                    curl_utils::curl_to_string_with_http_header(
+                        downloadUrlEndpoint,
+                        {"Accept: application/json", "x-api-key: " + token},
+                        false
+                    );
+
+                const json downloadData = json::parse(response);
+
+                if (!downloadData.contains("data") ||
+                    !downloadData["data"].is_string()) {
+                    throw std::runtime_error(
+                        "CurseForge did not return a valid download URL."
+                    );
+                }
+
+                dl_url = downloadData["data"].get<std::string>();
+            }
+                //dl_url = release["downloadUrl"];
+                //filename = release["fileName"];
             }
             std::string expected_hash,file_hash;
-            expected_hash = release["files"][0]["hashes"]["sha512"];
+            if(!cf_mod)                                                                                                                 //FIX LATER
+                expected_hash = release["files"][0]["hashes"]["sha512"];
             if (autoPathManagement){
                 std::filesystem::path subfolder;
-                if(cf_mod){
+                if(!cf_mod){
                     ProjectType ty = getProjectType(p_type);
                     subfolder = getInstallDirectory(ty);
                 } else{
@@ -195,7 +240,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                 out_file = install_path +"/"+filename;
             }
 
-            std::cout << "Found matching version for " << name << release["name"].get<std::string>() << " (" << project_id << ")"<< std::endl;
+            std::cout << "Found matching version for " << name << " (" << project_id << ")"<< std::endl;
             std::cout << "Downloading to: " << out_file << "\n";
 
             try {
@@ -331,7 +376,7 @@ std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project
         throw std::runtime_error("Error fetching versions.");
     }
     json projectData = json::parse(projectDataRaw);
-
+    if(cf_mod){name = projectData["data"]["name"];} else{name = projectData["title"];}
    //json mainData = json::parse(aboutVersionData);
     json mainData;
     try {
@@ -354,8 +399,21 @@ std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project
         } else{
             for (auto& gver : (cf_mod? release["gameVersions"]:release["game_versions"]))
                 if (gver == game_ver) { ver_comp = true; break; }
-            for(const auto& local_loader:loaders){
-                if(matchesLoader(projectData, release,toLower(local_loader))) loa_comp = true;
+            if(cf_mod){
+                for(const auto& local_loader:loaders){
+                    if(matchesLoader(projectData["data"], release,toLower(local_loader))) loa_comp = true;
+                    loader_to_use = local_loader;
+                }
+            } else{
+                for (const auto& ldr : release["loaders"]) {
+                    std::string rel_loader = ldr.get<std::string>();
+                    if (std::find(loaders.begin(), loaders.end(), rel_loader) != loaders.end()) {
+                        loa_comp = true;
+                        loader_to_use = rel_loader;
+                        break;
+                    }
+                    //lmn++;
+                }
             }
 
         }
@@ -363,36 +421,39 @@ std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project
 
         if (ver_comp && loa_comp) {
             found = true;
+            //std::cout<<"found\n";
             //std::cout << "Found matching version for " << name << release["name"].get<std::string>() << " (" << project_id << ")"<< std::endl;
-            //deps.push_back(project_id);        
-                if (release.contains("dependencies")) {
-                    for (auto& dep : release["dependencies"]) {
-                        std::string dep_project;
-                        if(cf_mod){
-                            std::string dep_type = dep["dependency_type"];
-                            if (dep_type != "required") continue; // skip optional
-                            dep_project = dep["project_id"].get<std::string>();
-                        } else{
-                            int dep_type = dep["relationType"];
-                            if(dep_type !=3)continue;
-                            dep_project = dep["modId"].get<std::string>();
-                        }
-
-                        json dep_data;
-                        try{
-                            std::string dep_name = pb::curl_utils::curl_to_string("https://api.modrinth.com/v2/project/" + dep_project);
-                            dep_data = json::parse(dep_name);
-                        } catch (const std::exception& e) {
-                            std::cerr << "Error fetching dependency project name: " << e.what() << "\n";
-                            throw std::runtime_error("Error fetching dependency project name.");
-                        }
-                        deps.push_back({dep_data[(cf_mod? "name":"title")].get<std::string>(),dep_project, true});
-                        auto subdeps =get_deps(dep_project,"",req);
-                        deps.insert(deps.end(),subdeps.begin(),subdeps.end());
+            if((installFlag&InstallFlag::PushOGProject)!=InstallFlag::None)
+                deps.push_back({name,project_id,0});        
+            if (release.contains("dependencies")) {
+                for (auto& dep : release["dependencies"]) {
+                    //std::cout<<"done smth\n";
+                    std::string dep_project;
+                    if(!cf_mod){
+                        std::string dep_type = dep["dependency_type"];
+                        if (dep_type != "required") continue; // skip optional
+                        dep_project = dep["project_id"].get<std::string>();
+                    } else{
+                        int dep_type = dep["relationType"];
+                        if(dep_type !=3)continue;
+                        dep_project = dep["modId"].get<std::string>();
                     }
+
+                    json dep_data;
+                    try{
+                        std::string dep_name = pb::curl_utils::curl_to_string("https://api.modrinth.com/v2/project/" + dep_project);
+                        dep_data = json::parse(dep_name);
+                    } catch (const std::exception& e) {
+                        std::cerr << "Error fetching dependency project name: " << e.what() << "\n";
+                        throw std::runtime_error("Error fetching dependency project name.");
+                    }
+                    deps.push_back({dep_data[(cf_mod? "name":"title")].get<std::string>(),dep_project, true});
+                    auto subdeps =get_deps(dep_project,"",req);
+                    deps.insert(deps.end(),subdeps.begin(),subdeps.end());
                 }
-                break; // stop after first matching release
             }
+                break; // stop after first matching release
+        }
     }
     if(!found) {
         std::cout << red<<("No matching version found for " + cyan+name+red + " (" + cyan+project_id+red + ")")<<reset_color<<"\n";
@@ -421,6 +482,7 @@ void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, 
     }
     for(const auto& mod:og_plan){
         //plan.push_back(mod);
+        //plan.push_back({"", mod, false});
         auto deps = get_deps(mod,"",req,InstallFlag::PushOGProject);
         plan.insert(plan.end(),deps.begin(),deps.end());
     }

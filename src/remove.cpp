@@ -10,6 +10,7 @@ using json = nlohmann::json;
 
 void pb::McModm::McModm::remove_package(std::string package_id, bool just_remove,bool autoPathHandling) {
     //set_path(install_path);
+    bool cf_mod = package_id.starts_with("cf:");
     json j = load_packages();
     if (j["installed"].contains(package_id)) {
         std::cout << "Package found: " << package_id << "\n" << "Deleting the file" << "\n";
@@ -18,7 +19,12 @@ void pb::McModm::McModm::remove_package(std::string package_id, bool just_remove
             file_path += '/';
         }
         if(autoPathHandling){
-            ProjectType type = getProjectType(j["installed"][package_id]["type"].get<std::string>()); 
+            ProjectType type;
+            if(cf_mod){
+                type = getProjectTypeCF(j["installed"][package_id].value("cf_type",0));
+            }else{
+                type = getProjectType(j["installed"][package_id]["type"].get<std::string>()); 
+            }
             file_path += getInstallDirectory(type).string() + "/";
         }
         file_path += j["installed"][package_id]["file"].get<std::string>();
