@@ -23,9 +23,20 @@ void pb::McModm::McModm::easy_install(bool color){
         std::getline(std::cin, query);
         std::vector<search_result> hits = search_mods(query);
         size_t hits_index =0;
+        size_t hits_index_m=0;
+        std::cout <<green<<"[Modrinth]"<<reset_color<<"\n";
         for (auto& result: hits){
             std::cout << cyan << hits_index << reset_color << " - " << yellow << "Title: " << reset_color << result.title << yellow << ", Author: " << reset_color << result.author << yellow << ", Project ID: " << reset_color << result.project_id << "\n";
             hits_index++;
+        }
+        hits_index_m = hits_index;
+        std::vector<search_result>hits_cf = search_mods_cf(query);
+        hits.insert(hits.end(), hits_cf.begin(), hits_cf.end());
+        std::cout<<green<<"[CurseForge]"<<reset_color<<"\n";
+        for(;hits_index<hits.size();++hits_index){
+            std::cout << cyan << hits_index << reset_color << " - " << yellow << "Title: " << reset_color << hits[hits_index].title << yellow << ", Author: " << reset_color << hits[hits_index].author << yellow << ", Project ID: " << reset_color << hits[hits_index].project_id << "\n";
+            hits[hits_index].project_id = "cf:"+hits[hits_index].project_id;
+
         }
         if (hits.empty()) {
             std::cout << "No results found for query: " << query << "\n";

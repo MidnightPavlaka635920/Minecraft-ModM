@@ -100,9 +100,28 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
 
     std::string token;
     if(cf_mod){
-        const char* home= std::getenv("HOME");
-        std::string key_path = std::string(home)+"/.config/mcmodm/";
-        std::ifstream key(key_path+"/api_key.txt");
+        #ifdef _WIN32
+        const char* appdata = std::getenv("APPDATA");
+        if (appdata == nullptr) {
+            throw std::runtime_error("APPDATA environment variable not found");
+        }
+        if (!appdata) appdata = ".";
+        std::string folder = std::string(appdata) + "\\mcmodm\\";
+        //filesystem::create_directories(folder);
+        std::string key_path = folder + "api_key.txt";
+
+    #else
+        const char* home = std::getenv("HOME");
+        if (home == nullptr) {
+            throw std::runtime_error("HOME environment variable not found");
+        }
+        if (!home) home = ".";
+        std::string folder = std::string(home) + "/.config/mcmodm/";
+        //std::filesystem::create_directories(folder);
+        std::string key_path = folder + "api_key.txt";
+    #endif
+
+        std::ifstream key(key_path);
         if(!key.is_open()){
             throw std::runtime_error("Could not open api_key.txt");
         }
