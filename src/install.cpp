@@ -35,6 +35,8 @@ bool pb::McModm::McModm::McModm::matchesLoader(
         // Bukkit plugins use a project category, not a mod loader.
         return classId == 5;
     }
+    if(requestedLoader=="iris"||requestedLoader=="optifine"){ return classId==6552;} // Shader loaders
+    if(requestedLoader=="minecraft")return classId==12; // Use for resource pack
 
     if (!file.contains("gameVersions") ||
         !file["gameVersions"].is_array()) {
