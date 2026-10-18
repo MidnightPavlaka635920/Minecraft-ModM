@@ -78,7 +78,6 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
     }
     if(loader.empty()&&!cf_mod){
         for (const auto& ver : projectData["game_versions"]){
-            std::cout<<"iwet\n";
             if (std::find(compatible_versions.begin(),compatible_versions.end(),ver.get<std::string>()) == compatible_versions.end()) {
                 compatible_versions.push_back(ver.get<std::string>());
             }
@@ -96,6 +95,13 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
                     }
                 }
                 continue;}
+            bool lm=false;
+            if(cf_mod){
+                for(const auto&gamVer:release["gameVersions"]){
+                    if(pb::McModm::McModm::toLower(gamVer)==loader){lm=true;break;}
+                }
+                if(!lm)continue;
+            }
             for(const auto& local_loader:(cf_mod?release["sortableGameVersions"]:release["loaders"])){
                 if(!cf_mod){
                     if(local_loader.get<std::string>() == loader){
@@ -106,9 +112,8 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
                         }
                     }
                 }else{
-                    if(pb::McModm::McModm::toLower(local_loader["gameVersionName"])!=loader)continue; //Discard non-wanted loaders
                     if(local_loader["gameVersion"].empty())continue; //Doesn't discard ones that matches loader, but discards if the actual version field is empty
-                    std::string gamever = local_loader["gameVersion"].get<std::string>(); std::cout<<gamever<<"\n";
+                    std::string gamever = local_loader["gameVersion"].get<std::string>();
                     if (std::find(compatible_versions.begin(),compatible_versions.end(),gamever) == compatible_versions.end()) {
                         compatible_versions.push_back(gamever);
                     }
