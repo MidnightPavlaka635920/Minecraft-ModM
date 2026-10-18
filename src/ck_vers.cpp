@@ -2,6 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <fstream>
 #include "nlohmann/json.hpp"
 #include "../include/curl_access.h"
 #include <unordered_set>
@@ -10,15 +11,54 @@
 using json = nlohmann::json;
 
 std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::string project_id, const std::string& loader){
+    bool cf_mod = project_id.starts_with("cf:");
+    if(cf_mod)
+        project_id = project_id.substr(3);
     std::vector<std::string> compatible_versions;
-    std::string url = "https://api.modrinth.com/v2/project/" + project_id;
-    std::string versionURL = "https://api.modrinth.com/v2/project/" + project_id+"/version";
-    std::string aboutVersionData;
+    std::string versionURL,url;
+    if(!cf_mod){
+        url = "https://api.modrinth.com/v2/project/" + project_id;
+        versionURL = "https://api.modrinth.com/v2/project/" + project_id+"/version";
+    } else{
+        versionURL = "https://api.curseforge.com/v1/mods/" + project_id+"/files";
+    }
+    std::string aboutVersionData,token;
+    if(cf_mod){
+        #ifdef _WIN32
+        const char* appdata = std::getenv("APPDATA");
+        if (appdata == nullptr) {
+            throw std::runtime_error("APPDATA environment variable not found");
+        }
+        if (!appdata) appdata = ".";
+        std::string folder = std::string(appdata) + "\\mcmodm\\";
+        //filesystem::create_directories(folder);
+        std::string key_path = folder + "api_key.txt";
+
+    #else
+        const char* home = std::getenv("HOME");
+        if (home == nullptr) {
+            throw std::runtime_error("HOME environment variable not found");
+        }
+        if (!home) home = ".";
+        std::string folder = std::string(home) + "/.config/mcmodm/";
+        //std::filesystem::create_directories(folder);
+        std::string key_path = folder + "api_key.txt";
+    #endif
+
+        std::ifstream key(key_path);
+        if(!key.is_open()){
+            throw std::runtime_error("Could not open api_key.txt");
+        }
+        std::getline(key,token);
+    }
+
     try {
-        if(loader.empty()){
-            aboutVersionData = curl_utils::curl_to_string(url);
+        if(!cf_mod){
+            url = curl_utils::curl_to_string(url);
+            if(!cf_mod)
+                aboutVersionData = curl_utils::curl_to_string(versionURL);
         } else{
-            aboutVersionData = curl_utils::curl_to_string(versionURL);
+            aboutVersionData = curl_utils::curl_to_string_with_http_header(versionURL,{"Accept: application/json","x-api-key: " + token},false);
         }
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
@@ -26,16 +66,19 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
     }
 
     //json versionData = json::parse(aboutVersionData);
-    json versionData;
+    json versionData,projectData;
     try {
         versionData = json::parse(aboutVersionData);
+        if(!cf_mod)
+            projectData = json::parse(url);
     } catch (const std::exception& e) {
         std::cerr << "Failed to parse JSON: [" << aboutVersionData << "]\n";
         std::cerr << "Error: " << e.what() << "\n";
         throw std::runtime_error("Failed to parse JSON.");
     }
-    if(loader.empty()){
-        for (const auto& ver : versionData["game_versions"]){
+    if(loader.empty()&&!cf_mod){
+        for (const auto& ver : projectData["game_versions"]){
+            std::cout<<"iwet\n";
             if (std::find(compatible_versions.begin(),compatible_versions.end(),ver.get<std::string>()) == compatible_versions.end()) {
                 compatible_versions.push_back(ver.get<std::string>());
             }
@@ -43,14 +86,33 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
         }
         return compatible_versions;
     } else{
-        for(const auto& release:versionData){
-            for(const auto& local_loader:release["loaders"]){
-                if(local_loader.get<std::string>() == loader){
-                    for(auto& ver:release["game_versions"]){
-                        if (std::find(compatible_versions.begin(),compatible_versions.end(),ver.get<std::string>()) == compatible_versions.end()) {
-                            compatible_versions.push_back(ver.get<std::string>());
+        for(const auto& release:(cf_mod?versionData["data"]:versionData)){
+            if(loader.empty()){
+                for(const auto&gamever:release["sortableGameVersions"]){
+                    if(gamever["gameVersion"].empty())
+                        continue;
+                    if (std::find(compatible_versions.begin(),compatible_versions.end(),gamever["gameVersion"].get<std::string>()) == compatible_versions.end()) {
+                        compatible_versions.push_back(gamever["gameVersion"].get<std::string>());
+                    }
+                }
+                continue;}
+            for(const auto& local_loader:(cf_mod?release["sortableGameVersions"]:release["loaders"])){
+                if(!cf_mod){
+                    if(local_loader.get<std::string>() == loader){
+                        for(auto& ver:release["game_versions"]){
+                            if (std::find(compatible_versions.begin(),compatible_versions.end(),ver.get<std::string>()) == compatible_versions.end()) {
+                                compatible_versions.push_back(ver.get<std::string>());
+                            }
                         }
                     }
+                }else{
+                    if(pb::McModm::McModm::toLower(local_loader["gameVersionName"])!=loader)continue; //Discard non-wanted loaders
+                    if(local_loader["gameVersion"].empty())continue; //Doesn't discard ones that matches loader, but discards if the actual version field is empty
+                    std::string gamever = local_loader["gameVersion"].get<std::string>(); std::cout<<gamever<<"\n";
+                    if (std::find(compatible_versions.begin(),compatible_versions.end(),gamever) == compatible_versions.end()) {
+                        compatible_versions.push_back(gamever);
+                    }
+
                 }
             }
         }
