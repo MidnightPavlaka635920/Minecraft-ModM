@@ -563,8 +563,10 @@ int runMcmodm(const std::vector<std::string>& arguments) {
                 }
             }
             std::cout << "\n";
+            if(!project_id.starts_with("cf")){
             std::cout << yellow<<"Client Side: "<<reset_color << (mod.cs ? green + "Yes" + reset_color : red + "No" + reset_color) << "\n";
             std::cout << yellow<<"Server Side: "<<reset_color << (mod.ss ? green + "Yes" + reset_color : red + "No" + reset_color) << "\n";
+            }
         }
 
     } else if(operation == "lscompl"){
