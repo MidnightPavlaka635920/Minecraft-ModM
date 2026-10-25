@@ -21,27 +21,7 @@ std::vector<ModInfo> pb::McModm::McModm::mod_info(const std::string& query){
     json resp,response;
     std::string token;
     if(cf_mod){
-        #ifdef _WIN32
-        const char* appdata = std::getenv("APPDATA");
-        if (appdata == nullptr) {
-            throw std::runtime_error("APPDATA environment variable not found");
-        }
-        if (!appdata) appdata = ".";
-        std::string folder = std::string(appdata) + "\\mcmodm\\";
-        //filesystem::create_directories(folder);
-        std::string key_path = folder + "api_key.txt";
-
-    #else
-        const char* home = std::getenv("HOME");
-        if (home == nullptr) {
-            throw std::runtime_error("HOME environment variable not found");
-        }
-        if (!home) home = ".";
-        std::string folder = std::string(home) + "/.config/mcmodm/";
-        //std::filesystem::create_directories(folder);
-        std::string key_path = folder + "api_key.txt";
-    #endif
-        std::ifstream key(key_path);
+        std::ifstream key(pb::McModm::McModm::getConfigDir()+"/api_key.txt");
         if(!key.is_open()){
             throw std::runtime_error("Could not open api_key.txt");
         }

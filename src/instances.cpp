@@ -13,20 +13,7 @@ std::string pb::McModm::McModm::getPath(std::string& pathString, std::string& in
         return "";
     }
     std::string default_path = "";
-    #ifdef _WIN32
-        const char* appdata = std::getenv("APPDATA");
-        if (!appdata) appdata = ".";
-        std::string folder = std::string(appdata) + "\\mcmodm\\";
-        //filesystem::create_directories(folder);
-        std::string config_path = folder + "defpath.json";
-
-    #else
-        const char* home = std::getenv("HOME");
-        if (!home) home = ".";
-        std::string folder = std::string(home) + "/.config/mcmodm/";
-        //std::filesystem::create_directories(folder);
-        std::string config_path = folder + "defpath.json";
-    #endif
+    std::string config_path = pb::McModm::McModm::getConfigDir()+"/defpath.json";
     if (std::filesystem::exists(config_path)) {
         std::ifstream config_pt(config_path);
         if (config_pt.is_open()) {
@@ -47,20 +34,7 @@ return "";
 std::unordered_map<std::string, std::string> pb::McModm::McModm::getInstances(){
     std::unordered_map<std::string, std::string> allInstances;
     std::string default_path = "";
-    #ifdef _WIN32
-        const char* appdata = std::getenv("APPDATA");
-        if (!appdata) appdata = ".";
-        std::string folder = std::string(appdata) + "\\mcmodm\\";
-        //filesystem::create_directories(folder);
-        std::string config_path = folder + "instances.json";
-
-    #else
-        const char* home = std::getenv("HOME");
-        if (!home) home = ".";
-        std::string folder = std::string(home) + "/.config/mcmodm/";
-        //std::filesystem::create_directories(folder);
-        std::string config_path = folder + "instances.json";
-    #endif
+    std::string config_path = pb::McModm::McModm::getConfigDir()+"/instances.json";
     if (std::filesystem::exists(config_path)) {
         std::ifstream config_pt(config_path);
         if (config_pt.is_open()) {
@@ -78,21 +52,7 @@ std::unordered_map<std::string, std::string> pb::McModm::McModm::getInstances(){
 return allInstances;
 }
 void pb::McModm::McModm::addInstance(std::string& path, std::string& name){
-    #ifdef _WIN32
-        const char* appdata = std::getenv("APPDATA");
-        if (!appdata) appdata = ".";
-        std::string folder = std::string(appdata) + "\\mcmodm\\";
-        //filesystem::create_directories(folder);
-        std::string config_path = folder + "instances.json";
-
-    #else
-        const char* home = std::getenv("HOME");
-        if (!home) home = ".";
-        std::string folder = std::string(home) + "/.config/mcmodm/";
-        //std::filesystem::create_directories(folder);
-        std::string config_path = folder + "instances.json";
-    #endif
-
+    std::string config_path = pb::McModm::McModm::getConfigDir()+"/instances.json";
     std::ifstream insFile(config_path);
         json insParsed;
 
@@ -109,24 +69,9 @@ void pb::McModm::McModm::addInstance(std::string& path, std::string& name){
     of<<insParsed.dump(4);
 }
 void pb::McModm::McModm::removeInstance(std::string& name){
-    #ifdef _WIN32
-        const char* appdata = std::getenv("APPDATA");
-        if (!appdata) appdata = ".";
-        std::string folder = std::string(appdata) + "\\mcmodm\\";
-        //filesystem::create_directories(folder);
-        std::string config_path = folder + "instances.json";
-
-    #else
-        const char* home = std::getenv("HOME");
-        if (!home) home = ".";
-        std::string folder = std::string(home) + "/.config/mcmodm/";
-        //std::filesystem::create_directories(folder);
-        std::string config_path = folder + "instances.json";
-    #endif
-
     //if(!input.is_open()){throw std::runtime_error("could not open instance file\n");}
     json insParsed;
-
+    std::string config_path = pb::McModm::McModm::getConfigDir()+"/instances.json";
     std::ifstream insFile(config_path);
     if (insFile && insFile.peek() != std::ifstream::traits_type::eof()) {
         insParsed = json::parse(insFile);

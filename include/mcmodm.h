@@ -175,6 +175,8 @@ class McModm{
         //verify_installed.cpp
         // Verify that all installed mods still exist on disk and prompt for missing-file recovery actions
         void verify_all_mods(json&req,InstallFlag&installFlag);
+        //misc.cpp
+        static std::string getConfigDir();
 };
 // Setup a managed installation directory with the given version and loader list
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);
