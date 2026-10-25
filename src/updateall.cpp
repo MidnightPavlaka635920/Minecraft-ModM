@@ -18,6 +18,7 @@ using json = nlohmann::json;
 struct upgradeableModInfo{
     std::string project_id;
     json info;
+    bool alreadyInstalled;
 };
 #include <unordered_set>
 void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<std::string>& loaders, json& req, std::vector<std::string> args) {
@@ -25,7 +26,8 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
     bool checkHash=true;
     if (std::find(args.begin(), args.end(),"-f")!=args.end()||std::find(args.begin(),args.end(),"--force")!=args.end()){
         force=true;
-    } else if(std::find(args.begin(),args.end(),"--noverify")!=args.end()){
+    } 
+    if(std::find(args.begin(),args.end(),"--noverify")!=args.end()){
         checkHash=false;
     }
     if (req[0]["version"] == version&&!force) {
@@ -49,7 +51,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
             continue;
         } else{
             upgradable = can_be_upgraded(project_id, version, info["loader"]);
-            plan.push_back({project_id, info});
+            plan.push_back({project_id, info,true});
             if (force&&upgradable){upgradeableMods.insert(project_id);}
             if (!upgradable) {
                 all_updatable = false;
@@ -63,43 +65,102 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
     InstallFlag useIF = InstallFlag::JustInstall;
     useIF = useIF| (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
     useIF = useIF| (checkHash?InstallFlag::VerifyHash:InstallFlag::None);
+    std::cout<<yellow<<"Getting version info...\n"<<reset_color;
     if (!all_updatable) {
         if (!force){
             std::cout << "Not all packages can be upgraded. Wait for all the packages to become upgradable to the specified version " << version << ", or, run 'mcmodm ck_upd <version to update> <loader> <path to req.json>' to check that.\n";
         return;}
         std::cout << yellow<<"You are forcing this upgrade. ONLY the packages that can be upgraded will be upgraded. Run this in future to update more."<<reset_color<<std::endl;
-        for (auto& mod : plan) {
-            int index = 0;
-            if(!upgradeableMods.contains(mod.project_id)){
-                //std::cout<< yellow << "Package "<<cyan<<project_id<<yellow<<" Is not upgradible to version" << cyan<<version<<reset_color<<std::endl;
+        auto newPlan = plan;
+        std::unordered_set<std::string> plannedIDs;
+        for(const auto&mod:newPlan){
+            plannedIDs.insert(mod.project_id);
+        }
+        json tio;
+        tio.push_back({{"version", version}, {"loader", loaders}}); // keep the same loader(s) as before
+        for(const auto& mod:plan){
+            if(!upgradeableMods.contains(mod.project_id))
+                continue;
+            auto deps = pb::McModm::McModm::get_deps(mod.project_id,"",tio);
+            std::vector<upgradeableModInfo> subplan;
+            for(const auto&thingy: deps){
+                if(plannedIDs.insert(thingy.project_id).second)subplan.push_back({thingy.project_id,json::array(),0});
+            }
+            newPlan.insert(newPlan.end(), subplan.begin(), subplan.end());
+        }
+        std::cout<<yellow<<"Will be installed: "<<reset_color<<"\n";
+        for(const auto&mod:newPlan)
+            std::cout<<(mod.alreadyInstalled?green:yellow)<<mod.project_id<<cyan<<" ("<<mod.project_id<<") ";
+        std::cout<<reset_color<<"\n";
+        std::string prompt;
+        std::cout << "Install these?(Y/n): ";
+        std::getline(std::cin,prompt);
+        if(prompt!="Y"&&prompt!="y"&&!prompt.empty()){std::cout<<"abort\n";return;}
+        int index = 1;
+        for (auto& mod : newPlan) {
+            std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(newPlan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
+            if(is_installed(mod.project_id)){
+                std::cout<<"This project is already installed.\nSkipping.\n";
+                index++;
                 continue;
             }
-            remove_package(mod.project_id, true,apm);
+            if(mod.alreadyInstalled)
+                remove_package(mod.project_id, true,apm);
             json ti;
-            ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
-            std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
-            install_mod(mod.project_id, ti, (const std::string)"",useIF);
+            if(mod.alreadyInstalled){
+                ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
+            }
+            install_mod(mod.project_id, (mod.alreadyInstalled?ti:tio), (const std::string)"",useIF);
             index++;
         }
-    }
-    int index = 0;
-    for (auto& mod:plan) {
-            bool up_to_date = false;
-            if(mod.info["game_version"] == version){
-                std::cout << "Package " << mod.project_id << " is already up to date for version " << version << ". Skipping.\n";
-                up_to_date = true;
-                continue;
+    } else{
+        int index = 1;
+        auto newPlan = plan;
+        std::unordered_set<std::string> plannedIDs;
+        for(const auto&mod:newPlan)
+            plannedIDs.insert(mod.project_id);
+        json tio;
+        tio.push_back({{"version", version}, {"loader", loaders}}); // keep the same loader(s) as before
+        for(const auto& mod:plan){
+            auto deps = pb::McModm::McModm::get_deps(mod.project_id,"",tio);
+            std::vector<upgradeableModInfo> subplan;
+            for(const auto&thingy: deps){
+                if(plannedIDs.insert(thingy.project_id).second)subplan.push_back({thingy.project_id,json::array(),0});
             }
-            if(!up_to_date){
-                remove_package(mod.project_id, true,apm);
-                json ti;
-                ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
-                std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(plan.size())<<"] "<<"Installing " << mod.project_id << "...\n"<<reset_color;
-                install_mod(mod.project_id, ti, (const std::string)"",useIF);
-                //continue;
-                index++;
-            }
-        
+            newPlan.insert(newPlan.end(), subplan.begin(), subplan.end());
+        }
+        std::cout<<yellow<<"Will be installed: "<<reset_color<<"\n";
+        for(const auto&mod:newPlan)
+            std::cout<<(mod.alreadyInstalled?green:yellow)<<mod.project_id<<cyan<<" ("<<mod.project_id<<") ";
+        std::cout<<reset_color<<"\n";
+        std::string prompt;
+        std::cout << "Install these?(Y/n): ";
+        std::getline(std::cin,prompt);
+        if(prompt!="Y"&&prompt!="y"&&!prompt.empty()){std::cout<<"abort\n";return;}
+        for (auto& mod:newPlan) {
+                std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(newPlan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
+                bool up_to_date = false;
+                if(mod.alreadyInstalled){
+                    if(mod.info["game_version"] == version){
+                        std::cout << "Package " << mod.project_id << " is already up to date for version " << version << ". Skipping.\n";
+                        up_to_date = true;
+                        continue;
+                    }
+                }
+                if(!up_to_date){
+                    if(mod.alreadyInstalled)
+                        remove_package(mod.project_id, true,apm);
+                    json ti;
+                    if(mod.alreadyInstalled){
+                        ti.push_back({{"version", version}, {"loader", json::array({mod.info["loader"]})}}); // keep the same loader(s) as before
+                    }
+                    install_mod(mod.project_id, (mod.alreadyInstalled?ti:tio), (const std::string)"",useIF);
+
+                    //continue;
+                    index++;
+                }
+            
+        }
     }
     std::string req_path = install_path;
     if (!req_path.empty() && req_path.back() != '/')

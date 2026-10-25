@@ -353,7 +353,6 @@ std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project
     }
     std::string aboutVersionData;
     std::string projectDataRaw;
-    std::cout << "Fetching versions...\n";
 
     std::string token;
     if(cf_mod){
