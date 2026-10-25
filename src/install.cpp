@@ -52,7 +52,18 @@ bool pb::McModm::McModm::McModm::matchesLoader(
 
     return false;
 }
-
+std::string getExpectedHASh(const json&release,bool cf_mod){
+    if(!cf_mod){
+        return release["files"][0]["hashes"]["sha512"].get<std::string>(); 
+    }
+    std::string target;
+    for(const auto&hash:release["hashes"]){
+        if(hash.value("algo",0)!=1){continue;}
+        target=hash.value("value","N/A");
+        break;
+    }
+    return target;
+}
 void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag) {
     bool cf_mod = false;
     std::string project_id = pn;
@@ -243,8 +254,8 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                 //filename = release["fileName"];
             }
             std::string expected_hash,file_hash;
-            if(!cf_mod)                                                                                                                 //FIX LATER
-                expected_hash = release["files"][0]["hashes"]["sha512"];
+            //if(!cf_mod)                                                                                                                 //FIX LATER
+            expected_hash = getExpectedHASh(release, cf_mod);
             if (autoPathManagement){
                 std::filesystem::path subfolder;
                 if(!cf_mod){
@@ -264,12 +275,12 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
             std::cout << "Downloading to: " << out_file << "\n";
 
             try {
-                curl_utils::curl_download_file(dl_url, out_file, file_hash);
+                curl_utils::curl_download_file(dl_url, out_file, file_hash,(cf_mod?"sha1":"sha512"));
                 std::cout << "\nDownload complete.\n";
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
             }
-            if(checkHash&&(!cf_mod)){                                                       //FIX LATER!!!
+            if(checkHash){
                 if(file_hash!=expected_hash){
                     std::cout<<red<<"Hashes are not matching!\nAboritng!"<<reset_color;
                     std::cout<<"Expected hash: "<<expected_hash<<"\n";

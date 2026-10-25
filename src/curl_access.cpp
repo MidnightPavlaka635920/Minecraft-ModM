@@ -123,7 +123,7 @@ static size_t write_file(void* ptr, size_t size, size_t nmemb, void* stream) {
     return total;
 }
 
-void pb::curl_utils::curl_download_file(const std::string& url, const std::string& output_path, std::string& hash_string, bool doProgressAnimation) {
+void pb::curl_utils::curl_download_file(const std::string& url, const std::string& output_path, std::string& hash_string, std::string algo,bool doProgressAnimation) {
     CURL* curl = curl_easy_init();
     if (!curl)
         throw std::runtime_error("curl init failed");
@@ -132,7 +132,11 @@ void pb::curl_utils::curl_download_file(const std::string& url, const std::strin
     if (!fp)
         throw std::runtime_error("cannot open output file");
     EVP_MD_CTX* hash = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(hash, EVP_sha512(), nullptr);
+    if(algo=="sha512"){
+        EVP_DigestInit_ex(hash, EVP_sha512(), nullptr);
+    }else if(algo=="sha1"){
+        EVP_DigestInit_ex(hash, EVP_sha1(),nullptr);
+    }
 
     DownloadData ctx{
         .file = fp,

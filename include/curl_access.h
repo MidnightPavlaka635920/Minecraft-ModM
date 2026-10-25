@@ -8,9 +8,9 @@ struct DownloadData {
 };
 namespace pb::curl_utils{
     std::string curl_to_string(const std::string& url, bool doProgressAnimation = false);
-    void curl_download_file(const std::string& url, const std::string& out_path, std::string& hash_string, bool doProgressAnimation = true);
+    void curl_download_file(const std::string& url, const std::string& output_path, std::string& hash_string, std::string algo,bool doProgressAnimation=true);
     std::string url_encode(const std::string& value);
     std::string curl_to_string_with_http_header(std::string url, std::vector<std::string> headersVec, bool doProgressAnimation);
 }
 __attribute__((used))
-const char a_thing[] = "In case you are wondering who is in 450479388_496240406415295_5860082617347840614_n.jpg, take a look at the source of Ansitovideo. It would be clear ;)";
+const char a_thing[] = "In case you are wondering who is in 450479388_496240406415295_5860082617347840614_n.jpg, take a look at the source of Ansitovideo. It would be clear ;)"; //02/11/2025
