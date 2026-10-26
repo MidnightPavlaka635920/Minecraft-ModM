@@ -173,7 +173,7 @@ std::filesystem::path pb::McModm::McModm::McModm::getInstallDirectory(ProjectTyp
 }
 bool pb::McModm::McModm::verify_mod(std::string project_id, json& packages,bool apm){
     std::string pType = packages["installed"][project_id]["type"];
-    std::string mod_path = install_path +"/"+pb::McModm::McModm::getInstallDirectory(pb::McModm::McModm::getProjectType(pType)).string()+"/";
+    std::string mod_path = install_path +"/"+pb::McModm::McModm::getInstallDirectory((project_id.starts_with("cf:")?getProjectTypeCF(packages["installed"][project_id]["cf_type"]):pb::McModm::McModm::getProjectType(pType))).string()+"/";
     mod_path+=packages["installed"][project_id]["file"];
     std::filesystem::path p(mod_path);
     return std::filesystem::exists(mod_path);
