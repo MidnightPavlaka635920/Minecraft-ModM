@@ -211,41 +211,64 @@ static size_t write_file(void* ptr, size_t size, size_t nmemb, void* stream) {
     size_t total = size*nmemb;
     if (fwrite(ptr, 1, total, ctx->file) != total)
         return 0;
-    EVP_DigestUpdate(ctx->hash,ptr,total);
+    if (ctx->hash && EVP_DigestUpdate(ctx->hash, ptr, total) != 1)
+        return 0;
     return total;
 }
-
 void pb::curl_utils::curl_download_file(const std::string& url, const std::string& output_path, std::string& hash_string, std::string algo,bool doProgressAnimation) {
+    const EVP_MD* md = nullptr;
+
+    if (algo == "sha512")
+        md = EVP_sha512();
+    else if (algo == "sha1")
+        md = EVP_sha1();
+    else if (algo != "none")
+        throw std::invalid_argument("Unsupported hash algorithm: " + algo);
+
     CURL* curl = curl_easy_init();
     if (!curl)
         throw std::runtime_error("curl init failed");
 
     FILE* fp = fopen(output_path.c_str(), "wb");
-    if (!fp)
+    if (!fp) {
+        curl_easy_cleanup(curl);
         throw std::runtime_error("cannot open output file");
-    EVP_MD_CTX* hash = EVP_MD_CTX_new();
-    if(algo=="sha512"){
-        EVP_DigestInit_ex(hash, EVP_sha512(), nullptr);
-    }else if(algo=="sha1"){
-        EVP_DigestInit_ex(hash, EVP_sha1(),nullptr);
+    }
+
+    EVP_MD_CTX* hash = nullptr;
+
+    if (md) {
+        hash = EVP_MD_CTX_new();
+
+        if (!hash || EVP_DigestInit_ex(hash, md, nullptr) != 1) {
+            EVP_MD_CTX_free(hash);
+            fclose(fp);
+            curl_easy_cleanup(curl);
+            throw std::runtime_error("hash initialization failed");
+        }
     }
 
     DownloadData ctx{
         .file = fp,
         .hash = hash
     };
-    #ifdef _WIN32
-        char exe_path[MAX_PATH];
-        GetModuleFileNameA(NULL, exe_path, MAX_PATH);
-        std::string exe_dir = std::string(exe_path);
-        exe_dir = exe_dir.substr(0, exe_dir.find_last_of("\\/"));
-        std::string ca_path = exe_dir + "\\cacert.pem";
-        curl_easy_setopt(curl, CURLOPT_CAINFO, ca_path.c_str());
-    #endif
+
+#ifdef _WIN32
+    char exe_path[MAX_PATH];
+    GetModuleFileNameA(NULL, exe_path, MAX_PATH);
+
+    std::string exe_dir(exe_path);
+    exe_dir = exe_dir.substr(0, exe_dir.find_last_of("\\/"));
+
+    std::string ca_path = exe_dir + "\\cacert.pem";
+    curl_easy_setopt(curl, CURLOPT_CAINFO, ca_path.c_str());
+#endif
+
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ctx);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
     ProgressData progress;
 
     if (doProgressAnimation) {
@@ -256,31 +279,50 @@ void pb::curl_utils::curl_download_file(const std::string& url, const std::strin
     } else {
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
     }
+
     CURLcode res = curl_easy_perform(curl);
-    if (res != CURLE_OK){
+
+    if (doProgressAnimation)
+        std::cout << '\n';
+
+    if (res != CURLE_OK) {
         std::string error = curl_easy_strerror(res);
+
         curl_easy_cleanup(curl);
         fclose(fp);
         EVP_MD_CTX_free(hash);
-        throw std::runtime_error("download failed: "+ error);
-    }
-    unsigned char digest[EVP_MAX_MD_SIZE];
-    unsigned int digest_len;
 
-    EVP_DigestFinal_ex(hash, digest, &digest_len);
+        throw std::runtime_error("download failed: " + error);
+    }
+
+    if (hash) {
+        unsigned char digest[EVP_MAX_MD_SIZE];
+        unsigned int digest_len = 0;
+
+        if (EVP_DigestFinal_ex(hash, digest, &digest_len) != 1) {
+            curl_easy_cleanup(curl);
+            fclose(fp);
+            EVP_MD_CTX_free(hash);
+            throw std::runtime_error("hash finalization failed");
+        }
+
+        std::ostringstream ss;
+
+        for (unsigned int i = 0; i < digest_len; ++i) {
+            ss << std::hex
+               << std::setw(2)
+               << std::setfill('0')
+               << static_cast<unsigned int>(digest[i]);
+        }
+
+        hash_string = ss.str();
+    } else {
+        hash_string.clear();
+    }
+
     fclose(fp);
     curl_easy_cleanup(curl);
-    std::ostringstream ss;
-
-    for (unsigned int i = 0; i < digest_len; ++i) {
-        ss << std::hex
-           << std::setw(2)
-           << std::setfill('0')
-           << static_cast<unsigned int>(digest[i]);
-    }
-
-    hash_string = ss.str();
-
+    EVP_MD_CTX_free(hash);
 }
 std::string pb::curl_utils::curl_to_string_with_http_header(std::string url, std::vector<std::string> headersVec, bool doProgressAnimation){
     CURL* curl = curl_easy_init();

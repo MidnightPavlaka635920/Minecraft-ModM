@@ -143,6 +143,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
                 if(mod.alreadyInstalled){
                     if(mod.info["game_version"] == version){
                         std::cout << "Package " << mod.project_id << " is already up to date for version " << version << ". Skipping.\n";
+                        index++;
                         up_to_date = true;
                         continue;
                     }
