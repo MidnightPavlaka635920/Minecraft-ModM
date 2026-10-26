@@ -98,7 +98,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
         if(prompt!="Y"&&prompt!="y"&&!prompt.empty()){std::cout<<"abort\n";return;}
         int index = 1;
         for (auto& mod : newPlan) {
-            std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(newPlan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
+            std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(newPlan.size())<<"] "<<"Installing " << mod.project_id << "..."<<reset_color<<"\n";
             if(is_installed(mod.project_id)){
                 std::cout<<"This project is already installed.\nSkipping.\n";
                 index++;
@@ -138,7 +138,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
         std::getline(std::cin,prompt);
         if(prompt!="Y"&&prompt!="y"&&!prompt.empty()){std::cout<<"abort\n";return;}
         for (auto& mod:newPlan) {
-                std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(newPlan.size())<<"] "<<"Installing " << mod.project_id << "...\n";
+                std::cout << green << "["<<std::to_string(index)<<"/"<<std::to_string(newPlan.size())<<"] "<<"Installing " << mod.project_id << "..."<<reset_color<<"\n";
                 bool up_to_date = false;
                 if(mod.alreadyInstalled){
                     if(mod.info["game_version"] == version){

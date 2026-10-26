@@ -13,8 +13,10 @@
 #include <curl/curl.h>
 #include <stdexcept>
 #include <iostream>
+#include <chrono>
+#include <algorithm>
 #include "../include/curl_access.h"
-size_t progress_print(void* ptr, curl_off_t total, curl_off_t now, curl_off_t, curl_off_t){
+/*size_t progress_print(void* ptr, curl_off_t total, curl_off_t now, curl_off_t, curl_off_t){
     if (total >0){
         float progress = (float)now / total;
         int ppo = progress * 100;
@@ -32,6 +34,92 @@ size_t progress_print(void* ptr, curl_off_t total, curl_off_t now, curl_off_t, c
     } else {
         std::cout << "\rDownloading... " << now << " bytes";
     }
+    return 0;
+}*/
+struct ProgressData {
+    curl_off_t lastBytes = 0;
+    std::chrono::steady_clock::time_point lastTime =
+        std::chrono::steady_clock::now();
+    double speed = 0.0;
+};
+
+static void format_size(double bytes, char* out, size_t size) {
+    const char* units[] = {"B", "K", "M", "G", "T"};
+    int unit = 0;
+
+    while (bytes >= 1024.0 && unit < 4) {
+        bytes /= 1024.0;
+        ++unit;
+    }
+
+    if (unit == 0)
+        snprintf(out, size, "%.0f %s", bytes, units[unit]);
+    else
+        snprintf(out, size, "%.1f %sB", bytes, units[unit]);
+}
+
+int progress_print(
+    void* ptr,
+    curl_off_t total,
+    curl_off_t now,
+    curl_off_t,
+    curl_off_t
+) {
+    auto* p = static_cast<ProgressData*>(ptr);
+
+    auto currentTime = std::chrono::steady_clock::now();
+    double elapsed = std::chrono::duration<double>(
+        currentTime - p->lastTime
+    ).count();
+
+    if (elapsed >= 0.5) {
+        p->speed = std::max(
+            0.0,
+            static_cast<double>(now - p->lastBytes) / elapsed
+        );
+
+        p->lastBytes = now;
+        p->lastTime = currentTime;
+    }
+
+    constexpr int barWidth = 50;
+    double fraction = total > 0
+        ? std::clamp(
+            static_cast<double>(now) / total, 0.0, 1.0
+          )
+        : 0.0;
+
+    int filled = static_cast<int>(barWidth * fraction);
+
+    char downloaded[32], totalSize[32], speed[32];
+    format_size(static_cast<double>(now), downloaded,
+                sizeof(downloaded));
+    format_size(static_cast<double>(total), totalSize,
+                sizeof(totalSize));
+    format_size(p->speed, speed, sizeof(speed));
+
+    std::cout << "\r[";
+
+    for (int i = 0; i < barWidth; ++i)
+        std::cout << (i < filled ? "#" : "-");
+
+    std::cout << "] ";
+
+    if (total > 0)
+        std::cout << std::fixed << std::setprecision(1)
+                  << fraction * 100.0 << "% ";
+    else
+        std::cout << "??.?% ";
+
+    std::cout << downloaded << " / ";
+
+    if (total > 0)
+        std::cout << totalSize;
+    else
+        std::cout << "unknown";
+
+    std::cout << "  " << speed << "/s" << std::flush;
+
     return 0;
 }
 static size_t curl_write_cb(void* contents, size_t size, size_t nmemb, void* userp)
@@ -63,8 +151,12 @@ std::string pb::curl_utils::curl_to_string(const std::string& url, bool doProgre
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "mcpm/0.1 (libcurl)");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result);
-        if (doProgressAnimation){
-        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_print);
+    ProgressData progress;
+
+    if (doProgressAnimation) {
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION,
+                         progress_print);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &progress);
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
     } else {
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
@@ -154,11 +246,16 @@ void pb::curl_utils::curl_download_file(const std::string& url, const std::strin
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ctx);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    if (doProgressAnimation){
-        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_print);
-        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    }
+    ProgressData progress;
 
+    if (doProgressAnimation) {
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION,
+                         progress_print);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &progress);
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    } else {
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+    }
     CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK){
         std::string error = curl_easy_strerror(res);
@@ -210,8 +307,12 @@ std::string pb::curl_utils::curl_to_string_with_http_header(std::string url, std
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "mcpm/0.1 (libcurl)");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result);
-    if (doProgressAnimation){
-        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_print);
+    ProgressData progress;
+
+    if (doProgressAnimation) {
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION,
+                         progress_print);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &progress);
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
     } else {
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
