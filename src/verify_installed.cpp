@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include "../include/mcmodm.h"
 #include "../include/color.h"
+#include <format>
 using json = nlohmann::json;
 
 void pb::McModm::McModm::verify_all_mods(json&req,InstallFlag&installFlag){
@@ -28,20 +29,23 @@ void pb::McModm::McModm::verify_all_mods(json&req,InstallFlag&installFlag){
     std::string wtd;
     std::getline(std::cin,wtd);
     if(wtd == "N"||wtd=="n"){std::cout<<"\nQuiting\n";return;}
-    
     else if(wtd.empty()||wtd=="R"||wtd=="r"){
+        int index = 1; 
         std::cout<<"Reinstalling mods...\n";
         InstallFlag useIF = installFlag|InstallFlag::JustInstall;
         for(const auto&mod:missing){
-            std::cout<<yellow<<"Installing "<<mod<<reset_color<<"\n";
+            std::cout<<std::format("{}[{}/{}] Reinstalling {}...{}\n",yellow,index,missing.size(),mod,reset_color);
             install_mod(mod, req,"",useIF);
+            ++index;
         }
         std::cout<<green<<"All done!\n"<<reset_color;
     } else if(wtd=="U"||wtd=="u"){
+        int index = 1;
         std::cout<<"Removing mods...\n";
         for(const auto&mod:missing){
-            std::cout<<yellow<<"Removing "<<mod<<reset_color<<"\n";
+            std::cout<<std::format("{}[{}/{}] Removing {}...{}\n",yellow,index,missing.size(),mod,reset_color);
             remove_package(mod, false, apm);
+            ++index;
         }
         std::cout<<green<<"All done!\n"<<reset_color;
     } else{std::cout<<red<<"Unsupported command.\nQuitting\n"<<reset_color;}

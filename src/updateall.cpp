@@ -168,7 +168,7 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
         req_path += '/';
     req_path += "req.json";
     json req_s;
-    req_s.push_back({{"version", version}, {"loader", loaders}});
+    req_s.push_back({{"apm",apm},{"version", version}, {"loader", loaders}});
     std::ofstream ofs(req_path);
     if (!ofs.is_open()) {
         std::cerr << "Failed to write req.json to " << req_path << "\n";

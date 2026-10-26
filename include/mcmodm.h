@@ -5,6 +5,9 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include <filesystem>
+#include <format>
+#include "color.h"
+#include <utility>
 using json = nlohmann::json;
 enum class ProjectType{Mod, ModPack, ResourcePack, Shader, NONE};
 struct search_result {
@@ -177,7 +180,14 @@ class McModm{
         void verify_all_mods(json&req,InstallFlag&installFlag);
         //misc.cpp
         static std::string getConfigDir();
-};
+        template<typename... Args>
+        std::string colored(const std::string& color,
+                            std::format_string<Args...> fmt,
+                            Args&&... args) {
+            return color + std::format(fmt, std::forward<Args>(args)...)
+                         + reset_color;
+        }
+    };
 // Setup a managed installation directory with the given version and loader list
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);
 
