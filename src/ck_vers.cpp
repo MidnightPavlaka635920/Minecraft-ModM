@@ -34,8 +34,7 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
     try {
         if(!cf_mod){
             url = curl_utils::curl_to_string(url);
-            if(!cf_mod)
-                aboutVersionData = curl_utils::curl_to_string(versionURL);
+            aboutVersionData = curl_utils::curl_to_string(versionURL);
         } else{
             aboutVersionData = curl_utils::curl_to_string_with_http_header(versionURL,{"Accept: application/json","x-api-key: " + token},false);
         }
@@ -106,10 +105,25 @@ std::vector<std::string> pb::McModm::McModm::list_compatible_versions(std::strin
 
 std::vector<std::string> pb::McModm::McModm::list_comp_loaders(std::string& version, std::string& project_id){
     std::vector<std::string> compatible_versions;
-    std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
-    std::string aboutVersionData;
+    bool cf_mod = false;
+    if(project_id.starts_with("cf:")){
+        cf_mod=true;
+        project_id = project_id.substr(3);
+    }
+    std::string url = (cf_mod?"https://api.curseforge.com/v1/mods/"+project_id+"/files":"https://api.modrinth.com/v2/project/" + project_id + "/version");
+    std::string aboutVersionData,token;
+    if(cf_mod){
+        std::ifstream key(pb::McModm::McModm::getConfigDir()+"/api_key.txt");
+        if(!key.is_open()){
+            throw std::runtime_error("Could not open api_key.txt");
+        }
+        std::getline(key,token);
+    }
     try {
-        aboutVersionData = curl_utils::curl_to_string(url);
+        if(!cf_mod)
+            aboutVersionData = curl_utils::curl_to_string(url);
+        else
+            aboutVersionData = curl_utils::curl_to_string_with_http_header(url,{"Accept: application/json","x-api-key: " + token},false);
     } catch (const std::exception& e) {
         std::cerr << "Error fetching versions: " << e.what() << "\n";
         throw std::runtime_error("Error fetching versions.");
@@ -124,16 +138,27 @@ std::vector<std::string> pb::McModm::McModm::list_comp_loaders(std::string& vers
         std::cerr << "Error: " << e.what() << "\n";
         throw std::runtime_error("Failed to parse JSON.");
     }
-    for (const auto& release: versionData){
-        for (const auto& ver: release["game_versions"]){
-            if (ver.get<std::string>() == version){
-                for (const auto& loader: release["loaders"]){
-                    if (std::find(compatible_versions.begin(),
-                      compatible_versions.end(),
-                      loader.get<std::string>()) == compatible_versions.end()) {
-                        compatible_versions.push_back(loader.get<std::string>());
+    if(!cf_mod){
+        for (const auto& release: versionData){
+            for (const auto& ver: release["game_versions"]){
+                if (ver.get<std::string>() == version){
+                    for (const auto& loader: release["loaders"]){
+                        if (std::find(compatible_versions.begin(),
+                          compatible_versions.end(),
+                          loader.get<std::string>()) == compatible_versions.end()) {
+                            compatible_versions.push_back(loader.get<std::string>());
+                        }
                     }
                 }
+            }
+        }
+    }else{
+        for(const auto&release:versionData["data"]){
+            if(std::find(release["gameVersions"].begin(), release["gameVersions"].end(), version)==release["gameVersions"].end()&&!version.empty())continue;
+            for(auto&sgv:release["sortableGameVersions"]){
+                if(!sgv["gameVersion"].get<std::string>().empty())continue;
+                if(std::find(compatible_versions.begin(),compatible_versions.end(),sgv["gameVersionName"].get<std::string>()) != compatible_versions.end())continue;
+                compatible_versions.push_back(sgv["gameVersionName"].get<std::string>());
             }
         }
     }
@@ -143,7 +168,6 @@ std::vector<std::string> pb::McModm::McModm::list_comp_loaders(std::string& vers
 std::vector<version_names_info> pb::McModm::McModm::list_version_nums(const std::string& project_id, const std::string& game_version){
     const std::string url = "https://api.modrinth.com/v2/project/" + project_id + "/version";
     json releases;
-    std::cout<<url<<"\n";
     try{
         std::string raw_releases = pb::curl_utils::curl_to_string(url);
         releases = json::parse(raw_releases);
