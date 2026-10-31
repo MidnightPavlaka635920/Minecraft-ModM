@@ -1,6 +1,6 @@
 # Minecraft-ModM
 
-A CLI tool for managing Minecraft mods/plugins for servers.
+A CLI tool for managing Minecraft mods/plugins for servers. Supports both Modrinth and CurseForge mods.
 
 ## About
 
@@ -33,7 +33,7 @@ Then, you have to install the program. Installation is different for both Window
 3. Run `cmd.exe` (`Win+R`, type `cmd`, press `Enter`), or easier, open terminal from the folder where `mcmodm.exe` is stored. If you do so, skip step 4.
 4. `cd` into folder where you extracted zip, the folder is called `wb`.
 5. Run `.\mcmodm.exe <options>`
-6. You should download CA certificate from <a href='https://curl.se/docs/caextract.html'>here</a> and copy them into the same folder as `mcmodm.exe` if it doesn't work, but now it is included in `.zip`. **Note** that you will have to rename file co `cacert.pem`.
+6. You should download CA certificate from <a href='https://curl.se/docs/caextract.html'>here</a> and copy it into the same folder as `mcmodm.exe` if it doesn't work, but now it is included in `.zip`. **Note** that you will have to rename file co `cacert.pem`.
 
 ### Linux (Debian)
 
@@ -65,7 +65,8 @@ yay -S mcmodm
    - Multiple loaders can be set by listing them after `<version>`.
 3. (Optional) Set a default path by creating a config file when running `mcmodm setup ..`. You should press `y` when the setup asks you to, and it will be done.
 4. (**For clients ONLY**) When prompted for automatic path management, say **y**(yes). If it is an server, say **n**(no)!
-5. You are ready
+5. If you are going to use CurseForge mods, follow steps from **CurseForge API** section.
+6. You are ready
 
 ## Managing instances
 Instances are added in v2.0
@@ -186,9 +187,11 @@ Commands:
 - Show detailed info for a project:  
   `mcmodm info <project_id>`
 - List compatible loaders for specific version of the project:
-  `lscompl <version> <project_id>`
+  `mcmodm lscompl <version> <project_id>`
+  
+  Example:`mcmodm lscompl 26.3 cf:394468`
 - Print information about setup:
-  `setupinfo [path]`
+  `mcmodm setupinfo [path]`
 - Verify installed mods still exist on disk:
   `mcmodm verify_installed [path]`
   - Checks each installed package against the actual files in the target folder.
@@ -202,6 +205,25 @@ Commands:
   `mcmodm instance rm <instance_name>`
   `mcmodm instance ls`
 **IMPORTANT** By `[path]`, I also mean -i/-p. Those two override default path. Also, -i/-p isn't supported for `setup` and all `instance` commands
+## CurseForge support
+
+`mcmodm` also supports CurseForge mods and plugins.
+
+To use it, put your CurseForge API key in one of these files:
+
+- Linux/macOS: `~/.config/mcmodm/api_key.txt`
+- Windows: `%APPDATA%\mcmodm\api_key.txt`
+
+Then use the project ID prefixed with `cf:`:
+
+```bash
+mcmodm search sodium
+mcmodm install cf:1234567 -p /srv/minecraft/plugins
+mcmodm info cf:1234567
+mcmodm listver cf:1234567
+```
+
+The `cf:` prefix tells `mcmodm` to query CurseForge instead of Modrinth. This works for searching, install, info, and version listing where the API is available.
 ## Compiling yourself
 
 ### App
@@ -220,6 +242,8 @@ You should run `make shared` to make the shared object file, and then `sudo make
 - (OPTIONAL, BUT USEFUL) Add folder where `mcmodm.exe` is located to the PATH, there are online tutorials for that. If you do that, you can run the program from any place on disk inside of CMD.
 - Modrinth API works with both slugs and project IDs, but this tool uses project IDs since they are more reliable, don’t change, and you can't run `mcmodm install sodium [path]`. I tried, it failed
 - For Resource packs or datapacks, the loader is called `minecraft`!
+- For shaders, loaders are called `iris` and `optifine`.
+- **When installing CurseForge mods, there for their IDs, there should be `cf:` begining. If it isn't there, add it.**
 ## How to use this program?
 
 - Open the shell
@@ -239,6 +263,16 @@ Then, you can do `easy_install` like this, follow instructions that you get by t
 ```bash
 mcmodm easy_install
 ```
+## CurseForge API
+If you are planning to use CurseForge, you will need to obtain yourself an CurseForge API key. Tho it is needed for general usage too. (W/o the key search and easy_install will fail)
+### How to obtain it:
+    1. Make an account on CurseForge for studios.
+    2. Get yourself a key.
+    3. Put your **private** key into `/home/<yourusername>/.config/mcmodm/api_key.txt` on Linux or `%APPDATA%\mcmodm\api_key.txt` on Windows.
+        I should and probably will automate key saving in next release.
+### Notes about it
+    - Do not share it with others, please. API is free.
+    - If API suddenly stops working (you will see when searching) but it worked before, get yourself a new API key.
 
 ## Shared Library
 
@@ -246,3 +280,7 @@ So, if you want to use my shared library with `main.cpp` of this program, you ha
 	- change this line `#include "../include/setup.h"` to `#include "pbmcmodm/setup.h"`
 	- repeat that for `color.h` and `mcmodm.h`
 	- That is it.
+
+## Shell usage
+
+You can use `mcmodm` either as a normal CLI program or as an interactive shell.

@@ -101,11 +101,18 @@ void help(){
     << "  mcmodm> help\n"
     << "  mcmodm> list -i my_server\n"
     << "  mcmodm install sodium -p /srv/minecraft/plugins\n"
+    << "  mcmodm install cf:1234567 -p /srv/minecraft/plugins\n"
     << "  mcmodm verify_installed -i my_server\n"
     << "  mcmodm instance add prod /srv/minecraft/plugins\n"
     << "Note: [path] arguments are optional if a default path is configured via config file.\n"
+    << "\nCurseForge support:\n"
+    << "  Use 'cf:<project_id>' to target a CurseForge project, for example:\n"
+    << "    mcmodm install cf:1234567 -p /srv/minecraft/plugins\n"
+    << "    mcmodm info cf:1234567\n"
+    << "  Put your CurseForge API key in ~/.config/mcmodm/api_key.txt\n"
+    << "  (Windows: %APPDATA%\\mcmodm\\api_key.txt)\n"
     << "Also, in most commands, you can specify path with -p <path> or -i <instance_name>\n"
-    << "Version 2.2\n";
+    << "Version 3.0\n";
 }
 int runMcmodm(const std::vector<std::string>& arguments) {
     //if (arguments.size() < 2) {
@@ -271,15 +278,16 @@ int runMcmodm(const std::vector<std::string>& arguments) {
         //req = json::array({{{"version", version}, {"loader", loaders}}});
         req[0]["version"] = version;
         req[0]["loaders"] = loaders;
-        //size_t modsamm = mods.size();
-        //int index = 0;
-        //for (const auto& mod:mods){
-        //             // mod name or slug
-        //    std::cout << green << "["<<std::to_string(index+1)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
+        size_t modsamm = mods.size();
+        int index = 0;
+        for (const auto& mod:mods){
+                     // mod name or slug
+            std::cout << green << "["<<std::to_string(index+1)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
             InstallFlag tempIF = InstallFlag::None;
             tempIF = tempIF | (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
             tempIF = tempIF | (checkHash?InstallFlag::VerifyHash:InstallFlag::None);
             modm.install_wrapper(mods, req,version_number,tempIF,InstallWrapper::NoCheckInstalled);
+        }
         //    ++index;
         //}
         //std::string pn = argv[2];          // mod name or slug
