@@ -162,7 +162,6 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
     bool found = false;
     bool ver_comp = false, loa_comp = false;
     for (auto& release : (cf_mod? mainData["data"]:mainData)) {
-        bool ver_comp = false, loa_comp = false;
         std::string loader_to_use = "";
         if (useVersionNumber &&(!cf_mod)){
             if(versionString==release["version_number"].get<std::string>()){
@@ -397,7 +396,6 @@ std::vector<Dependency> pb::McModm::McModm::get_deps(const std::string&project_i
     bool found = false;
     bool ver_comp = false, loa_comp = false;
      for (auto& release : (cf_mod? mainData["data"]:mainData)) {
-        bool ver_comp = false, loa_comp = false;
         std::string loader_to_use = "";
         if (useVersionNumber &&(!cf_mod)){
             if(version_number==release["version_number"].get<std::string>()){

@@ -1,6 +1,5 @@
 3
 - Add dep handling for removal
-- Fix shadowed variables.
 - Prevent infinite recursion.
 - Only recursively resolve required dependencies.
 
