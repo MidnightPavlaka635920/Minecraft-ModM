@@ -13,6 +13,7 @@ using json = nlohmann::json;
 #include "../include/color.h"
 std::string name;
 #include <cctype>
+#include <format>
 std::string pb::McModm::McModm::toLower(std::string str) {
     std::transform(str.begin(), str.end(), str.begin(),
         [](unsigned char c) {
@@ -324,7 +325,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
 
 
 
-std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag){
+std::vector<Dependency> pb::McModm::McModm::get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag){
     bool cf_mod = false;
     std::string project_id_n = project_id;
     if(project_id.starts_with("cf:")){
@@ -332,7 +333,7 @@ std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project
         cf_mod = true;
     }
 
-    std::vector<areUpdatable> deps;
+    std::vector<Dependency> deps;
     bool useVersionNumber = !version_number.empty();
     std::string game_ver = req[0]["version"].get<std::string>();
     std::vector<std::string> loaders;
@@ -431,32 +432,51 @@ std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project
             //std::cout<<"found\n";
             //std::cout << "Found matching version for " << name << release["name"].get<std::string>() << " (" << project_id << ")"<< std::endl;
             if((installFlag&InstallFlag::PushOGProject)!=InstallFlag::None)
-                deps.push_back({name,project_id,0});        
+                deps.push_back({name,project_id,DependencyType::UNKNOWN});        
             if (release.contains("dependencies")) {
                 for (auto& dep : release["dependencies"]) {
                     //std::cout<<"done smth\n";
                     std::string dep_project;
-                    if(!cf_mod){
-                        std::string dep_type = dep["dependency_type"];
-                        if (dep_type != "required") continue; // skip optional
+                    std::string dep_name;
+                    DependencyType dep_type_g;
+
+                    if (!cf_mod) {
+                        std::string dep_type = dep["dependency_type"].get<std::string>();
+                        dep_type_g = get_dep_type_mr(dep_type);
                         dep_project = dep["project_id"].get<std::string>();
-                    } else{
-                        int dep_type = dep["relationType"];
-                        if(dep_type !=3)continue;
-                        dep_project = dep["modId"].get<std::string>();
+
+                        // Fetch Modrinth dependency information
+                        std::string response = curl_utils::curl_to_string(
+                            "https://api.modrinth.com/v2/project/" + dep_project
+                        );
+
+                        json dep_data = json::parse(response);
+                        dep_name = dep_data["title"].get<std::string>();
+
+                    } else {
+                        int dep_type = dep["relationType"].get<int>();
+                        dep_type_g = get_dep_type_cf(dep_type);
+
+                        dep_project = "cf:" +
+                            std::to_string(dep["modId"].get<int64_t>());
+
+                        // Fetch CurseForge dependency information
+                        std::string response =
+                            curl_utils::curl_to_string_with_http_header(
+                                "https://api.curseforge.com/v1/mods/" +
+                                    dep_project.substr(3),
+                                {"Accept: application/json", "x-api-key: " + token},
+                                false
+                            );
+
+                        json dep_data = json::parse(response);
+                        dep_name = dep_data["data"]["name"].get<std::string>();
                     }
 
-                    json dep_data;
-                    try{
-                        std::string dep_name = pb::curl_utils::curl_to_string("https://api.modrinth.com/v2/project/" + dep_project);
-                        dep_data = json::parse(dep_name);
-                    } catch (const std::exception& e) {
-                        std::cerr << "Error fetching dependency project name: " << e.what() << "\n";
-                        throw std::runtime_error("Error fetching dependency project name.");
-                    }
-                    deps.push_back({dep_data[(cf_mod? "name":"title")].get<std::string>(),dep_project, true});
-                    auto subdeps =get_deps(dep_project,"",req);
-                    deps.insert(deps.end(),subdeps.begin(),subdeps.end());
+                    deps.push_back({dep_name, dep_project, dep_type_g});
+
+                    auto subdeps = get_deps(dep_project, "", req);
+                    deps.insert(deps.end(), subdeps.begin(), subdeps.end());
                 }
             }
                 break; // stop after first matching release
@@ -475,42 +495,73 @@ std::vector<areUpdatable> pb::McModm::McModm::get_deps(const std::string&project
 }
 
 void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag,const InstallWrapper& installWrapper) {
+    bool force = (installWrapper&InstallWrapper::Force)!=InstallWrapper::None;
     std::vector<areUpdatable>plan;
-    //std::ifstream packgs(install_path+"/packages.json");
-    //if(!packgs.is_open()){
-    //    std::cerr<<red<<"Could not open packages.json in folder: "<<install_path<<"\n"<<reset_color; 
-    //    throw std::runtime_error("Could not open packages.json");
-    //}
-    json packgs;//load_packages();
+    json packgs;
     bool use_colors = false;
     if((installWrapper&InstallWrapper::NoCheckInstalled)!=InstallWrapper::None){
         packgs = load_packages();
         use_colors=true;
     }
+    std::vector<Dependency> deps_plan;
     for(const auto& mod:og_plan){
         //plan.push_back(mod);
         //plan.push_back({"", mod, false});
-        auto deps = get_deps(mod,"",req,InstallFlag::PushOGProject);
-        plan.insert(plan.end(),deps.begin(),deps.end());
+        plan.push_back({pb::McModm::McModm::get_project_name(mod),mod,false});
+        auto deps = get_deps(mod,"",req,InstallFlag::None);
+        deps_plan.insert(deps_plan.end(),deps.begin(),deps.end());
     }
     std::cout<<yellow<<"Will be installed: "<<reset_color<<"\n";
+    std::cout<<green<<"\tOriginal packages: "<<reset_color<<"\n";
     for(const auto&mod:plan){
         if(use_colors){
-            std::cout<<(is_installed(mod.project_id)?green:yellow)<<mod.project_id<<cyan<<" ("<<mod.name<<") ";
+            std::cout<<"\t\t"<<(is_installed(mod.project_id)?green:yellow)<<mod.project_id<<cyan<<" ("<<mod.name<<") ";
         } else{
             std::cout<<cyan<<mod.project_id<<" ";
         }
     }
     std::cout<<reset_color<<"\n";
+    std::cout<<green<<"\tDependencies: "<<reset_color<<"\n";
+    for(const auto& dep:deps_plan){
+        bool condition = dep.dep_type==DependencyType::REQUIRED;
+        if((installWrapper&InstallWrapper::OptDeps)!=InstallWrapper::None)
+            condition=condition||dep.dep_type==DependencyType::OPTIONAL;
+        if(condition)std::cout<<"*";
+        std::string clr=cyan;
+        if(dep.dep_type==DependencyType::REQUIRED){
+            clr=cyan;
+        }else if(dep.dep_type==DependencyType::OPTIONAL){
+            clr=green;
+        }else if(dep.dep_type==DependencyType::INCOMPATIBLE){
+            if(is_installed(dep.project_id)){
+                clr=red;
+            }else{
+             clr=yellow;
+            }
+        }else{clr=green;}
+
+        std::cout<<std::format("\t\t{} ({}) - {}\n", colored(is_installed(dep.project_id)?green:yellow,"{}",dep.project_id),colored(yellow,"{}",dep.name),colored(clr,"{}",dep_type_to_str(dep.dep_type)));
+    }
+
     std::string prompt;
     std::cout << "Install these?(Y/n): ";
     std::getline(std::cin,prompt);
     if(prompt!="Y"&&prompt!="y"&&!prompt.empty()){std::cout<<"abort\n";return;}
     size_t index = 1;
     InstallFlag newFlags = installFlag|InstallFlag::NoHandleDeps;
+    for(const auto& dep_mod:deps_plan){
+        bool condition = dep_mod.dep_type==DependencyType::REQUIRED;
+        if((installWrapper&InstallWrapper::OptDeps)!=InstallWrapper::None)
+            condition=condition||dep_mod.dep_type==DependencyType::OPTIONAL;
+        if(dep_mod.dep_type==DependencyType::INCOMPATIBLE){std::cout<<"W:"<<reset_color<<std::format("Incomatible dependency {} ({}) won't be installed.", dep_mod.project_id,dep_mod.name);condition=false;}
+        if(dep_mod.dep_type==DependencyType::INCOMPATIBLE&&is_installed(dep_mod.project_id)&&!force){std::cerr<<red<<"E: "<< dep_mod.name<<" is incompatible with an installed mod!\n"<<reset_color;return;}
+        if(condition)plan.push_back({dep_mod.name, dep_mod.project_id, false});
+    }
     for(const auto&mod:plan){
         std::cout<<green<<"["<<index<<"/"<<plan.size()<<"] Installing " <<mod.project_id<<" ("<<mod.name<<")"<<reset_color<<"\n";
         install_mod(mod.project_id,req,versionString,newFlags);
         ++index;
     }
 }
+//Today I heard some rumor that my crush of 7 months doesn't love me back, but somebody else. Now, I am not completely believing in that, but I am kinda dissapointed,
+//but if it is true, I'll get over it. - 02/11/2026 (DD/MM/YYYY)

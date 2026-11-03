@@ -46,11 +46,19 @@ enum class InstallFlag : uint32_t {
     AutoPathManagement = 1u << 1,
     JustInstall = 1u << 2,
     NoHandleDeps = 1u << 3,
-    PushOGProject = 1u << 4
+    PushOGProject = 1u << 4,
 };
 enum class InstallWrapper : uint32_t {
     None        = 0,
-    NoCheckInstalled  = 1u << 0
+    NoCheckInstalled  = 1u << 0,
+    OptDeps = 1u << 1,
+    Force = 1u << 2
+};
+enum class DependencyType {OPTIONAL, REQUIRED, INCOMPATIBLE, EMBEDDED, UNKNOWN};
+struct Dependency{
+    std::string name;
+    std::string project_id;
+    DependencyType dep_type;
 };
 constexpr InstallWrapper operator|(InstallWrapper a, InstallWrapper b)
 {
@@ -124,7 +132,7 @@ class McModm{
         //install.cpp
         // Install a mod/plugin by project ID and requirements
         void install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag);
-        std::vector<areUpdatable> get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag =InstallFlag::None);
+        std::vector<Dependency> get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag =InstallFlag::None);
         void install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag,const InstallWrapper& installWrapper = InstallWrapper::None);
         static std::string toLower(std::string str);
         static bool matchesLoader(
@@ -187,6 +195,10 @@ class McModm{
             return color + std::format(fmt, std::forward<Args>(args)...)
                          + reset_color;
         }
+        DependencyType get_dep_type_mr(std::string dep_type);
+        DependencyType get_dep_type_cf(int type);
+        std::string get_project_name(const std::string& project_id);
+        std::string dep_type_to_str(DependencyType type);
     };
 // Setup a managed installation directory with the given version and loader list
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);

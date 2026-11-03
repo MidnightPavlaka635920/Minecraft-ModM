@@ -211,6 +211,7 @@ int runMcmodm(const std::vector<std::string>& arguments) {
         std::vector<std::string> mods;  // project IDs
         std::string install_path;
         bool checkHash=true;
+        bool OptDeps=false;
         for (size_t i = 1; i < args.size(); i++) {
             std::string arg = args[i];
 
@@ -223,6 +224,8 @@ int runMcmodm(const std::vector<std::string>& arguments) {
                 version_number = arg.substr(5);
             } else if(arg=="--noverify"){
                 checkHash = false;
+            }else if(arg=="--optional"){
+                OptDeps = true;continue;
             }else {
                 mods.push_back(arg); // temporarily push everything else
             }
@@ -280,13 +283,15 @@ int runMcmodm(const std::vector<std::string>& arguments) {
         req[0]["loaders"] = loaders;
         size_t modsamm = mods.size();
         int index = 0;
+        InstallFlag tempIF = InstallFlag::None;
+        tempIF = tempIF | (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
+        tempIF = tempIF | (checkHash?InstallFlag::VerifyHash:InstallFlag::None);
+        InstallWrapper tempIW;
+        tempIW = tempIW | (OptDeps?InstallWrapper::OptDeps:InstallWrapper::None);
         for (const auto& mod:mods){
                      // mod name or slug
             std::cout << green << "["<<std::to_string(index+1)<<"/"<<std::to_string(modsamm)<<"] "<<"Installing " << mod << "...\n"<<reset_color;
-            InstallFlag tempIF = InstallFlag::None;
-            tempIF = tempIF | (apm?InstallFlag::AutoPathManagement:InstallFlag::None);
-            tempIF = tempIF | (checkHash?InstallFlag::VerifyHash:InstallFlag::None);
-            modm.install_wrapper(mods, req,version_number,tempIF,InstallWrapper::NoCheckInstalled);
+            modm.install_wrapper(mods, req,version_number,tempIF,InstallWrapper::NoCheckInstalled|tempIW);
         }
         //    ++index;
         //}
