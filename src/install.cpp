@@ -11,7 +11,6 @@
 using json = nlohmann::json;
 #include "../include/mcmodm.h"
 #include "../include/color.h"
-std::string name;
 #include <cctype>
 #include <format>
 std::string pb::McModm::McModm::toLower(std::string str) {
@@ -131,6 +130,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
         throw std::runtime_error("Error fetching versions.");
     }
     json projectData = json::parse(projectDataRaw);
+    std::string name;
     if(cf_mod){name = projectData["data"]["name"];} else{name = projectData["title"];}
     std::string p_type;
     int p_type_cf;
@@ -162,6 +162,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
     bool found = false;
     bool ver_comp = false, loa_comp = false;
     for (auto& release : (cf_mod? mainData["data"]:mainData)) {
+        ver_comp = false; loa_comp = false;
         std::string loader_to_use = "";
         if (useVersionNumber &&(!cf_mod)){
             if(versionString==release["version_number"].get<std::string>()){
@@ -199,7 +200,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                 dl_url = release["files"][0]["url"];
                 filename = release["files"][0]["filename"];
             } else{
-                filename = release.at("fileName").get<std::string>();
+                filename = std::to_string(release.at("fileName").get<int>());
                 if (release.contains("downloadUrl") &&
                 release["downloadUrl"].is_string()) {
                 dl_url = release["downloadUrl"].get<std::string>();
@@ -258,6 +259,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                 std::cout << "\nDownload complete.\n";
             } catch (const std::exception& e) {
                 std::cerr << "Download failed: " << e.what() << "\n";
+                throw std::runtime_error(std::string("Download failed: ")+e.what());
             }
             if(checkHash){
                 if(file_hash!=expected_hash){
@@ -278,7 +280,7 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
                 if (release.contains("dependencies")) {
                     for (auto& dep : release["dependencies"]) {
                         std::string dep_project;
-                        if(cf_mod){
+                        if(!cf_mod){
                             std::string dep_type = dep["dependency_type"];
                             if (dep_type != "required") continue; // skip optional
                             dep_project = dep["project_id"].get<std::string>();
@@ -324,8 +326,13 @@ void pb::McModm::McModm::install_mod(const std::string& pn, const json& req, con
 
 
 
-std::vector<Dependency> pb::McModm::McModm::get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag){
+std::vector<Dependency> pb::McModm::McModm::get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag, std::unordered_set<std::string>& visited){
     bool cf_mod = false;
+    if (visited.contains(project_id)) {
+        return {};
+    }
+    visited.insert(project_id);
+
     std::string project_id_n = project_id;
     if(project_id.starts_with("cf:")){
         project_id_n = project_id.substr(3);
@@ -383,6 +390,7 @@ std::vector<Dependency> pb::McModm::McModm::get_deps(const std::string&project_i
         throw std::runtime_error("Error fetching versions.");
     }
     json projectData = json::parse(projectDataRaw);
+    std::string name;
     if(cf_mod){name = projectData["data"]["name"];} else{name = projectData["title"];}
    //json mainData = json::parse(aboutVersionData);
     json mainData;
@@ -396,6 +404,7 @@ std::vector<Dependency> pb::McModm::McModm::get_deps(const std::string&project_i
     bool found = false;
     bool ver_comp = false, loa_comp = false;
      for (auto& release : (cf_mod? mainData["data"]:mainData)) {
+        ver_comp = false; loa_comp = false;
         std::string loader_to_use = "";
         if (useVersionNumber &&(!cf_mod)){
             if(version_number==release["version_number"].get<std::string>()){
@@ -473,7 +482,7 @@ std::vector<Dependency> pb::McModm::McModm::get_deps(const std::string&project_i
 
                     deps.push_back({dep_name, dep_project, dep_type_g});
 
-                    auto subdeps = get_deps(dep_project, "", req);
+                    auto subdeps = get_deps(dep_project, "", req, installFlag,visited);
                     deps.insert(deps.end(), subdeps.begin(), subdeps.end());
                 }
             }
@@ -502,12 +511,27 @@ void pb::McModm::McModm::install_wrapper(const std::vector<std::string>og_plan, 
         use_colors=true;
     }
     std::vector<Dependency> deps_plan;
-    for(const auto& mod:og_plan){
-        //plan.push_back(mod);
-        //plan.push_back({"", mod, false});
-        plan.push_back({pb::McModm::McModm::get_project_name(mod),mod,false});
-        auto deps = get_deps(mod,"",req,InstallFlag::None);
-        deps_plan.insert(deps_plan.end(),deps.begin(),deps.end());
+    std::unordered_set<std::string> visited;
+    std::unordered_set<std::string> added;
+
+    for (const auto& mod : og_plan) {
+        if (added.insert(mod).second) {
+            plan.push_back({get_project_name(mod), mod, false});
+        }
+
+        auto deps = get_deps(mod, "", req, InstallFlag::None, visited);
+
+        for (const auto& dep : deps) {
+            bool condition = dep.dep_type == DependencyType::REQUIRED;
+
+            if ((installWrapper&InstallWrapper::OptDeps)!=InstallWrapper::None) {
+                condition |= dep.dep_type == DependencyType::OPTIONAL;
+            }
+
+            if (condition && added.insert(dep.project_id).second) {
+                plan.push_back({dep.name, dep.project_id, false});
+            }
+        }
     }
     std::cout<<yellow<<"Will be installed: "<<reset_color<<"\n";
     std::cout<<green<<"\tOriginal packages: "<<reset_color<<"\n";

@@ -132,7 +132,7 @@ class McModm{
         //install.cpp
         // Install a mod/plugin by project ID and requirements
         void install_mod(const std::string& pn, const json& req, const std::string& versionString,InstallFlag& installFlag);
-        std::vector<Dependency> get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag =InstallFlag::None);
+        std::vector<Dependency> get_deps(const std::string&project_id,const std::string&version_number,const json&req, const InstallFlag& installFlag, std::unordered_set<std::string>& visited);
         void install_wrapper(const std::vector<std::string>og_plan, const json& req, const std::string& versionString,InstallFlag& installFlag,const InstallWrapper& installWrapper = InstallWrapper::None);
         static std::string toLower(std::string str);
         static bool matchesLoader(
