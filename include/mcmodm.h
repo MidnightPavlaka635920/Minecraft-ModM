@@ -199,9 +199,9 @@ class McModm{
         DependencyType get_dep_type_cf(int type);
         std::string get_project_name(const std::string& project_id);
         std::string dep_type_to_str(DependencyType type);
-        void set_api_key(std::string key);
-        std::string get_api_key();
-        void remove_api_key();
+        static void set_api_key(std::string key);
+        static std::string get_api_key();
+        static void remove_api_key();
     };
 // Setup a managed installation directory with the given version and loader list
 void setup(std::string& path, std::string& version, std::vector<std::string>& loaders);

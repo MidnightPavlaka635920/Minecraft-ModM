@@ -689,11 +689,26 @@ int runMcmodm(const std::vector<std::string>& arguments) {
         std::ifstream ifs(install_path+"/req.json");
         json req = json::parse(ifs);
         ifs.close();
-        auto deps = modm.get_deps(args[1],"",req);
+        std::unordered_set<std::string> visited;
+        auto deps = modm.get_deps(args[1],"",req, InstallFlag::None, visited);
         std::cout<<yellow<<"Deps for this project:\n"<<reset_color;
         for(const auto& id:deps){
             std::cout<<id.project_id<<" - " <<id.name<<"\n";
         }
+    }else if(operation=="apikey"){
+        if(args.size()<3){
+            std::cerr<<"Too few args.\nUsage: mcmodm apikey <option> <arguments>\n\tmcmodm apikey add\n\tmcmodm apikey remove\n";
+            return 1;
+        }
+        if(args[2]=="set"){
+            std::cout<<"Enter your key: ";
+            std::string key;
+            std::getline(std::cin, key);
+            pb::McModm::McModm::set_api_key(key);
+        } else if(args[2]=="remove"){
+            pb::McModm::McModm::remove_api_key();
+            std::cout<<"Your API key has been removed successfully.\n";
+        } else{std::cout<<"Unknown command. Run mcmodm help for help\n";}
     }else{
         std::cerr << "Unknown operation: " << operation << "\n WTF were you trying to do?\nRun help for available commands.\n";
         //help();
