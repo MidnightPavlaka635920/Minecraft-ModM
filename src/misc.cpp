@@ -96,3 +96,33 @@ std::string pb::McModm::McModm::dep_type_to_str(DependencyType type) {
         default:                         return "unknown";
     }
 }
+
+void pb::McModm::McModm::set_api_key(std::string key){
+    std::string path = pb::McModm::McModm::getConfigDir();
+    std::ofstream key_path(path+"/api_key.txt");
+    if(!key_path){
+        throw std::runtime_error("failed to open key_path.txt");
+    }
+    key_path<<key;
+    key_path.close();
+}
+std::string pb::McModm::McModm::get_api_key(){
+    std::string key="";
+    std::string path = pb::McModm::McModm::getConfigDir();
+    std::ifstream key_path(path+"/api_key.txt");
+    if(!key_path){
+        throw std::runtime_error("failed to open key_path.txt");
+    }
+    key_path>>key;
+    return key;
+}
+void pb::McModm::McModm::remove_api_key() {
+    const auto path = std::filesystem::path(getConfigDir()) / "api_key.txt";
+    std::error_code ec;
+    if (!std::filesystem::remove(path, ec)) {
+        if (ec) {
+            throw std::runtime_error("failed to remove API key: " + ec.message());
+        }
+        throw std::runtime_error("API key does not exist");
+    }
+}
