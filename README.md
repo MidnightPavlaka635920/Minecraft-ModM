@@ -199,20 +199,22 @@ Commands:
   - The older alias `mcmodm verify-installed` is still accepted for compatibility.
   - Path is optional if default is set.
 - List version numbers:
-  `listvernums <project_id> [game_version]`
+  `mcmodm listvernums <project_id> [game_version]`
+- List dependencies for a project in the configured installation:
+  `mcmodm get-deps <project_id> [-p <path> | -i <instance_name>]`
 - Manage saved instances:
   `mcmodm instance add <instance_name> <instance_path>`
   `mcmodm instance rm <instance_name>`
   `mcmodm instance ls`
+- Manage the saved CurseForge API key:
+  `mcmodm apikey set` prompts for a key and saves it.
+  `mcmodm apikey remove` deletes the saved key.
 **IMPORTANT** By `[path]`, I also mean -i/-p. Those two override default path. Also, -i/-p isn't supported for `setup` and all `instance` commands
 ## CurseForge support
 
 `mcmodm` also supports CurseForge mods and plugins.
 
-To use it, put your CurseForge API key in one of these files:
-
-- Linux/macOS: `~/.config/mcmodm/api_key.txt`
-- Windows: `%APPDATA%\mcmodm\api_key.txt`
+To use it, save your CurseForge API key with `mcmodm apikey set`. The key is stored in the application configuration directory. Remove it with `mcmodm apikey remove`.
 
 Then use the project ID prefixed with `cf:`:
 
@@ -264,12 +266,11 @@ Then, you can do `easy_install` like this, follow instructions that you get by t
 mcmodm easy_install
 ```
 ## CurseForge API
-If you are planning to use CurseForge, you will need to obtain yourself an CurseForge API key. Tho it is needed for general usage too. (W/o the key search and easy_install will fail)
+If you are planning to use CurseForge, you will need a CurseForge API key. Some CurseForge features, including search and `easy_install`, require it.
 ### How to obtain it:
     1. Make an account on CurseForge for studios.
     2. Get yourself a key.
-    3. Put your **private** key into `/home/<yourusername>/.config/mcmodm/api_key.txt` on Linux or `%APPDATA%\mcmodm\api_key.txt` on Windows.
-        I should and probably will automate key saving in next release.
+    3. Run `mcmodm apikey set` and enter your **private** key when prompted.
 ### Notes about it
     - Do not share it with others, please. API is free.
     - If API suddenly stops working (you will see when searching) but it worked before, get yourself a new API key.
