@@ -1,5 +1,2 @@
 3
 - Add dep handling for removal
-- Prevent infinite recursion.
-- Only recursively resolve required dependencies.
-
