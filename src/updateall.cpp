@@ -78,10 +78,11 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
         }
         json tio;
         tio.push_back({{"version", version}, {"loader", loaders}}); // keep the same loader(s) as before
+        std::unordered_set<std::string> visited;
         for(const auto& mod:plan){
             if(!upgradeableMods.contains(mod.project_id))
                 continue;
-            auto deps = pb::McModm::McModm::get_deps(mod.project_id,"",tio);
+            auto deps = pb::McModm::McModm::get_deps(mod.project_id,"",tio, InstallFlag::None, visited);
             std::vector<upgradeableModInfo> subplan;
             for(const auto&thingy: deps){
                 if(plannedIDs.insert(thingy.project_id).second)subplan.push_back({thingy.project_id,json::array(),0});
@@ -121,8 +122,9 @@ void pb::McModm::McModm::update_all_packages(std::string& version, std::vector<s
             plannedIDs.insert(mod.project_id);
         json tio;
         tio.push_back({{"version", version}, {"loader", loaders}}); // keep the same loader(s) as before
+        std::unordered_set<std::string> visited;
         for(const auto& mod:plan){
-            auto deps = pb::McModm::McModm::get_deps(mod.project_id,"",tio);
+            auto deps = pb::McModm::McModm::get_deps(mod.project_id,"",tio, InstallFlag::None, visited);
             std::vector<upgradeableModInfo> subplan;
             for(const auto&thingy: deps){
                 if(plannedIDs.insert(thingy.project_id).second)subplan.push_back({thingy.project_id,json::array(),0});
